@@ -1,0 +1,7 @@
+spdlog-----https://github.com/gabime/spdlog
+
+premake----https://github.com/premake/premake-core
+
+Imgui------https://github.com/ocornut/imgui
+
+glfw-------https://github.com/glfw/glfw

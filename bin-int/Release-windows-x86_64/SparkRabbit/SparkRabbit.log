@@ -1,0 +1,19 @@
+﻿cl : 命令行  warning D9025: 正在重写“/MT”(用“/MD”)
+  imgui_impl_glfw.cpp
+  imgui_impl_opengl3.cpp
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(91): warning C4603: “_CRT_SECURE_NO_WARNINGS”: 未定义宏或在预编译头使用后定义发生改变
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(91): message : 将宏添加到预编译头中，而不是在此处定义
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(93): message : 使用预编译头
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(305,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(306,5): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(269,9): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\leeds\SparkRabbit\SparkRabbit\src\PlatForm\OpenGL\imgui_impl_opengl3.cpp(698,5): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  Log.cpp
+D:\leeds\SparkRabbit\SparkRabbit\src\SparkRabbit\Log.h(16,42): warning C4251: “SparkRabbit::Log::s_CoreLogger”: class“std::shared_ptr<spdlog::logger>”需要有 dll 接口由 class“SparkRabbit::Log”的客户端使用
+D:\leeds\SparkRabbit\SparkRabbit\ThirdParties\spdlog\include\spdlog\details\registry.h(34): message : 参见“std::shared_ptr<spdlog::logger>”的声明
+D:\leeds\SparkRabbit\SparkRabbit\src\SparkRabbit\Log.h(17,42): warning C4251: “SparkRabbit::Log::s_ClientLogger”: class“std::shared_ptr<spdlog::logger>”需要有 dll 接口由 class“SparkRabbit::Log”的客户端使用
+D:\leeds\SparkRabbit\SparkRabbit\ThirdParties\spdlog\include\spdlog\details\registry.h(34): message : 参见“std::shared_ptr<spdlog::logger>”的声明
+  正在生成代码...
+    正在创建库 ..\bin\Release-windows-x86_64\SparkRabbit\SparkRabbit.lib 和对象 ..\bin\Release-windows-x86_64\SparkRabbit\SparkRabbit.exp
+LINK : warning LNK4098: 默认库“LIBCMT”与其他库的使用冲突；请使用 /NODEFAULTLIB:library
+  SparkRabbit.vcxproj -> D:\leeds\SparkRabbit\bin\Release-windows-x86_64\SparkRabbit\SparkRabbit.dll
