@@ -16,6 +16,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "SparkRabbit/vendor/GLFW/include"
 IncludeDir["Glad"] = "SparkRabbit/vendor/Glad/include"
 IncludeDir["ImGui"] = "SparkRabbit/vendor/imgui"
+IncludeDir["glm"] = "SparkRabbit/vendor/glm"
 
 include "SparkRabbit/vendor/GLFW"
 include "SparkRabbit/vendor/Glad"
@@ -36,7 +37,9 @@ project "SparkRabbit"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
 
 	includedirs
@@ -45,7 +48,8 @@ project "SparkRabbit"
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
-		"%{IncludeDir.ImGui}"
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.glm}"
 	}
 
 	links 
@@ -105,7 +109,8 @@ project "Sandbox"
 	includedirs
 	{
 		"SparkRabbit/vendor/spdlog/include",
-		"SparkRabbit/src"
+		"SparkRabbit/src",
+		"%{IncludeDir.glm}"
 	}
 
 	links
