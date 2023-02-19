@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\DEV\Hazel\bin\Debug-windows-x86_64\Hazel\Hazel.dll</FullPath>
+      <FullPath>C:\DEV\Hazel\bin\Debug-windows-x86_64\SparkRabbit\SparkRabbit.dll</FullPath>
     </ProjectOutput>
     <ProjectOutput>
       <FullPath>C:\DEV\Hazel\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe</FullPath>

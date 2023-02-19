@@ -1,6 +1,6 @@
-workspace "Hazel"
+workspace "SparkRabbit"
 	architecture "x64"
-
+	startproject "Sandbox"
 
 	configurations
 	{
@@ -9,126 +9,130 @@ workspace "Hazel"
 		"Dist"
 	}
 
-	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-	-- include diretories relative to root folder (solution diretories)
-	IncludeDir = {}
-	IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"
+-- Include directories relative to root folder (solution directory)
+IncludeDir = {}
+IncludeDir["GLFW"] = "SparkRabbit/vendor/GLFW/include"
+IncludeDir["Glad"] = "SparkRabbit/vendor/Glad/include"
+IncludeDir["ImGui"] = "SparkRabbit/vendor/imgui"
 
-	include "Hazel/vendor/GLFW"
+include "SparkRabbit/vendor/GLFW"
+include "SparkRabbit/vendor/Glad"
+include "SparkRabbit/vendor/imgui"
 
-	project"Hazel"
-		location "Hazel"
-		kind "SharedLib"
-		language "c++"
+project "SparkRabbit"
+	location "SparkRabbit"
+	kind "SharedLib"
+	language "C++"
+	staticruntime "off"
 
-		targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-		objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-		pchheader "hzpch.h"
-		pchsource "Hazel/src/hzpch.cpp"
+	pchheader "PrecompileH.h"
+	pchsource "SparkRabbit/src/PrecompileH.cpp"
 
-		files
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+
+	includedirs
+	{
+		"%{prj.name}/src",
+		"%{prj.name}/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}"
+	}
+
+	links 
+	{ 
+		"GLFW",
+		"Glad",
+		"ImGui",
+		"opengl32.lib"
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
+
+		defines
 		{
-			"%{prj.name}/src/**.h",
-			"%{prj.name}/src/**.cpp"
+			"SR_PLATFORM_WINDOWS",
+			"SR_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
-		includedirs
-		{	
-			"%{prj.name}/src",
-			"%{prj.name}/vendor/spdlog/include",
-			"%{IncludeDir.GLFW}"
-		}
-
-		links
+		postbuildcommands
 		{
-			"GLFW",
-			"opengl32.lib"
+			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
 		}
 
-		filter "system:windows"
-			cppdialect "C++17"
-			staticruntime "On"
-			systemversion "latest"
+	filter "configurations:Debug"
+		defines "SPARK_DEBUG"
+		runtime "Debug"
+		symbols "On"
 
-			defines
-			{
-				"HZ_PLATFORM_WINDOWS",
-				"HZ_BUILD_DLL"
-			}
+	filter "configurations:Release"
+		defines "SPARK_RELEASE"
+		runtime "Release"
+		optimize "On"
 
-			postbuildcommands
-			{
-				("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
-			}
+	filter "configurations:Dist"
+		defines "SPARK_DIST"
+		runtime "Release"
+		optimize "On"
 
-		filter "configurations:Debug"
-			defines "HZ_DEBUG"
-			buildoptions "/MDd"
-			symbols "On"
+project "Sandbox"
+	location "Sandbox"
+	kind "ConsoleApp"
+	language "C++"
+	staticruntime "off"
 
-		filter "configurations:Release"
-			defines "HZ_RELEASE"
-			buildoptions "/MD"
-			optimize "On"
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-		filter "configurations:Dist"
-			defines "HZ_DIST"
-			buildoptions "/MD"
-			optimize "On"
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
 
+	includedirs
+	{
+		"SparkRabbit/vendor/spdlog/include",
+		"SparkRabbit/src"
+	}
 
+	links
+	{
+		"SparkRabbit"
+	}
 
-	project"Sandbox"
-		location "Sandbox"
-		kind "ConsoleApp"
+	filter "system:windows"
+		cppdialect "C++17"
+		systemversion "latest"
 
-		language "c++"
-
-		targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-		objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-		files
+		defines
 		{
-			"%{prj.name}/src/**.h",
-			"%{prj.name}/src/**.cpp"
+			"SR_PLATFORM_WINDOWS"
 		}
 
-		includedirs
-		{
-			"Hazel/vendor/spdlog/include",
-			"Hazel/src"
-		}
+	filter "configurations:Debug"
+		defines "SPARK_DEBUG"
+		runtime "Debug"
+		symbols "On"
 
-		links
-		{
-			"Hazel"
-		}
+	filter "configurations:Release"
+		defines "SPARK_RELEASE"
+		runtime "Release"
+		optimize "On"
 
-		filter "system:windows"
-			cppdialect "C++17"
-			staticruntime "On"
-			systemversion "latest"
-
-			defines
-			{
-				"HZ_PLATFORM_WINDOWS"
-			}
-
-
-		filter "configurations:Debug"
-			defines "HZ_DEBUG"
-			buildoptions "/MDd"
-			symbols "On"
-
-		filter "configurations:Release"
-			defines "HZ_RELEASE"
-			buildoptions "/MD"
-			optimize "On"
-
-		filter "configurations:Dist"
-			defines "HZ_DIST"
-			buildoptions "/MD"
-			optimize "On"
-
+	filter "configurations:Dist"
+		defines "SPARK_DIST"
+		runtime "Release"
+		optimize "On"
