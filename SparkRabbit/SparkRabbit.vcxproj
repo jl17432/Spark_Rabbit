@@ -148,8 +148,6 @@
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\PrecompileH.h" />
-    <ClInclude Include="src\SparkRabbit\Renderer\Buffer.h" />
-    <ClInclude Include="src\SparkRabbit\Renderer\RenderContext.h" />
     <ClInclude Include="src\SparkAPI.h" />
     <ClInclude Include="src\SparkRabbit\Application.h" />
     <ClInclude Include="src\SparkRabbit\Core.h" />
@@ -164,6 +162,8 @@
     <ClInclude Include="src\SparkRabbit\Layer.h" />
     <ClInclude Include="src\SparkRabbit\LayerStack.h" />
     <ClInclude Include="src\SparkRabbit\Log.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Buffer.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\RenderContext.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Renderer.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Shader.h" />
     <ClInclude Include="src\SparkRabbit\Window.h" />
@@ -624,10 +624,6 @@
     <ProjectReference Include="vendor\imgui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\SparkRabbit\Shaders\shader.frag" />
-    <None Include="src\SparkRabbit\Shaders\shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
