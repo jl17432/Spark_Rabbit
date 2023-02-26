@@ -7,9 +7,6 @@
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Platform\OpenGL">
-      <UniqueIdentifier>{35A49437-A105-7245-2A73-B8F796D3A804}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Platform\Windows">
       <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
     </Filter>
@@ -45,9 +42,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsInput.h">
       <Filter>src\Platform\Windows</Filter>
     </ClInclude>
@@ -1386,11 +1380,14 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="src\SparkRabbit\Renderer\RenderContext.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Shader.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Buffer.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Renderer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1402,6 +1399,9 @@
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Application.cpp">
       <Filter>src\SparkRabbit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SparkRabbit\ImGui\ImGuiBuild.cpp">
+      <Filter>src\SparkRabbit\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuiLayer.cpp">
       <Filter>src\SparkRabbit\ImGui</Filter>
@@ -1415,5 +1415,14 @@
     <ClCompile Include="src\SparkRabbit\Log.cpp">
       <Filter>src\SparkRabbit</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\Shader.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\SparkRabbit\Shaders\shader.frag" />
+    <None Include="src\SparkRabbit\Shaders\shader.vert" />
   </ItemGroup>
 </Project>

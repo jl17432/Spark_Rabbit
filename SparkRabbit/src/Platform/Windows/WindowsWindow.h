@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SparkRabbit/Window.h"
+#include "SparkRabbit/Renderer/RenderContext.h"
 
 #include <GLFW/glfw3.h>
 
@@ -29,6 +30,7 @@ namespace SparkRabbit {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
+		RenderContext* m_Context;
 
 		struct WindowData
 		{

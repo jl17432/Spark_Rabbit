@@ -1,11 +1,15 @@
 #pragma once
 
 #ifdef SR_PLATFORM_WINDOWS
+#if SR_DYNAMIC_LINK
 	#ifdef SR_BUILD_DLL
 		#define SPARK_API _declspec(dllexport)
 	#else
 		#define SPARK_API _declspec(dllimport)
 	#endif
+#else 
+	#define SPARK_API
+#endif
 #else
 	#error Hazel only support Windows!
 #endif

@@ -1,5 +1,6 @@
 #include <SparkAPI.h>
 
+
 class ExampleLayer : public SparkRabbit::Layer
 {
 public:
@@ -33,7 +34,6 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		PushOverlay(new SparkRabbit::ImGuiLayer());
 	}
 
 	~Sandbox()
