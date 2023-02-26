@@ -1380,9 +1380,6 @@
     <ClInclude Include="src\SparkRabbit\Render\OpenGL\OpenglShader.h">
       <Filter>src\SparkRabbit\Render\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="src\SparkRabbit\Render\RenderProcess.h">
-      <Filter>src\SparkRabbit\Render</Filter>
-    </ClInclude>
     <ClInclude Include="src\SparkRabbit\Render\Shader.h">
       <Filter>src\SparkRabbit\Render</Filter>
     </ClInclude>
@@ -1447,9 +1444,6 @@
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Render\OpenGL\OpenglShader.cpp">
       <Filter>src\SparkRabbit\Render\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SparkRabbit\Render\RenderProcess.cpp">
-      <Filter>src\SparkRabbit\Render</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Render\Shader.cpp">
       <Filter>src\SparkRabbit\Render</Filter>

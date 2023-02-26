@@ -4,8 +4,13 @@
 #include"glad/glad.h"
 #include"EventsSystem/WindowEvent.h"
 #include"Log.h"
+#include<glm.hpp>
 #include"SparkRabbit/input.h"
-#include"Render/RenderProcess.h"
+#include"SparkRabbit/Render/Version.h"
+#include"SparkRabbit/Render/Shader.h"
+#include"SparkRabbit/Render/Texture.h"
+#include"SparkRabbit/Render/Load.h"
+#include"SparkRabbit/Render/VBOHandler.h"
 
 GLuint VertexArrayID, programID, MatrixID, ViewMatrixID, ModelMatrixID,
 Texture, TextureID, vertexbuffer, uvbuffer, normalbuffer, elementbuffer, LightID;
@@ -29,12 +34,12 @@ namespace SparkRabbit {
 
 		m_ImguiLayer = new ImguiLayer();
 		PushEndLayer(m_ImguiLayer);
-
+		
 		std::vector<glm::vec3> vertices;
 		std::vector<glm::vec2> uvs;
 		std::vector<glm::vec3> normals;
 
-		const char* filePath = "D:/leeds/SparkRabbit/SparkRabbit/src/SparkRabbit/m4a1_s.obj";
+		const char* filePath = "D:/leeds/SparkRabbit/SparkRabbit/src/SparkRabbit/suzanne.obj";
 		const char* texturePath = "D:/leeds/SparkRabbit/SparkRabbit/src/SparkRabbit/uvmap.dds";
 
 		//Render(filePath, texturePath, vertices, uvs, normals);

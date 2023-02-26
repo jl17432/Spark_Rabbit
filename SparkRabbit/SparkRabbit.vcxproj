@@ -586,7 +586,6 @@
     <ClInclude Include="src\SparkRabbit\Render\OpenGL\OpenglBuffer.h" />
     <ClInclude Include="src\SparkRabbit\Render\OpenGL\OpenglContext.h" />
     <ClInclude Include="src\SparkRabbit\Render\OpenGL\OpenglShader.h" />
-    <ClInclude Include="src\SparkRabbit\Render\RenderProcess.h" />
     <ClInclude Include="src\SparkRabbit\Render\Shader.h" />
     <ClInclude Include="src\SparkRabbit\Render\Texture.h" />
     <ClInclude Include="src\SparkRabbit\Render\VBOHandler.h" />
@@ -612,7 +611,6 @@
     <ClCompile Include="src\SparkRabbit\Render\OpenGL\OpenglBuffer.cpp" />
     <ClCompile Include="src\SparkRabbit\Render\OpenGL\OpenglContext.cpp" />
     <ClCompile Include="src\SparkRabbit\Render\OpenGL\OpenglShader.cpp" />
-    <ClCompile Include="src\SparkRabbit\Render\RenderProcess.cpp" />
     <ClCompile Include="src\SparkRabbit\Render\Shader.cpp" />
     <ClCompile Include="src\SparkRabbit\Render\Texture.cpp" />
     <ClCompile Include="src\SparkRabbit\Render\VBOHandler.cpp" />
