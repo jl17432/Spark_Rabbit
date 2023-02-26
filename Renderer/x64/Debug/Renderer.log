@@ -1,0 +1,5 @@
+﻿  ComputeNormal.cpp
+  Render.cpp
+C:\Users\phili\Desktop\Renderer\Renderer\utils\Render.cpp(301,3): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Generating Code...
+  Renderer.vcxproj -> C:\Users\phili\Desktop\Renderer\x64\Debug\Renderer.exe
