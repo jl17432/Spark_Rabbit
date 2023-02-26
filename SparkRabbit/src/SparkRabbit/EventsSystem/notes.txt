@@ -1,0 +1,4 @@
+事件系统可主要分为window event，mouse event，keyboard event，application event
+
+
+
