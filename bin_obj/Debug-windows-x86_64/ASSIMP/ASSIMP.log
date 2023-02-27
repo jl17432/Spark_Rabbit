@@ -1,0 +1,157 @@
+﻿  3DSConverter.cpp
+  3DSExporter.cpp
+  3DSLoader.cpp
+  D3MFExporter.cpp
+  D3MFImporter.cpp
+  D3MFOpcPackage.cpp
+  XmlSerializer.cpp
+  FBXAnimation.cpp
+  FBXBinaryTokenizer.cpp
+  FBXConverter.cpp
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\code\AssetLib\FBX\FBXConverter.cpp(2154,37): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\code\AssetLib\FBX\FBXConverter.cpp(2154,31): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+  FBXDeformer.cpp
+  FBXDocument.cpp
+  FBXDocumentUtil.cpp
+  FBXExportNode.cpp
+  FBXExportProperty.cpp
+  FBXExporter.cpp
+  FBXImporter.cpp
+  FBXMaterial.cpp
+  FBXMeshGeometry.cpp
+  FBXModel.cpp
+  Generating Code...
+  Compiling...
+  FBXNodeAttribute.cpp
+  FBXParser.cpp
+  FBXProperties.cpp
+  FBXTokenizer.cpp
+  FBXUtil.cpp
+  IQMImporter.cpp
+  M3DExporter.cpp
+  M3DImporter.cpp
+  M3DWrapper.cpp
+  ObjExporter.cpp
+  ObjFileImporter.cpp
+  ObjFileMtlImporter.cpp
+  ObjFileParser.cpp
+  STLExporter.cpp
+  STLLoader.cpp
+  X3DExporter.cpp
+  X3DGeoHelper.cpp
+  X3DImporter.cpp
+  X3DImporter_Geometry2D.cpp
+  X3DImporter_Geometry3D.cpp
+  Generating Code...
+  Compiling...
+  X3DImporter_Group.cpp
+  X3DImporter_Light.cpp
+  X3DImporter_Metadata.cpp
+  X3DImporter_Networking.cpp
+  X3DImporter_Postprocess.cpp
+  X3DImporter_Rendering.cpp
+  X3DImporter_Shape.cpp
+  X3DImporter_Texturing.cpp
+  X3DXmlHelper.cpp
+  AssimpCExport.cpp
+  CInterfaceIOWrapper.cpp
+  AssertHandler.cpp
+  Assimp.cpp
+  Base64.cpp
+  BaseImporter.cpp
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\code\Common\FileSystemFilter.h(303,27): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+  BaseProcess.cpp
+  Bitmap.cpp
+  Compression.cpp
+  CreateAnimMesh.cpp
+  DefaultIOStream.cpp
+  Generating Code...
+  Compiling...
+  DefaultIOSystem.cpp
+  DefaultLogger.cpp
+  Exceptional.cpp
+  Exporter.cpp
+  IOSystem.cpp
+  Importer.cpp
+  ImporterRegistry.cpp
+  PostStepRegistry.cpp
+  RemoveComments.cpp
+  SGSpatialSort.cpp
+  SceneCombiner.cpp
+  ScenePreprocessor.cpp
+  SkeletonMeshBuilder.cpp
+  SpatialSort.cpp
+  StandardShapes.cpp
+  Subdivision.cpp
+  TargetAnimation.cpp
+  Version.cpp
+  VertexTriangleAdjacency.cpp
+  ZipArchiveIOSystem.cpp
+  Generating Code...
+  Compiling...
+  material.cpp
+  scene.cpp
+  simd.cpp
+  MaterialSystem.cpp
+  ArmaturePopulate.cpp
+  CalcTangentsProcess.cpp
+  ComputeUVMappingProcess.cpp
+  ConvertToLHProcess.cpp
+  DeboneProcess.cpp
+  DropFaceNormalsProcess.cpp
+  EmbedTexturesProcess.cpp
+  FindDegenerates.cpp
+  FindInstancesProcess.cpp
+  FindInvalidDataProcess.cpp
+  FixNormalsStep.cpp
+  GenBoundingBoxesProcess.cpp
+  GenFaceNormalsProcess.cpp
+  GenVertexNormalsProcess.cpp
+  ImproveCacheLocality.cpp
+  JoinVerticesProcess.cpp
+  Generating Code...
+  Compiling...
+  LimitBoneWeightsProcess.cpp
+  MakeVerboseFormat.cpp
+  OptimizeGraph.cpp
+  OptimizeMeshes.cpp
+  PretransformVertices.cpp
+  ProcessHelper.cpp
+  RemoveRedundantMaterials.cpp
+  RemoveVCProcess.cpp
+  ScaleProcess.cpp
+  SortByPTypeProcess.cpp
+  SplitByBoneCountProcess.cpp
+  SplitLargeMeshes.cpp
+  TextureTransform.cpp
+  TriangulateProcess.cpp
+  ValidateDataStructure.cpp
+  pugixml.cpp
+  Generating Code...
+  crypt.c
+  ioapi.c
+  unzip.c
+  zip.c
+  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  gzclose.c
+  gzlib.c
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\contrib\zlib\gzlib.c(245,9): warning C4996: 'open': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _open. See online help for details.
+  gzread.c
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\contrib\zlib\gzread.c(35,15): warning C4996: 'read': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _read. See online help for details.
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\contrib\zlib\gzread.c(649,11): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _close. See online help for details.
+  gzwrite.c
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\contrib\zlib\gzwrite.c(89,20): warning C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _write. See online help for details.
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\contrib\zlib\gzwrite.c(110,24): warning C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _write. See online help for details.
+C:\Users\phili\Desktop\Spark_Rabbit\SparkRabbit\ThirdParties\assimp\contrib\zlib\gzwrite.c(664,9): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _close. See online help for details.
+  infback.c
+  inffast.c
+  inflate.c
+  inftrees.c
+  trees.c
+  uncompr.c
+  zutil.c
+  Generating Code...
+  ASSIMP.vcxproj -> C:\Users\phili\Desktop\Spark_Rabbit\bin\Debug-windows-x86_64\ASSIMP\ASSIMP.lib
