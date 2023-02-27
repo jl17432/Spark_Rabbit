@@ -1,2 +1,14 @@
+# self
+.gitignore
+
+
+# lfs attributes file
+.gitattributes
+
+
+# git and vs config folders
+
 /.git
 /.vs
+
+
