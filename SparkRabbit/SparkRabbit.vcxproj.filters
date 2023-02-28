@@ -1399,6 +1399,7 @@
       <Filter>src\SparkRabbit</Filter>
     </ClInclude>
     <ClInclude Include="src\SparkRabbit\Render\ComputeNormal.h" />
+    <ClInclude Include="src\SparkRabbit\Render\skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PlatForm\OpenGL\imgui_impl_glfw.cpp">
@@ -1459,5 +1460,9 @@
       <Filter>src\SparkRabbit\Render</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Render\ComputeNormal.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\SparkRabbit\Render\Shaders\skybox.vertexshader" />
+    <None Include="src\SparkRabbit\Render\Shaders\skybox.fragmentshader" />
   </ItemGroup>
 </Project>

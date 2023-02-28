@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\SparkRabbit\Render\ComputeNormal.h" />
+    <ClInclude Include="src\SparkRabbit\Render\skybox.h" />
     <ClInclude Include="ThirdParties\glm\glm\common.hpp" />
     <ClInclude Include="ThirdParties\glm\glm\detail\_features.hpp" />
     <ClInclude Include="ThirdParties\glm\glm\detail\_fixes.hpp" />
@@ -631,6 +632,10 @@
     <ProjectReference Include="ThirdParties\assimp\ASSIMP.vcxproj">
       <Project>{B20B8BA5-9EAD-B57B-8768-C9CF73A93CCC}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\SparkRabbit\Render\Shaders\skybox.fragmentshader" />
+    <None Include="src\SparkRabbit\Render\Shaders\skybox.vertexshader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

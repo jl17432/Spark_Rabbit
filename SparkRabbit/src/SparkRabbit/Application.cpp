@@ -13,11 +13,12 @@
 #include"SparkRabbit/Render/VBOHandler.h"
 #include"SparkRabbit/Render/ComputeNormal.h"
 
-GLuint VertexArrayID, programID, MatrixID, ViewMatrixID, ModelMatrixID, 
-ModelView3x3MatrixID, DiffuseTexture, NormalTexture, SpecularTexture, 
-DiffuseTextureID, NormalTextureID,SpecularTextureID, tangentbuffer, bitangentbuffer, 
+GLuint VertexArrayID, programID, MatrixID, ViewMatrixID, ModelMatrixID,
+ModelView3x3MatrixID, DiffuseTexture, NormalTexture, SpecularTexture,
+DiffuseTextureID, NormalTextureID, SpecularTextureID, tangentbuffer, bitangentbuffer,
 Texture, TextureID, vertexbuffer, uvbuffer, normalbuffer, elementbuffer, LightID;
 
+// 创建优化输出
 std::vector<unsigned short> indices;
 std::vector<glm::vec3> indexed_vertices;
 std::vector<glm::vec2> indexed_uvs;
@@ -42,7 +43,7 @@ namespace SparkRabbit {
 
 		m_ImguiLayer = new ImguiLayer();
 		PushEndLayer(m_ImguiLayer);
-		
+
 		std::vector<glm::vec3> vertices;
 		std::vector<glm::vec2> uvs;
 		std::vector<glm::vec3> normals;
@@ -50,9 +51,6 @@ namespace SparkRabbit {
 		std::vector<glm::vec3> bitangents;
 
 		const char* filePath = ResourceDir_"cylinder.obj";
-		
-
-
 
 		// 创建VAO
 		//GLuint VertexArrayID;
@@ -80,7 +78,7 @@ namespace SparkRabbit {
 
 		// 读文件
 		bool load_success = LoadObjModel(filePath, vertices, uvs, normals);
-		
+
 		// 读取不成功
 		if (load_success == false)
 		{
@@ -94,17 +92,9 @@ namespace SparkRabbit {
 			tangents, bitangents    // output
 		);
 
-		////创建优化输出
-		//std::vector<unsigned short> indices;
-		//std::vector<glm::vec3> indexed_vertices;
-		//std::vector<glm::vec2> indexed_uvs;
-		//std::vector<glm::vec3> indexed_normals;
-		//std::vector<glm::vec3> indexed_tangents;
-		//std::vector<glm::vec3> indexed_bitangents;
-
 		// TBN 优化
 		indexVBO_TBN(vertices, uvs, normals, tangents, bitangents, indices, indexed_vertices, indexed_uvs, indexed_normals, indexed_tangents, indexed_bitangents);
-		
+
 		//load to a VBO=======================================
 
 		// 顶点
@@ -195,15 +185,19 @@ namespace SparkRabbit {
 	}
 
 	void Application::Run() {
+		glClearColor(0.8f, 0.8f, 0.8f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_LESS);
+		//裁剪,暂时不需要
+		//glDisable(GL_CULL_FACE);
+
 		while (m_running)
 		{
-			// Çå¿ÕÆÁÄ»
+			// 清空屏幕
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// µ÷ÓÃshader
+			// 调用shader
 			glUseProgram(programID);
-
-			//GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 			// 计算矩阵
 			computeMatricesFromInputs();
@@ -225,9 +219,8 @@ namespace SparkRabbit {
 			glm::vec3 lightPos = glm::vec3(0, 0, 4);
 			glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
-
 			// 与缓冲区一一对应
-		    // 绑定纹理, 漫反射用 Unit0
+			// 绑定纹理, 漫反射用 Unit0
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, DiffuseTexture);
 			glUniform1i(DiffuseTextureID, 0);
@@ -305,11 +298,6 @@ namespace SparkRabbit {
 			// Index buffer
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
-			
-
-			////»­
-			//glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
 			// Draw the triangles !
 			glDrawElements(
 				GL_TRIANGLES,      // mode
@@ -325,6 +313,7 @@ namespace SparkRabbit {
 			glDisableVertexAttribArray(3);
 			glDisableVertexAttribArray(4);
 
+
 			for (Layer* layer : m_Layerstack)
 			{
 				layer->update();
@@ -338,11 +327,22 @@ namespace SparkRabbit {
 			}
 			m_ImguiLayer->end();
 
-			
+
 			m_Window->Update();
 		}
+		glDeleteBuffers(1, &vertexbuffer);
+		glDeleteBuffers(1, &uvbuffer);
+		glDeleteBuffers(1, &normalbuffer);
+		glDeleteBuffers(1, &tangentbuffer);
+		glDeleteBuffers(1, &bitangentbuffer);
+		glDeleteBuffers(1, &elementbuffer);
+		glDeleteProgram(programID);
+		glDeleteTextures(1, &DiffuseTexture);
+		glDeleteTextures(1, &NormalTexture);
+		glDeleteTextures(1, &SpecularTexture);
+		glDeleteVertexArrays(1, &VertexArrayID);
 
-	} 
+	}
 
 	void Application::Close()
 	{
@@ -354,5 +354,5 @@ namespace SparkRabbit {
 		m_running = false;
 		return true;
 	}
-	
+
 }
