@@ -6,7 +6,6 @@ namespace SparkRabbit {
 	class SPARK_API Input
 	{
 	public:
-		//delet this comment
 		inline static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
 		inline static bool IsMouseButtonPressed(int button) { return s_Instance->IsMouseButtonPressedImpl(button); }
 		inline static float GetMouseX() { return s_Instance->GetMouseXImpl(); }

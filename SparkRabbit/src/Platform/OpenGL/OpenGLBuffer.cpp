@@ -21,7 +21,7 @@ namespace SparkRabbit {
 		glDeleteBuffers(1, &m_RendererID);
 	}
 
-	void OpenGLVertexBuffer::Bind() const
+	void OpenGLVertexBuffer::Bind() const 
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 	}

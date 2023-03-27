@@ -12,8 +12,8 @@ public:
 	void OnUpdate() override
 	{ 
 		//SPARK_INFO("ExampleLayer::Update");
-		if (SparkRabbit::Input::IsKeyPressed(SR_KEY_A))
-			SPARK_INFO("A key is pressed!");
+		/*if (SparkRabbit::Input::IsKeyPressed(SR_KEY_A))
+			SPARK_INFO("A key is pressed!");*/
 	}
 
 	void OnEvent(SparkRabbit::Event& event) override
@@ -22,7 +22,7 @@ public:
 		if (event.GetEventType() == SparkRabbit::EventType::KeyPressed)
 		{
 			SparkRabbit::KeyPressedEvent& e = (SparkRabbit::KeyPressedEvent&)event;
-			SPARK_TRACE("{0}", (char)e.GetKeyCode());
+			SPARK_TRACE("{0}", (char)e.GetKeyCode()); 
 		}
 	}
 
