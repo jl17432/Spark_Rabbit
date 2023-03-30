@@ -39,6 +39,8 @@ project "SparkRabbit"
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/src/**.c",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
@@ -51,11 +53,14 @@ project "SparkRabbit"
 	includedirs
 	{
 		"%{prj.name}/src",
+		"%{prj.name}/vendor",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{prj.name}/vendor/assimp/include",
+		"%{prj.name}/vendor/stb/include"
 	}
 
 	links 
@@ -72,7 +77,6 @@ project "SparkRabbit"
 		defines
 		{
 			"SR_PLATFORM_WINDOWS",
-			"SR_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
 
@@ -105,13 +109,17 @@ project "Sandbox"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/src/**.c"
 	}
 
 	includedirs
 	{
 		"SparkRabbit/vendor/spdlog/include",
+		"SparkRabbit/vendor",
 		"SparkRabbit/src",
+		"%{prj.name}/src",
 		"%{IncludeDir.glm}"
 	}
 

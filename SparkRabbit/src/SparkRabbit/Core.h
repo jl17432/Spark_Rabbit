@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #ifdef SR_PLATFORM_WINDOWS
 #if SR_DYNAMIC_LINK
 	#ifdef SR_BUILD_DLL
