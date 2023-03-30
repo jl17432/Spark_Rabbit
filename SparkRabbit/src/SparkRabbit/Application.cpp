@@ -1,37 +1,16 @@
 #include "PrecompileH.h"
 #include "Application.h"
 
-#include <glad/glad.h>
+#include "SparkRabbit/Renderer/Renderer.h"
 
 #include "Input.h"
 
 namespace SparkRabbit{
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
-#define vShaderPath  "../SparkRabbit/src/SparkRabbit/Shaders/shader.vert"
-#define fShaderPath  "../SparkRabbit/src/SparkRabbit/Shaders/shader.frag"
+#define ShaderPath_  "../SparkRabbit/src/SparkRabbit/Shaders/"
 
 
-	static GLenum OpenGLShaderDataType(ShaderDataType type)
-	{
-		switch (type)
-		{
-			case SparkRabbit::ShaderDataType::Float:    return GL_FLOAT;
-			case SparkRabbit::ShaderDataType::Vec2:		return GL_FLOAT;
-			case SparkRabbit::ShaderDataType::Vec3:		return GL_FLOAT;
-			case SparkRabbit::ShaderDataType::Vec4:		return GL_FLOAT;
-			case SparkRabbit::ShaderDataType::Mat3:     return GL_FLOAT;
-			case SparkRabbit::ShaderDataType::Mat4:     return GL_FLOAT;
-			case SparkRabbit::ShaderDataType::Int:      return GL_INT;
-			case SparkRabbit::ShaderDataType::Ivec2:    return GL_INT;
-			case SparkRabbit::ShaderDataType::Ivec3:    return GL_INT;
-			case SparkRabbit::ShaderDataType::Ivec4:    return GL_INT;
-			case SparkRabbit::ShaderDataType::Bool:     return GL_BOOL;
-		}
-
-		SPARK_CORE_ASSERT(false, "Unknown ShaderDataType!");
-		return 0;
-	}
 
 	Application* Application::s_Instance = nullptr;
 
@@ -45,9 +24,7 @@ namespace SparkRabbit{
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
-
+		m_VertexArray.reset(VertexArray::Create());
 
 		float vertices[3 * 7] = {
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -55,42 +32,47 @@ namespace SparkRabbit{
 			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
 		};
 
-		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-
-		{
-			BufferLayout layout = {
-				{ShaderDataType::Vec3, "a_Position"},
-				{ShaderDataType::Vec4, "a_Color"}
-			};
-
-			m_VertexBuffer->SetLayout(layout);
-		}
-
-		uint32_t index = 0;
-		const auto& layout = m_VertexBuffer->GetLayout();
-		for (const auto& element : layout)
-		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index,
-				element.GetComponentCount(),
-				OpenGLShaderDataType(element.Type),
-				element.Normalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(),
-				(const void*)element.Offset
-			);
-			index++;
-		}
-
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
+		BufferLayout layout = {
+			{ShaderDataType::Vec3, "a_Position"},
+			{ShaderDataType::Vec4, "a_Color"}
+		};
+		
+		vertexBuffer->SetLayout(layout); 
+		m_VertexArray->AddVertexBuffer(vertexBuffer);  
 
 		uint32_t indices[3] = { 0, 1, 2 };
-		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		m_VertexArray->SetIndexBuffer(indexBuffer); 
+
+		m_Shader.reset(new Shader(ShaderPath_"shader.vert", ShaderPath_"shader.frag"));
 
 
-		m_Shader.reset(new Shader(vShaderPath, fShaderPath));
-	}
+		m_SquareVA.reset(VertexArray::Create());
 
-	Application::~Application()
-	{
+		float squareVertices[3 * 4] = {
+			-0.75f, -0.75f, 0.0f,
+			 0.75f, -0.75f, 0.0f,
+			 0.75f,  0.75f, 0.0f,
+			-0.75f,  0.75f, 0.0f
+		};
+
+		std::shared_ptr<VertexBuffer> squareVB; 
+		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices))); 
+		squareVB->SetLayout({
+			{ ShaderDataType::Vec3, "a_Position" } 
+			});
+		m_SquareVA->AddVertexBuffer(squareVB); 
+
+		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 }; 
+		std::shared_ptr<IndexBuffer> squareIB; 
+		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t))); 
+		m_SquareVA->SetIndexBuffer(squareIB); 
+
+
+		m_BlueShader.reset(new Shader(ShaderPath_"square.vert", ShaderPath_"square.frag"));
 
 	}
 
@@ -126,11 +108,20 @@ namespace SparkRabbit{
 	{
 		while (m_Running)
 		{
-			glClearColor(0.1f, 0.1f, 0.1f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
-			m_Shader->Bind();
+			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+			RenderCommand::Clear();
 
-			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::BeginScene();
+
+
+			m_BlueShader->Bind();
+			Renderer::Submit(m_SquareVA);
+
+			m_Shader->Bind();
+			Renderer::Submit(m_VertexArray);
+
+			Renderer::EndScene();
+
 
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();

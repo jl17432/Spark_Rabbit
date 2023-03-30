@@ -13,7 +13,7 @@ namespace SparkRabbit {
 		unsigned int Width;
 		unsigned int Height;
 
-		WindowProps(const std::string& title = "Hazel Engine",
+		WindowProps(const std::string& title = "SparkRabbit Engine",
 			unsigned int width = 1280,
 			unsigned int height = 720)
 			: Title(title), Width(width), Height(height)
@@ -21,13 +21,13 @@ namespace SparkRabbit {
 		}
 	};
 
-	// Interface representing a desktop system based Window
+	//Window interface
 	class SPARK_API Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() {}
+		virtual ~Window() = default;
 
 		virtual void OnUpdate() = 0;
 

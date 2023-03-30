@@ -14,6 +14,9 @@
 #include <stdint.h>
 
 #include "SparkRabbit/Log.h"
+#include "SparkRabbit/Events/Event.h"
+#include "SparkRabbit/Core.h"
+
 
 #ifdef SR_PLATFORM_WINDOWS
 	#include <Windows.h>

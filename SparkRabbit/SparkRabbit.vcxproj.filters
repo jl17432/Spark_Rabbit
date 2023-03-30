@@ -1404,6 +1404,19 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="src\SparkRabbit\Renderer\RenderAPI.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRenderWrapper.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\RenderCommand.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\OrthographicCamera.h" />
+    <ClInclude Include="src\SparkRabbit\TickTime.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\ProjectiveCamera.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Framebuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\CmdQueue.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\RenderPass.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRenderPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
@@ -1448,5 +1461,17 @@
     <ClCompile Include="src\SparkRabbit\Renderer\Shader.cpp">
       <Filter>src\SparkRabbit\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\SparkRabbit\Renderer\RenderAPI.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRenderWrapper.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\RenderCommand.cpp" />
+    <ClCompile Include="src\SparkRabbit\TickTime.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\ProjectiveCamera.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\Framebuffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\CmdQueue.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\RenderPass.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRenderPass.cpp" />
   </ItemGroup>
 </Project>

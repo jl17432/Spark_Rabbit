@@ -34,7 +34,6 @@ namespace SparkRabbit {
 			fragmentCode = fShaderStream.str();
 		}
 		catch (std::ifstream::failure& e) {
-			//std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ:" << e.what() << std::endl;
 			SPARK_CORE_ERROR("Cannot read shader files : {0}", e.what());
 		}
 		const char* vShaderCode = vertexCode.c_str();

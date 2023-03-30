@@ -11,8 +11,8 @@ namespace SparkRabbit {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::None:    SPARK_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::OpenGL:  return new OpenGLVertexBuffer(vertices, size);
+		case RenderAPI::API::None:    SPARK_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr; 
+		case RenderAPI::API::OpenGL:  return new OpenGLVertexBuffer(vertices, size); 
 		}
 
 		SPARK_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -23,8 +23,8 @@ namespace SparkRabbit {
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::None:    SPARK_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RendererAPI::OpenGL:  return new OpenGLIndexBuffer(indices, size);
+		case RenderAPI::API::None:    SPARK_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+		case RenderAPI::API::OpenGL:  return new OpenGLIndexBuffer(indices, size);
 		}
 
 		SPARK_CORE_ASSERT(false, "Unknown RendererAPI!");
