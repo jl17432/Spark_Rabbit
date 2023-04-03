@@ -20,7 +20,7 @@ namespace SparkRabbit {
     {
         auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         auto state = glfwGetMouseButton(window, button);
-        return state = GLFW_PRESS;
+        return state == GLFW_PRESS;
     }
 
     float WindowsInput::GetMouseXImpl()

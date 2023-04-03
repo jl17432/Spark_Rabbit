@@ -36,7 +36,7 @@ namespace SparkRabbit {
 		void SetEnvironment(const Environment& env);
 		void SetSkybox(const std::shared_ptr<TextureCube>& skybox);
 
-		Light GetLight() const { return m_Light; }
+		Light& GetLight() { return m_Light; }
 
 		float& GetSkyboxLod() { return m_SkyboxLod; }
 
