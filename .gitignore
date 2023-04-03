@@ -1,5 +1,6 @@
 # Binaries
 **/bin/
+!SparkRabbit/vendor/assimp/bin
 !vendor/bin/premake/
 bin-int/
 
