@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SparkRabbit/Core.h"
-#include "SparkRabbit/Events/Event.h"
+#include "SparkRabbit/TickTime.h"
 
 
 namespace SparkRabbit
@@ -10,11 +10,11 @@ namespace SparkRabbit
 	{
 	public:
 		Layer(const std::string& name = "Layer");
-		virtual ~Layer() = default;
+		virtual ~Layer();
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(TickTime time) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 

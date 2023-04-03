@@ -1,48 +1,59 @@
 #pragma once
 #include"Core.h"
-
 #include "Window.h"
 #include "SparkRabbit/LayerStack.h"
-#include "Events/Event.h"
+#include "SparkRabbit/TickTime.h"
+
 #include "SparkRabbit/Events/ApplicationEvent.h"
 
 #include "SparkRabbit/ImGui/ImGuiLayer.h"
 
-#include "Renderer/Shader.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/VertexArray.h"
 
 namespace SparkRabbit
 {
+
+	struct ApplicationProps
+	{
+		std::string Name;
+		uint32_t WindowWidth, WindowHeight;
+	};
+
 	class SPARK_API Application
 	{
 	public:
-		Application();
-		virtual ~Application() = default;
+		Application(const ApplicationProps& props = { "SparkRabbit Engine Demo", 1280, 720 });
+		virtual ~Application();
 
 		void Run();
 
-		void OnEvent(Event& e);
+		virtual void OnInit() {}
+		virtual void OnShutdown() {}
+		virtual void OnUpdate(TickTime ts) {}
+
+		virtual void OnEvent(Event& event);
 
 		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* overlay);
+		void PushOverlay(Layer* layer);
+		void RenderImGui();
+
+		std::string OpenFile(const std::string& filter) const;
 
 		inline Window& GetWindow() { return *m_Window; }
-		inline static Application& Get() { return *s_Instance; }
 
+		static inline Application& Get() { return *s_Instance; }
+
+		float GetTime() const; 
 	private:
+		bool OnWindowResize(WindowResizeEvent& e);
 		bool OnWindowClose(WindowCloseEvent& e);
-
-		std::unique_ptr<Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
-		bool m_Running = true;
+	private:
+		std::unique_ptr<Window> m_Window;  //for now we only have one window
+		bool m_Running = true, m_Minimized = false;
 		LayerStack m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
+		TickTime m_TickTime;
 
-		std::shared_ptr<Shader> m_Shader;
-		std::shared_ptr<VertexArray> m_VertexArray;
-
-		std::shared_ptr<Shader> m_BlueShader;
-		std::shared_ptr<VertexArray> m_SquareVA;
+		float m_LastFrameTime = 0.0f;
 
 		static Application* s_Instance;
 	};

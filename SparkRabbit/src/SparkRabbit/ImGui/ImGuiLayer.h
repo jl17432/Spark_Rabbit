@@ -7,19 +7,19 @@
 
 namespace SparkRabbit {
 	
-	class SPARK_API ImGuiLayer : public Layer
+	class ImGuiLayer : public Layer
 	{
 	public:
 		ImGuiLayer();
-		~ImGuiLayer() = default;
+		ImGuiLayer(const std::string& name);
+		virtual ~ImGuiLayer();
+
+		void Begin();
+		void End();
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 		virtual void OnImGuiRender() override;
-
-		void Begin();
-		void End();
-		
 	private:
 		float m_Time = 0.0f;
 	};

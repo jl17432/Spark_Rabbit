@@ -8,11 +8,11 @@ namespace SparkRabbit {
 	public:
 		OpenGLFramebuffer(const FramebufferSpecification& spec);
 		//~OpenGLFramebuffer();
-		~OpenGLFramebuffer() = default;
+		~OpenGLFramebuffer();
 
 		void Bind() const override;
 		void Unbind() const override;
-		void Resize(uint32_t width, uint32_t height, bool recreate = false) override;
+		virtual void Resize(uint32_t width, uint32_t height, bool recreate = false) override;
 
 		void BindTexture(uint32_t slot = 0) const override;
 

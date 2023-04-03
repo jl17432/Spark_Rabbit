@@ -22,7 +22,6 @@ namespace SparkRabbit {
 		std::cout << "  Renderer: " << glGetString(GL_RENDERER) <<std::endl;
 		std::cout << "  Version: " << glGetString(GL_VERSION) << std::endl;
 		
-		
 	}
 	
 	void OpenGLContext::SwapBuffers()

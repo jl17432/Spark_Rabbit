@@ -78,32 +78,42 @@ namespace SparkRabbit {
 		uint32_t m_Stride = 0;
 	};
 
-
+	enum class VertexBufferUsage
+	{
+		None = 0, Static = 1, Dynamic = 2
+	};
 	class VertexBuffer
 	{
 	public:
-		virtual ~VertexBuffer() = default;
+		virtual ~VertexBuffer() {}
 
+		virtual void SetData(void* buffer, uint32_t size, uint32_t offset = 0) = 0;
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 
-		static VertexBuffer* Create(float* vertices, uint32_t size);
-
-		virtual void SetLayout(const BufferLayout& layout) = 0;
 		virtual const BufferLayout& GetLayout() const = 0;
+		virtual void SetLayout(const BufferLayout& layout) = 0;
+
+		virtual unsigned int GetSize() const = 0;
+		virtual uint32_t GetRendererID() const = 0;
+
+		static std::shared_ptr<VertexBuffer> Create(void* data, uint32_t size, VertexBufferUsage usage = VertexBufferUsage::Static);
+		static std::shared_ptr<VertexBuffer> Create(uint32_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
 	};
 
 	class IndexBuffer
 	{
 	public:
-		virtual ~IndexBuffer() = default;
+		virtual ~IndexBuffer() {}
 
+		virtual void SetData(void* buffer, uint32_t size, uint32_t offset = 0) = 0;
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 
 		virtual uint32_t GetCount() const = 0;
 
-		static IndexBuffer* Create(uint32_t* indices, uint32_t size);
+		virtual unsigned int GetSize() const = 0;
+		virtual uint32_t GetRendererID() const = 0;
+
+		static std::shared_ptr<IndexBuffer> Create(void* data, uint32_t size = 0);
 	};
 
 	static uint32_t ShaderDataTypeSize(ShaderDataType type)

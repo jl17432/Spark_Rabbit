@@ -15,14 +15,22 @@ namespace SparkRabbit {
 		float MaxAnisotropy = 0.0f;
 		int MaxTextureUnits = 0;
 	};
+
+
+	enum class PrimitiveType
+	{
+		None = 0, Triangles, Lines
+	};
 	
 	class RenderAPI
 	{
 	public:
+
 		enum class API
 		{
 			None = 0, OpenGL // ,Vulkan, DirectX
 		};
+
 
 		static RenderAPIInfo& GetInfo()
 		{
@@ -31,13 +39,15 @@ namespace SparkRabbit {
 		}
 
 
-		virtual void Init() = 0;
-		virtual void Shutdown() = 0;
+		static void Init();
+		static void Shutdown();
 	
-		virtual void SetClearColor(const glm::vec4& color) = 0;
-		virtual void Clear() = 0;
-		virtual void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray) = 0;
-		virtual void SetDepthTest(bool enabled) = 0;
+		static void Clear(float r, float g, float b, float a);
+		static void SetClearColor(float r, float g, float b, float a);
+
+		static void DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest = true);
+		static void SetLineWidth(float width);
+
 		inline static API GetAPI() { return s_API; }
 	private:
 		static API s_API;

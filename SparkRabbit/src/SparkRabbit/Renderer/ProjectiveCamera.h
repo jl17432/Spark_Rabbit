@@ -16,6 +16,7 @@ namespace SparkRabbit{
 		void OnUpdate(TickTime time);
 		void OnEvent(Event& event);
 
+
 		glm::vec3 GetCameraUp();
 		glm::vec3 GetCameraRight();
 		glm::vec3 GetCameraFront();

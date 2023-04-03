@@ -6,6 +6,12 @@
 #include "SparkRabbit/TickTime.h"
 #include "SparkRabbit/Log.h"
 
+#include "Buffer.h"
+#include "Shader.h"
+#include "VertexArray.h"
+#include "Material.h"
+#include "SparkRabbit/Math/BoundingBox.h"
+
 struct aiNode;
 struct aiAnimation;
 struct aiNodeAnim;
@@ -47,7 +53,8 @@ namespace SparkRabbit {
 					return;
 				}
 			}
-			SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight);
+			//--to much mesages in console, uncomment it when debugging this
+			//SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight); 
 		}	
 	};
 
@@ -69,7 +76,7 @@ namespace SparkRabbit {
 		uint32_t IDs[4] = { 0,0,0,0 };
 		float Weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-		VertexBoneData()
+		VertexBoneData() //constructor
 		{
 			memset(IDs, 0, sizeof(IDs));
 			memset(Weights, 0, sizeof(Weights));
@@ -86,7 +93,7 @@ namespace SparkRabbit {
 					return;
 				}
 			}
-			SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight);
+			SPARK_CORE_ASSERT(false, "Too many bones,(BoneID={0}, Weight={1})");
 		}
 	};
 
@@ -97,7 +104,7 @@ namespace SparkRabbit {
 			: V0(v0), V1(v1), V2(v2) {}
 	};
 
-	class SubMesh
+	class Submesh
 	{
 	public:
 	public:
@@ -107,7 +114,7 @@ namespace SparkRabbit {
 		uint32_t IndexCount;
 
 		glm::mat4 Transform;
-		//AABB BoundingBox;
+		BoundingBox Box;
 
 		std::string NodeName, MeshName;
 	};
@@ -115,34 +122,73 @@ namespace SparkRabbit {
 	class Mesh
 	{
 	public:
-		Mesh(const std::string& path);
+		Mesh(const std::string& filename);
 		~Mesh();
 
-		void OnUpdate(TickTime ts);
-		//void LogVertexBuffer();
+		void OnUpdate(TickTime ts); 
+		//void DumpVertexBuffer();
 
-		std::vector<SubMesh>& GetSubMeshes() { return m_SubMeshes; }
-		const std::vector<SubMesh>& GetSubMeshes() const { return m_SubMeshes; }
+		std::vector<Submesh>& GetSubmeshes() { return m_Submeshes; }
+		const std::vector<Submesh>& GetSubmeshes() const { return m_Submeshes; }
 
-		//std::shared_ptr<Shader> GetMeshShader() { return m_MeshShader; }
-		std::shared_ptr<Material>GetMaterial() { return m_Material; }
+		std::shared_ptr<Shader> GetMeshShader() { return m_MeshShader; }
+		std::shared_ptr<Material> GetMaterial() { return m_BaseMaterial; }
+		std::vector<std::shared_ptr<MaterialInstance>> GetMaterials() { return m_Materials; }
+		const std::vector<std::shared_ptr<Texture2D>>& GetTextures() const { return m_Textures; }
+		const std::string& GetFilePath() const { return m_FilePath; }
 
-
-
+		const std::vector<Triangle> GetTriangleCache(uint32_t index) const { return m_TriangleCache.at(index); }
 	private:
-		std::vector<SubMesh> m_SubMeshes;
-		std::vector<Vertex> m_Vertices;
-		std::vector<AnimatedVertex> m_AnimatedVertices;
-		std::vector<Index> m_Indices;
-		std::unordered_map<std::string, uint32_t> m_BoneMapping;
-		std::vector<glm::mat4> m_BoneTransforms;
-		const aiScene* m_Scene;
+		void BoneTransform(float time);
+		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
+		void TraverseNodes(aiNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f), uint32_t level = 0);
+
+		const aiNodeAnim* FindNodeAnim(const aiAnimation* animation, const std::string& nodeName);
+		uint32_t FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint32_t FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		uint32_t FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		glm::vec3 InterpolateTranslation(float animationTime, const aiNodeAnim* nodeAnim);
+		glm::quat InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim);
+		glm::vec3 InterpolateScale(float animationTime, const aiNodeAnim* nodeAnim);
+	private:
+		std::vector<Submesh> m_Submeshes;
 
 		std::unique_ptr<Assimp::Importer> m_Importer;
 
 		glm::mat4 m_InverseTransform;
 
 		uint32_t m_BoneCount = 0;
+		std::vector<BoneInfo> m_BoneInfo;
+
+		std::shared_ptr<VertexArray> m_VertexArray;
+
+		std::vector<Vertex> m_StaticVertices;
+		std::vector<AnimatedVertex> m_AnimatedVertices;
+		std::vector<Index> m_Indices;
+		std::unordered_map<std::string, uint32_t> m_BoneMapping;
+		std::vector<glm::mat4> m_BoneTransforms;
+		const aiScene* m_Scene;
+
+		// Materials
+		std::shared_ptr<Shader> m_MeshShader;
+		std::shared_ptr<Material> m_BaseMaterial;
+		std::vector<std::shared_ptr<Texture2D>> m_Textures;
+		std::vector<std::shared_ptr<Texture2D>> m_NormalMaps;
+		std::vector<std::shared_ptr<MaterialInstance>> m_Materials;
+
+		std::unordered_map<uint32_t, std::vector<Triangle>> m_TriangleCache;
+
+		// Animation
+		bool m_IsAnimated = false;
+		float m_AnimationTime = 0.0f;
+		float m_WorldTime = 0.0f;
+		float m_TimeMultiplier = 1.0f;
+		bool m_AnimationPlaying = true;
+
+		std::string m_FilePath;
+
+		friend class Renderer;
+		friend class SceneHierarchyPanel;
 	};
 
 }

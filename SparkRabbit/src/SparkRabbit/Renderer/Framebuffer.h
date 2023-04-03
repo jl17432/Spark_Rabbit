@@ -49,7 +49,7 @@ namespace SparkRabbit {
 	{
 	public:
 		FramebufferPool(uint32_t maxFBs = 32);
-		~FramebufferPool() = default;
+		~FramebufferPool();
 
 		std::weak_ptr<Framebuffer> AllocateBuffer();
 		void Add(std::weak_ptr<Framebuffer> framebuffer);

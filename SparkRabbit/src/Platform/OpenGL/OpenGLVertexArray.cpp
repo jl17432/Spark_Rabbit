@@ -1,5 +1,6 @@
 #include "PrecompileH.h"
 #include "OpenGLVertexArray.h"
+#include "SparkRabbit/Renderer/Renderer.h"
 
 #include <glad/glad.h>
 
@@ -28,43 +29,70 @@ namespace SparkRabbit {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		glCreateVertexArrays(1, &m_RendererID);
+		Renderer::Submit([this]() {
+			glCreateVertexArrays(1, &m_RendererID);
+		});
+	}
+
+	OpenGLVertexArray::~OpenGLVertexArray()
+	{ 
+		Renderer::Submit([this]() { 
+			glDeleteVertexArrays(1, &m_RendererID); 
+		}); 
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
-		glBindVertexArray(m_RendererID);
+		Renderer::Submit([this]() {
+			glBindVertexArray(m_RendererID);
+		});
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
-		glBindVertexArray(0);
+		Renderer::Submit([this]() {
+			glBindVertexArray(0);
+		});
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertBuff)
 	{
 		SPARK_CORE_ASSERT(vertBuff->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
-		glBindVertexArray(m_RendererID);
+		Bind();
 		vertBuff->Bind();
-		auto const& layout = vertBuff->GetLayout();
-		for (auto const& element : layout)
-		{
-			glEnableVertexAttribArray(m_VertexBufferIndex); 
-			glVertexAttribPointer(m_VertexBufferIndex, 
-								element.GetComponentCount(), 
-								OpenGLShaderDataType(element.Type), 
-								element.Normalized ? GL_TRUE : GL_FALSE, 
-								layout.GetStride(), 
-								(const void*)element.Offset); 
-			m_VertexBufferIndex++; 
-		}
-		m_VertexBuffers.push_back(vertBuff); 
+		Renderer::Submit([this, vertBuff]() {
+			const auto& layout = vertBuff->GetLayout();
+			for (const auto& element : layout)
+			{
+				auto glBaseType = OpenGLShaderDataType(element.Type);
+				glEnableVertexAttribArray(m_VertexBufferIndex);
+				if (glBaseType == GL_INT)
+				{
+					glVertexAttribIPointer(m_VertexBufferIndex,
+						element.GetComponentCount(),
+						glBaseType,
+						layout.GetStride(),
+						(const void*)(intptr_t)element.Offset);
+				}
+				else
+				{
+					glVertexAttribPointer(m_VertexBufferIndex,
+						element.GetComponentCount(),
+						glBaseType,
+						element.Normalized ? GL_TRUE : GL_FALSE,
+						layout.GetStride(),
+						(const void*)(intptr_t)element.Offset);
+				}
+				m_VertexBufferIndex++; 
+			}
+			});
+		m_VertexBuffers.push_back(vertBuff);
 	}
 
 	void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuff)
 	{
-		glBindVertexArray(m_RendererID); 
+		Bind();
 		indexBuff->Bind(); 
 		m_IndexBuffer = indexBuff; 
 	}

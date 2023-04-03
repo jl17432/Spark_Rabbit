@@ -1,6 +1,7 @@
 workspace "SparkRabbit"
 	architecture "x64"
 	startproject "Sandbox"
+	targetdir "build"
 
 	configurations
 	{
@@ -127,6 +128,10 @@ project "Sandbox"
 	{
 		"SparkRabbit"
 	}
+	postbuildcommands 
+	{
+		'{COPY} "../Sandbox/assets" "%{cfg.targetdir}/assets"'
+	}
 
 	filter "system:windows"
 		systemversion "latest"
@@ -141,12 +146,42 @@ project "Sandbox"
 		runtime "Debug"
 		symbols "on"
 
+		links
+		{
+			"SparkRabbit/vendor/assimp/bin/Debug/assimp-vc141-mtd.lib"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "../SparkRabbit/vendor/assimp/bin/Debug/assimp-vc141-mtd.dll" "%{cfg.targetdir}"'
+		}
+
 	filter "configurations:Release"
 		defines "SPARK_RELEASE"
 		runtime "Release"
 		optimize "on"
 
+		links
+		{
+			"SparkRabbit/vendor/assimp/bin/Release/assimp-vc141-mt.lib"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "../SparkRabbit/vendor/assimp/bin/Release/assimp-vc141-mt.dll" "%{cfg.targetdir}"'
+		}
+
 	filter "configurations:Dist"
 		defines "SPARK_DIST"
 		runtime "Release"
 		optimize "on"
+
+		links
+		{
+			"SparkRabbit/vendor/assimp/bin/Release/assimp-vc141-mt.lib"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "../SparkRabbit/vendor/assimp/bin/Release/assimp-vc141-mtd.dll" "%{cfg.targetdir}"'
+		}

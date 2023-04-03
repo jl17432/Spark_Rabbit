@@ -7,32 +7,33 @@ namespace SparkRabbit {
 
 	class OpenGLTexture2D : public Texture2D
 	{
+	public:
 		OpenGLTexture2D(TextureFormat format, uint32_t width, uint32_t height, TextureWrap wrap);
 		OpenGLTexture2D(const std::string& path, bool srgb);
 
-		virtual ~OpenGLTexture2D();
+		~OpenGLTexture2D();
 
-		virtual void Bind(uint32_t slot = 0) const override; 
-		virtual TextureFormat GetFormat() const override { return m_Format; }
-		virtual uint32_t GetWidth() const override { return m_Width; }
-		virtual uint32_t GetHeight() const override { return m_Height; }
-		// This function currently returns the expected number of mips based on image size,
-		// not present mips in data
-		virtual uint32_t GetMipLevelCount() const override;
+		void Bind(uint32_t slot = 0) const override; 
+		TextureFormat GetFormat() const override { return m_Format; }
+		uint32_t GetWidth() const override { return m_Width; }
+		uint32_t GetHeight() const override { return m_Height; }
 
-		virtual void Lock() override;
-		virtual void Unlock() override;
+		// This function currently returns the expected number of mips based on image size
+		uint32_t GetMipLevelCount() const override;
 
-		virtual void Resize(uint32_t width, uint32_t height) override;
-		virtual Buffer GetWritableBuffer() override;
+		void Lock() override;
+		void Unlock() override;
 
-		virtual const std::string& GetPath() const override { return m_FilePath; }
+		void Resize(uint32_t width, uint32_t height) override;
+		Buffer GetWritableBuffer() override;
 
-		virtual bool Loaded() const override { return m_Loaded; }
+		const std::string& GetPath() const override { return m_FilePath; }
 
-		virtual uint32_t GetRendererID() const override { return m_RendererID; }
+		bool Loaded() const override { return m_Loaded; }
 
-		virtual bool operator==(const Texture& other) const override
+		uint32_t GetRendererID() const override { return m_RendererID; }
+
+		bool operator==(const Texture& other) const override
 		{
 			return m_RendererID == ((OpenGLTexture2D&)other).m_RendererID;
 		}
@@ -64,8 +65,8 @@ namespace SparkRabbit {
 		virtual TextureFormat GetFormat() const { return m_Format; }
 		virtual uint32_t GetWidth() const { return m_Width; }
 		virtual uint32_t GetHeight() const { return m_Height; }
-		// This function currently returns the expected number of mips based on image size,
-		// not present mips in data
+
+		// This function currently returns the expected number of mips based on image size
 		virtual uint32_t GetMipLevelCount() const override;
 
 		virtual const std::string& GetPath() const override { return m_FilePath; }

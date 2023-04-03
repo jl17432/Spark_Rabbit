@@ -1,61 +1,105 @@
 #include "PrecompileH.h"
 #include "OpenGLBuffer.h"
+#include "SparkRabbit/Renderer/Renderer.h"
 
 #include <glad/glad.h>
 
 namespace SparkRabbit {
 
-	/////////////////////////////////////////////////////////////////////////////
-	// VertexBuffer /////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////
+	// VertexBuffer
+	//////////////////////////////////////////////////////////////////////////////////
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size)
+	static GLenum OpenGLUsage(VertexBufferUsage usage)
 	{
-		glCreateBuffers(1, &m_RendererID);
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+		switch (usage)
+		{
+		case VertexBufferUsage::Static:    return GL_STATIC_DRAW;
+		case VertexBufferUsage::Dynamic:   return GL_DYNAMIC_DRAW;
+		}
+		SPARK_CORE_ASSERT(false, "Unknown vertex buffer usage");
+		return 0;
+	}
+
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, uint32_t size, VertexBufferUsage usage)
+		: m_Size(size), m_Usage(usage)
+	{
+		m_LocalData = Buffer::Copy(data, size);
+
+		Renderer::Submit([=]() {
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, OpenGLUsage(m_Usage));
+			});
+	}
+
+	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size, VertexBufferUsage usage)
+		: m_Size(size), m_Usage(usage)
+	{
+		Renderer::Submit([this]() {
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, nullptr, OpenGLUsage(m_Usage));
+			});
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
-		glDeleteBuffers(1, &m_RendererID);
+		Renderer::Submit([this]() {
+			glDeleteBuffers(1, &m_RendererID);
+			});
 	}
 
-	void OpenGLVertexBuffer::Bind() const 
+	void OpenGLVertexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		m_LocalData = Buffer::Copy(data, size);
+		m_Size = size;
+		Renderer::Submit([this, offset]() {
+			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+			});
 	}
 
-	void OpenGLVertexBuffer::Unbind() const
+	void OpenGLVertexBuffer::Bind() const
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		Renderer::Submit([this]() {
+			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+			});
 	}
 
-	/////////////////////////////////////////////////////////////////////////////
-	// IndexBuffer //////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////
+	// IndexBuffer
+	//////////////////////////////////////////////////////////////////////////////////
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
-		: m_Count(count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(void* data, uint32_t size)
+		: m_RendererID(0), m_Size(size)
 	{
-		glCreateBuffers(1, &m_RendererID);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		m_LocalData = Buffer::Copy(data, size);
+
+		Renderer::Submit([this]() { 
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, GL_STATIC_DRAW);
+			});
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
-		glDeleteBuffers(1, &m_RendererID);
+		Renderer::Submit([this]() {
+			glDeleteBuffers(1, &m_RendererID);
+			});
+	}
+
+	void OpenGLIndexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
+	{
+		m_LocalData = Buffer::Copy(data, size);
+		m_Size = size;
+		Renderer::Submit([this, offset]() {
+			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+			});
 	}
 
 	void OpenGLIndexBuffer::Bind() const
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
-	}
-
-	void OpenGLIndexBuffer::Unbind() const
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		Renderer::Submit([this]() {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+			});
 	}
 
 }

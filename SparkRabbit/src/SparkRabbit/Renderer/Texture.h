@@ -29,7 +29,7 @@ namespace SparkRabbit{
 
 		virtual uint32_t GetRendererID() const = 0;
 
-		static uint32_t GetBPP(TextureFormat format);
+		static uint32_t GetBPP(TextureFormat format); // Get bytes per pixel
 		static uint32_t CalculateMipMapCount(uint32_t width, uint32_t height);
 
 		virtual bool operator==(const Texture& other) const = 0;

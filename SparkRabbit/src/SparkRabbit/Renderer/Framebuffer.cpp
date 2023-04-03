@@ -11,10 +11,23 @@ namespace SparkRabbit {
 		switch (RenderAPI::GetAPI())
 		{
 			case RenderAPI::API::None:    SPARK_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RenderAPI::API::OpenGL:  result = std::make_shared<OpenGLFramebuffer>(spec); break;
+			case RenderAPI::API::OpenGL:  result = std::make_shared<OpenGLFramebuffer>(spec);
 		}
 		FramebufferPool::GetGlobal()->Add(result);
 		return result;
+	}
+
+	FramebufferPool* FramebufferPool::s_Instance = new FramebufferPool;
+
+	FramebufferPool::FramebufferPool(uint32_t maxFBs)
+	{
+		//m_Pool.reserve(maxFBs);
+		//s_Instance = this;
+	}
+
+	FramebufferPool::~FramebufferPool()
+	{
+
 	}
 	
 	std::weak_ptr<Framebuffer> FramebufferPool::AllocateBuffer()

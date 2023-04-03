@@ -13,8 +13,10 @@
 	#define SPARK_API
 #endif
 #else
-	#error Hazel only support Windows!
+	#error SparkRabbit only support Windows!
 #endif
+
+#define SR_BIND_EVENT_FN(fn) std::bind(&##fn, this, std::placeholders::_1)
 
 #ifdef SPARK_DEBUG 
 #define SPARK_ENABLE_ASSERTS

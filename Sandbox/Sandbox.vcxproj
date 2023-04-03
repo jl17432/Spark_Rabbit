@@ -89,7 +89,12 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>..\SparkRabbit\vendor\assimp\bin\Debug\assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST "..\Sandbox\assets"\ (xcopy /Q /E /Y /I "..\Sandbox\assets" "..\bin\Debug-windows-x86_64\Sandbox\assets" &gt; nul) ELSE (xcopy /Q /Y /I "..\Sandbox\assets" "..\bin\Debug-windows-x86_64\Sandbox\assets" &gt; nul)
+IF EXIST "..\SparkRabbit\vendor\assimp\bin\Debug\assimp-vc141-mtd.dll"\ (xcopy /Q /E /Y /I "..\SparkRabbit\vendor\assimp\bin\Debug\assimp-vc141-mtd.dll" "..\bin\Debug-windows-x86_64\Sandbox" &gt; nul) ELSE (xcopy /Q /Y /I "..\SparkRabbit\vendor\assimp\bin\Debug\assimp-vc141-mtd.dll" "..\bin\Debug-windows-x86_64\Sandbox" &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -110,7 +115,12 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST "..\Sandbox\assets"\ (xcopy /Q /E /Y /I "..\Sandbox\assets" "..\bin\Release-windows-x86_64\Sandbox\assets" &gt; nul) ELSE (xcopy /Q /Y /I "..\Sandbox\assets" "..\bin\Release-windows-x86_64\Sandbox\assets" &gt; nul)
+IF EXIST "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mt.dll"\ (xcopy /Q /E /Y /I "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mt.dll" "..\bin\Release-windows-x86_64\Sandbox" &gt; nul) ELSE (xcopy /Q /Y /I "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mt.dll" "..\bin\Release-windows-x86_64\Sandbox" &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
@@ -131,9 +141,18 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>IF EXIST "..\Sandbox\assets"\ (xcopy /Q /E /Y /I "..\Sandbox\assets" "..\bin\Dist-windows-x86_64\Sandbox\assets" &gt; nul) ELSE (xcopy /Q /Y /I "..\Sandbox\assets" "..\bin\Dist-windows-x86_64\Sandbox\assets" &gt; nul)
+IF EXIST "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mtd.dll"\ (xcopy /Q /E /Y /I "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mtd.dll" "..\bin\Dist-windows-x86_64\Sandbox" &gt; nul) ELSE (xcopy /Q /Y /I "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mtd.dll" "..\bin\Dist-windows-x86_64\Sandbox" &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\EditorLayer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\EditorLayer.cpp" />
     <ClCompile Include="src\SandboxApp.cpp" />
   </ItemGroup>
   <ItemGroup>

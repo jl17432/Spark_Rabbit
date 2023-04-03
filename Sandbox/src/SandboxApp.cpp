@@ -1,49 +1,26 @@
 #include <SparkAPI.h>
+#include "EditorLayer.h"
+#include "SparkRabbit/EntryPoint.h"
 
 
-class ExampleLayer : public SparkRabbit::Layer
-{
-public:
-	ExampleLayer()
-		: Layer("Example")
-	{
-	}
-
-	void OnUpdate() override
-	{ 
-		//SPARK_INFO("ExampleLayer::Update");
-		/*if (SparkRabbit::Input::IsKeyPressed(SR_KEY_A))
-			SPARK_INFO("A key is pressed!");*/
-	}
-
-	void OnEvent(SparkRabbit::Event& event) override
-	{
-		//SPARK_TRACE("{0}", event);
-		if (event.GetEventType() == SparkRabbit::EventType::KeyPressed)
-		{
-			SparkRabbit::KeyPressedEvent& e = (SparkRabbit::KeyPressedEvent&)event;
-			SPARK_TRACE("{0}", (char)e.GetKeyCode()); 
-		}
-	}
-
-};
 
 class Sandbox : public SparkRabbit::Application
 {
 public:
-	Sandbox()
+	Sandbox(const SparkRabbit::ApplicationProps& props)
+		: SparkRabbit::Application(props)
 	{
-		PushLayer(new ExampleLayer());
+		
 	}
 
-	~Sandbox()
+	void OnInit() override
 	{
-
+		PushLayer(new SparkRabbit::EditorLayer());
 	}
 
 };
 
 SparkRabbit::Application* SparkRabbit::CreateApplication()
 {
-	return new Sandbox();
+	return new Sandbox({ "SparkRabbit Engine", 1600, 900 });
 }

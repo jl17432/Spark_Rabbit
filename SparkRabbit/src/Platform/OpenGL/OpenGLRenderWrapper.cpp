@@ -1,79 +1,109 @@
 #include "PrecompileH.h"
-#include "OpenGLRenderWrapper.h"
+#include "SparkRabbit/Renderer/RenderAPI.h"
 
+#include<Glad/glad.h>
 
 namespace SparkRabbit {
 
-	void OpenGLRenderWrapper::Init()
+	static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
-		
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:
+			SPARK_CORE_ERROR("[OpenGL Debug HIGH] {0}", message);
+			//SPARK_CORE_ASSERT(false, "GL_DEBUG_SEVERITY_HIGH");
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			SPARK_CORE_WARN("[OpenGL Debug MEDIUM] {0}", message);
+			break;
+		case GL_DEBUG_SEVERITY_LOW:
+			SPARK_CORE_INFO("[OpenGL Debug LOW] {0}", message);
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			break;
+		}
+	}
+	
+	void RenderAPI::Init() 
+	{
+		glDebugMessageCallback(OpenGLLogMessage, nullptr);
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(OpenGLLogMessage, nullptr);
 
-		/*
 		unsigned int vao;
 		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);*/
+		glBindVertexArray(vao);
 
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);  //启用立方体贴图的无缝过滤
-		glEnable(GL_CULL_FACE);////
-		glFrontFace(GL_CCW);  
-		glCullFace(GL_BACK);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glFrontFace(GL_CCW);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_MULTISAMPLE);
 
-		auto& apiInfo = RenderAPI::GetInfo();
-		apiInfo.vendor = (const char*)glGetString(GL_VENDOR);
-		apiInfo.renderer = (const char*)glGetString(GL_RENDERER);
-		apiInfo.version = (const char*)glGetString(GL_VERSION);
+		auto& caps = RenderAPI::GetInfo();
 
-		glGetIntegerv(GL_MAX_SAMPLES, &apiInfo.MaxSamples);
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &apiInfo.MaxAnisotropy);
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &apiInfo.MaxTextureUnits);
+		caps.vendor = (const char*)glGetString(GL_VENDOR);
+		caps.renderer = (const char*)glGetString(GL_RENDERER);
+		caps.version = (const char*)glGetString(GL_VERSION);
 
+		glGetIntegerv(GL_MAX_SAMPLES, &caps.MaxSamples);
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &caps.MaxAnisotropy);
 
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &caps.MaxTextureUnits);
+		/*
+		GLenum error = glGetError();
+		while (error != GL_NO_ERROR)
+		{
+			SPARK_CORE_ERROR("OpenGL Error {0}", error);
+			error = glGetError();
+		}*/
+
+		//LoadRequiredAssets(); 
 	}
-	void OpenGLRenderWrapper::Shutdown()
+
+	void RenderAPI::Shutdown()
 	{
+		//UnloadRequiredAssets(); 
 	}
-	void OpenGLRenderWrapper::SetClearColor(const glm::vec4& color)
+
+	void RenderAPI::Clear(float r, float g, float b, float a)
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
-	}
-	void OpenGLRenderWrapper::Clear()
-	{
+		glClearColor(r, g, b, a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-	void OpenGLRenderWrapper::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+
+	void RenderAPI::SetClearColor(float r, float g, float b, float a)
 	{
-		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glClearColor(r, g, b, a);
 	}
-	void OpenGLRenderWrapper::SetDepthTest(bool enabled)
+
+	void RenderAPI::DrawIndexed(uint32_t count, PrimitiveType type, bool depthTest)
 	{
-		if (enabled)
-			glEnable(GL_DEPTH_TEST);
-		else
+		if (!depthTest)
 			glDisable(GL_DEPTH_TEST);
-	}
-	
-	void OpenGLRenderWrapper::OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-	{
-		switch (severity)
+		
+		switch (type)
 		{
-		case GL_DEBUG_SEVERITY_HIGH:
-			SPARK_CORE_CRITICAL("[OpenGL Debug Severity High] {0}", message); break;
-		case GL_DEBUG_SEVERITY_MEDIUM:
-			SPARK_CORE_ERROR("[OpenGL Debug Severity Meduim] {0}", message); break;
-		case GL_DEBUG_SEVERITY_LOW:
-			SPARK_CORE_WARN("[OpenGL Debug Severity Low] {0}", message); break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION:
-			SPARK_CORE_TRACE("[OpenGL Debug Severity Notification] {0}", message); break;
+		case PrimitiveType::Triangles:
+			glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+			break;
+		case PrimitiveType::Lines:
+			glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, nullptr);
+			break;
 		}
+		if (!depthTest)
+			glEnable(GL_DEPTH_TEST);
 	}
+
+	void RenderAPI::SetLineWidth(float width)
+	{
+		glLineWidth(width);
+	}
+
 
 
 }

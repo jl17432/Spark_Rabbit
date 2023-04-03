@@ -1,7 +1,8 @@
 #pragma once
-namespace SparkRaabit{
 
-	class CmdQueue
+namespace SparkRabbit{
+
+	class CmdQueue 
 	{
 	public:
 		typedef void(*RenderCmdFn)(void*);
@@ -17,5 +18,7 @@ namespace SparkRaabit{
 		uint8_t* m_CmdBufferPtr;
 		uint32_t m_CmdCount = 0;
 	};
+
+
 }
 
