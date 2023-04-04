@@ -1,0 +1,15 @@
+# Binaries
+**/bin/
+!SparkRabbit/vendor/assimp/bin
+!vendor/bin/premake/
+bin-int/
+
+# Visual Studio files and folder
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+
+#Folders specific
+/project_requirements/
