@@ -46,7 +46,7 @@ namespace SparkRabbit {
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
-				if (Weights[i] = 0.0f)
+				if (Weights[i] == 0.0f)
 				{
 					IDs[i] = boneID;
 					Weights[i] = weight;
@@ -54,7 +54,7 @@ namespace SparkRabbit {
 				}
 			}
 			//--to much mesages in console, uncomment it when debugging this
-			//SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight); 
+			SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight); 
 		}	
 	};
 
