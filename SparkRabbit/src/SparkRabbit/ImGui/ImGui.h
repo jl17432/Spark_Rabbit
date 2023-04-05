@@ -284,7 +284,7 @@ namespace SparkRabbit::UI {
 		return changed;
 	}
 
-	template<typename T>
+	/*template<typename T>
 	static bool PropertyAssetReference(const char* label, std::shared_ptr<T>& object, AssetType supportedType)
 	{
 		bool modified = false;
@@ -295,7 +295,7 @@ namespace SparkRabbit::UI {
 
 		if (object)
 		{
-			char* assetName = ((Ref<Asset>&)object)->FileName.data();
+			char* assetName = ((std::shared_ptr<Asset>&)object)->FileName.data();
 			ImGui::InputText("##assetRef", assetName, 256, ImGuiInputTextFlags_ReadOnly);
 		}
 		else
@@ -321,7 +321,7 @@ namespace SparkRabbit::UI {
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		return modified;
-	}
+	}*/
 
 	static void EndPropertyGrid()
 	{

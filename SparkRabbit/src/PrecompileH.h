@@ -21,6 +21,8 @@
 #include <fstream>
 #include"SparkRabbit/InputCodes.h"
 
+#include <glm/glm.hpp>
+
 
 #ifdef SR_PLATFORM_WINDOWS
 	#include <Windows.h>

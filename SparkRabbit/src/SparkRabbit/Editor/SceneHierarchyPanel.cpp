@@ -94,7 +94,7 @@ namespace SparkRabbit {
 			uint32_t entityCount = 0, meshCount = 0;
 			m_Context->m_Registry.each([&](auto entity)
 				{
-					Entity e(entity, m_Context.Raw());
+					Entity e(entity, m_Context.get());
 					if (e.HasComponent<IDComponent>() && e.GetParentUUID() == 0)
 						DrawEntityNode(e);
 	});
@@ -558,12 +558,12 @@ namespace SparkRabbit {
 				DrawVec3Control("Scale", component.Scale, 1.0f);
 			});
 
-		DrawComponent<MeshComponent>("Mesh", entity, [](MeshComponent& mc)
+		/*DrawComponent<MeshComponent>("Mesh", entity, [](MeshComponent& mc)
 			{
 				UI::BeginPropertyGrid();
 				UI::PropertyAssetReference("Mesh", mc.Mesh, AssetType::Mesh);
 				UI::EndPropertyGrid();
-			});
+			});*/
 
 		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& cc)
 			{
@@ -637,13 +637,13 @@ namespace SparkRabbit {
 				UI::EndPropertyGrid();
 			});
 
-		DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& slc)
+		/*DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& slc)
 			{
 				UI::BeginPropertyGrid();
 				UI::PropertyAssetReference("Environment Map", slc.SceneEnvironment, AssetType::EnvMap);
 				UI::Property("Intensity", slc.Intensity, 0.01f, 0.0f, 5.0f);
 				UI::EndPropertyGrid();
-			});
+			});*/
 
 
 	}

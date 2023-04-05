@@ -9,6 +9,7 @@
 #include"SparkRabbit/Renderer/Mesh.h"
 #include"SparkRabbit/Asset/Asset.h"
 #include"SparkRabbit/Scene/SceneCamera.h"
+#include"SparkRabbit/Renderer/SceneEnvironment.h"
 
 namespace SparkRabbit {
 	struct IDComponent

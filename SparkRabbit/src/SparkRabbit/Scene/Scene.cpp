@@ -163,7 +163,7 @@ namespace SparkRabbit {
 	void Scene::OnRenderEditor(TickTime ts, const ProjectiveCamera& projectiveCamera)
 	{
 
-		{
+		/*{
 			m_LightEnvironment = LightEnvironment();
 			auto lights = m_Registry.group<DirectionalLightComponent>(entt::get<TransformComponent>);
 			uint32_t directionalLightIndex = 0;
@@ -179,10 +179,10 @@ namespace SparkRabbit {
 					lightComponent.CastShadows
 				};
 			}
-		}
+		}*/
 
 		{
-			m_Environment = std::make_shared<Environments>();
+			m_Environment = std::shared_ptr<Environments>();
 			auto lights = m_Registry.group<SkyLightComponent>(entt::get<TransformComponent>);
 			for (auto entity : lights)
 			{
@@ -415,14 +415,13 @@ namespace SparkRabbit {
 		CopyComponent<CameraComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<SpriteRendererComponent>(target->m_Registry, m_Registry, enttMap);
 
-		target->SetPhysics2DGravity(GetPhysics2DGravity());
 	}
 
-	std::shared_ptr<Scene> Scene::GetScene(UUID uuid)
+	/*std::shared_ptr<Scene> Scene::GetScene(UUID uuid)
 	{
 		if (s_ActiveScenes.find(uuid) != s_ActiveScenes.end())
 			return s_ActiveScenes.at(uuid);
 
 		return {};
-	}
+	}*/
 }

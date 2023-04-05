@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "SparkRabbit/TickTime.h"
 #include "SparkRabbit/Events/MouseEvent.h"
+#include"Camera.h"
 
 namespace SparkRabbit{
 

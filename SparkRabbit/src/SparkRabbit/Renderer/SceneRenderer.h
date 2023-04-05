@@ -1,6 +1,7 @@
 #pragma once
 #include "SparkRabbit/Scene/Scene.h"
 #include "RenderPass.h"
+#include"SparkRabbit/Renderer/Mesh.h"
 
 namespace SparkRabbit {
 

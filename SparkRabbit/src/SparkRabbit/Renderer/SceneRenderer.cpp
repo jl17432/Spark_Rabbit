@@ -37,6 +37,7 @@ namespace SparkRabbit {
 			glm::mat4 Transform;
 		};
 		std::vector<DrawCommand> DrawList;
+		std::vector<DrawCommand> SelectedMeshDrawList;
 		std::vector<DrawCommand> ShadowPassDrawList;
 
 		// Grid
@@ -114,6 +115,12 @@ namespace SparkRabbit {
 
 		s_Data.DrawList.push_back({ mesh, overrideMaterial, transform });
 		s_Data.ShadowPassDrawList.push_back({ mesh, overrideMaterial, transform });
+	}
+
+	void SceneRenderer::SubmitSelectedMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform)
+	{
+		s_Data.SelectedMeshDrawList.push_back({ mesh, nullptr, transform });
+		s_Data.ShadowPassDrawList.push_back({ mesh, nullptr, transform });
 	}
 
 	static std::shared_ptr<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;

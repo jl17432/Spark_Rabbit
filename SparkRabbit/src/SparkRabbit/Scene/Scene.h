@@ -142,9 +142,6 @@ namespace SparkRabbit {
 
 		static std::shared_ptr<Scene> GetScene(UUID uuid);
 
-		float GetPhysics2DGravity() const;
-		void SetPhysics2DGravity(float gravity);
-
 		// Editor-specific
 		void SetSelectedEntity(entt::entity entity) { m_SelectedEntity = entity; }
 	private:
