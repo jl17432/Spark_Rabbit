@@ -1,5 +1,6 @@
 #include "PrecompileH.h"
 #include "SceneRenderer.h"
+#include"SceneEnvironment.h"
 
 #include "Renderer.h"
 #include "Renderer2D.h"
@@ -15,11 +16,11 @@ namespace SparkRabbit {
 		const Scene* ActiveScene = nullptr;
 		struct SceneInfo
 		{
-			ProjectiveCamera SceneCamera;
+			SceneRendererCamera SceneCamera;
 
 			// Resources
 			std::shared_ptr<MaterialInstance> SkyboxMaterial;
-			Environment SceneEnvironment;
+			std::shared_ptr<Environments> SceneEnvironment;
 			Light ActiveLight;
 		} SceneData;
 
@@ -36,6 +37,7 @@ namespace SparkRabbit {
 			glm::mat4 Transform;
 		};
 		std::vector<DrawCommand> DrawList;
+		std::vector<DrawCommand> ShadowPassDrawList;
 
 		// Grid
 		std::shared_ptr<MaterialInstance> GridMaterial;
@@ -85,13 +87,13 @@ namespace SparkRabbit {
 		s_Data.CompositePass->GetSpecification().TargetFramebuffer->Resize(width, height, false); 
 	}
 
-	void SceneRenderer::BeginScene(const Scene* scene)
+	void SceneRenderer::BeginScene(const Scene* scene, const SceneRendererCamera& camera)
 	{
 		SPARK_CORE_ASSERT(!s_Data.ActiveScene, "");
 
 		s_Data.ActiveScene = scene;
 
-		s_Data.SceneData.SceneCamera = scene->m_Camera;
+		s_Data.SceneData.SceneCamera = camera;
 		s_Data.SceneData.SkyboxMaterial = scene->m_SkyboxMaterial;
 		s_Data.SceneData.SceneEnvironment = scene->m_Environment;
 		s_Data.SceneData.ActiveLight = scene->m_Light;
@@ -106,15 +108,12 @@ namespace SparkRabbit {
 		FlushDrawList();
 	}
 
-	void SceneRenderer::SubmitEntity(Entity* entity)
+	void SceneRenderer::SubmitMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform, std::shared_ptr<MaterialInstance> overrideMaterial)
 	{
 		// TODO: Culling, sorting, etc.
 
-		auto mesh = entity->GetMesh();
-		if (!mesh)
-			return;
-
-		s_Data.DrawList.push_back({ mesh, entity->GetMaterial(), entity->GetTransform() });
+		s_Data.DrawList.push_back({ mesh, overrideMaterial, transform });
+		s_Data.ShadowPassDrawList.push_back({ mesh, overrideMaterial, transform });
 	}
 
 	static std::shared_ptr<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
@@ -186,7 +185,9 @@ namespace SparkRabbit {
 	{
 		Renderer::BeginRenderPass(s_Data.GeoPass);
 
-		auto viewProjection = s_Data.SceneData.SceneCamera.GetViewProjection();
+		auto& sceneCamera = s_Data.SceneData.SceneCamera;
+
+		auto viewProjection = sceneCamera.Camera.GetProjectionMatrix() * sceneCamera.ViewMatrix;
 
 		// Skybox
 		auto skyboxShader = s_Data.SceneData.SkyboxMaterial->GetShader();
@@ -198,11 +199,11 @@ namespace SparkRabbit {
 		{
 			auto baseMaterial = dc.Mesh->GetMaterial();
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
-			baseMaterial->Set("u_CameraPosition", s_Data.SceneData.SceneCamera.GetPosition());
+			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
 
 			// Environment (TODO: don't do this per mesh)
-			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment.RadianceMap);
-			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment.IrradianceMap);
+			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
+			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
 			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
 
 			// Set lights (TODO: move to light environment and don't do per mesh)
@@ -234,7 +235,7 @@ namespace SparkRabbit {
 	{
 		Renderer::BeginRenderPass(s_Data.CompositePass);
 		s_Data.CompositeShader->Bind();
-		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.GetExposure());
+		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.Camera.GetExposure());
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Renderer::SubmitFullscreenQuad(nullptr);

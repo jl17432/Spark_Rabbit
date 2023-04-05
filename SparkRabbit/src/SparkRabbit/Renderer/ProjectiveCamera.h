@@ -6,7 +6,7 @@
 
 namespace SparkRabbit{
 
-	class ProjectiveCamera
+	class ProjectiveCamera : public Camera
 	{
 	public:
 		ProjectiveCamera() = default;

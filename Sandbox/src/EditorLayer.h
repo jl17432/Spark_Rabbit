@@ -59,6 +59,8 @@ namespace SparkRabbit {
 
 		Entity* m_MeshEntity = nullptr;
 
+		ProjectiveCamera m_ProjectiveCamera;
+
 		std::shared_ptr<Shader> m_BrushShader;
 		std::shared_ptr<Mesh> m_PlaneMesh;
 		std::shared_ptr<Material> m_SphereBaseMaterial;
@@ -126,9 +128,13 @@ namespace SparkRabbit {
 
 		struct SelectedSubmesh
 		{
-			Submesh* Mesh;
-			float Distance;
+			SparkRabbit::Entity Entity;
+			Submesh* Mesh = nullptr;
+			float Distance = 0.0f;
 		};
+
+		void OnSelected(const SelectedSubmesh& m_SelectedSubmeshes);
+
 		std::vector<SelectedSubmesh> m_SelectedSubmeshes;
 		glm::mat4* m_CurrentlySelectedTransform = nullptr;
 	};
