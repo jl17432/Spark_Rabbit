@@ -48,16 +48,20 @@ namespace SparkRabbit {
 		void ShowBoundingBoxes(bool show, bool onTop = false);
 
 		void NewScene();
+
+		void SelectEntity(Entity entity);
 	private:
 		std::pair<float, float> GetMouseViewportSpace();
 		std::pair<glm::vec3, glm::vec3> CastRay(float mx, float my);
+
+		float GetSnapValue();
 	private:
 		std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		std::unique_ptr<FileSystemPanel> m_AssetFilePanel;
 
 		std::shared_ptr<Scene> m_Scene;
-		std::shared_ptr<Scene> m_SphereScene;
-		std::shared_ptr<Scene> m_ActiveScene;
+		std::shared_ptr<Scene> m_EditorScene;
+		std::shared_ptr<Scene> m_PlayScene;
 
 		Entity* m_MeshEntity = nullptr;
 
@@ -135,10 +139,16 @@ namespace SparkRabbit {
 			float Distance = 0.0f;
 		};
 
+		enum class SelectionMode
+		{
+			None = 0, Entity = 1, SubMesh = 2
+		};
+
 		void OnSelected(const SelectedSubmesh& m_SelectedSubmeshes);
 
 		std::vector<SelectedSubmesh> m_SelectedSubmeshes;
 		glm::mat4* m_CurrentlySelectedTransform = nullptr;
+		SelectionMode m_SelectionMode = SelectionMode::Entity;
 	};
 }
 

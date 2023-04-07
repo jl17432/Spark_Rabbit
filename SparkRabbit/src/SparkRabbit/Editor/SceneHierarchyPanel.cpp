@@ -53,39 +53,6 @@ namespace SparkRabbit {
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		//ImGui::Begin("Scene Hierarchy");
-
-		//uint32_t entityCount = 0, meshCount = 0;
-		//auto& sceneEntities = m_Context->m_Entities;
-		//for (Entity* entity : sceneEntities)
-		//	DrawEntityNode(entity, entityCount, meshCount);
-
-		//ImGui::End();
-
-		//ImGui::Begin("Properties");
-
-		//if (m_SelectionContext)
-		//{
-		//	//TODO: Decomposite transform to translation, rotation, scale to configure in UI panel
-		//	//-------------------------------------------------------------------------------------------
-		//	/*auto mesh = m_SelectionContext;
-
-		//	{
-		//		auto [translation, rotation, scale] = GetTransformDecomposition(transform);
-		//		ImGui::Text("World Transform");
-		//		ImGui::Text("  Translation: %.2f, %.2f, %.2f", translation.x, translation.y, translation.z);
-		//		ImGui::Text("  Scale: %.2f, %.2f, %.2f", scale.x, scale.y, scale.z);
-		//	}
-		//	{
-		//		auto [translation, rotation, scale] = GetTransformDecomposition(localTransform);
-		//		ImGui::Text("Local Transform");
-		//		ImGui::Text("  Translation: %.2f, %.2f, %.2f", translation.x, translation.y, translation.z);
-		//		ImGui::Text("  Scale: %.2f, %.2f, %.2f", scale.x, scale.y, scale.z);
-		//	}*/
-		//}
-
-		//ImGui::End();
-
 		ImGui::Begin("Scene Hierarchy");
 		ImRect windowRect = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 
@@ -636,14 +603,6 @@ namespace SparkRabbit {
 				UI::Property("Source Size", dlc.LightSize);
 				UI::EndPropertyGrid();
 			});
-
-		/*DrawComponent<SkyLightComponent>("Sky Light", entity, [](SkyLightComponent& slc)
-			{
-				UI::BeginPropertyGrid();
-				UI::PropertyAssetReference("Environment Map", slc.SceneEnvironment, AssetType::EnvMap);
-				UI::Property("Intensity", slc.Intensity, 0.01f, 0.0f, 5.0f);
-				UI::EndPropertyGrid();
-			});*/
 
 
 	}

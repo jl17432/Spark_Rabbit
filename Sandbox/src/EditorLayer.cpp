@@ -2,6 +2,8 @@
 
 #include "SparkRabbit/ImGui/ImGuizmo.h"
 #include "SparkRabbit/Renderer/Renderer2D.h"
+#include"SparkRabbit/Asset/AssetManager.h"
+#include"SparkRabbit/Math/Math.h"
 
 namespace SparkRabbit{
 	static void ImGuiShowHelpMarker(const char* desc)
@@ -29,140 +31,14 @@ namespace SparkRabbit{
 	void EditorLayer::OnAttach()
 	{
 		SPARK_CORE_TRACE("EditorLayer::OnAttach() IS CALLED!!!!");
-		// ImGui Colors
-		//ImVec4* colors = ImGui::GetStyle().Colors;
-		//colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		//colors[ImGuiCol_TextDisabled] = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-		//colors[ImGuiCol_WindowBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f); // Window background
-		//colors[ImGuiCol_ChildBg] = ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
-		//colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-		//colors[ImGuiCol_Border] = ImVec4(0.43f, 0.43f, 0.50f, 0.5f);
-		//colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-		//colors[ImGuiCol_FrameBg] = ImVec4(0.3f, 0.3f, 0.3f, 0.5f); // Widget backgrounds
-		//colors[ImGuiCol_FrameBgHovered] = ImVec4(0.4f, 0.4f, 0.4f, 0.4f);
-		//colors[ImGuiCol_FrameBgActive] = ImVec4(0.4f, 0.4f, 0.4f, 0.6f);
-		//colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.0f);
-		//colors[ImGuiCol_TitleBgActive] = ImVec4(0.29f, 0.29f, 0.29f, 1.0f);
-		//colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.0f, 0.0f, 0.0f, 0.51f);
-		//colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.0f);
-		//colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-		//colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.0f);
-		//colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.0f);
-		//colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.0f);
-		//colors[ImGuiCol_CheckMark] = ImVec4(0.94f, 0.94f, 0.94f, 1.0f);
-		//colors[ImGuiCol_SliderGrab] = ImVec4(0.51f, 0.51f, 0.51f, 0.7f);
-		//colors[ImGuiCol_SliderGrabActive] = ImVec4(0.66f, 0.66f, 0.66f, 1.0f);
-		//colors[ImGuiCol_Button] = ImVec4(0.44f, 0.44f, 0.44f, 0.4f);
-		//colors[ImGuiCol_ButtonHovered] = ImVec4(0.46f, 0.47f, 0.48f, 1.0f);
-		//colors[ImGuiCol_ButtonActive] = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
-		//colors[ImGuiCol_Header] = ImVec4(0.7f, 0.7f, 0.7f, 0.31f);
-		//colors[ImGuiCol_HeaderHovered] = ImVec4(0.7f, 0.7f, 0.7f, 0.8f);
-		//colors[ImGuiCol_HeaderActive] = ImVec4(0.48f, 0.5f, 0.52f, 1.0f);
-		//colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.5f, 0.5f);
-		//colors[ImGuiCol_SeparatorHovered] = ImVec4(0.72f, 0.72f, 0.72f, 0.78f);
-		//colors[ImGuiCol_SeparatorActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.0f);
-		//colors[ImGuiCol_ResizeGrip] = ImVec4(0.91f, 0.91f, 0.91f, 0.25f);
-		//colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.81f, 0.81f, 0.81f, 0.67f);
-		//colors[ImGuiCol_ResizeGripActive] = ImVec4(0.46f, 0.46f, 0.46f, 0.95f);
-		//colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.0f);
-		//colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.0f, 0.43f, 0.35f, 1.0f);
-		//colors[ImGuiCol_PlotHistogram] = ImVec4(0.73f, 0.6f, 0.15f, 1.0f);
-		//colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.0f, 0.6f, 0.0f, 1.0f);
-		//colors[ImGuiCol_TextSelectedBg] = ImVec4(0.87f, 0.87f, 0.87f, 0.35f);
-		//colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.8f, 0.8f, 0.8f, 0.35f);
-		//colors[ImGuiCol_DragDropTarget] = ImVec4(1.0f, 1.0f, 0.0f, 0.9f);
-		//colors[ImGuiCol_NavHighlight] = ImVec4(0.60f, 0.6f, 0.6f, 1.0f);
-		//colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
 
 		using namespace glm;
 
-		//auto environment = Environments::Load("assets/env/birchwood_4k.hdr");
-
 		m_CheckerboardTex = Texture2D::Create("assets/editor/Checkerboard.tga");
 
-		//// Model Scene
-		//{
-		//	m_Scene = std::make_shared<Scene>("Model Scene");
-		//	m_Scene->SetCamera(ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f)));
-
-		//	m_Scene->SetEnvironment(environment);
-
-		//	m_MeshEntity = m_Scene->CreateEntity("Test Entity");
-
-		//	auto mesh = std::make_shared<Mesh>("assets/meshes/TestScene.fbx");
-		//	m_MeshEntity->SetMesh(mesh);
-
-		//	m_MeshMaterial = mesh->GetMaterial();
-
-		//	auto secondEntity = m_Scene->CreateEntity("Gun Entity");
-		//	secondEntity->Transform() = glm::translate(glm::mat4(1.0f), { 5, 5, 5 }) * glm::scale(glm::mat4(1.0f), { 10, 10, 10 });
-		//	mesh = std::make_shared<Mesh>("assets/models/m1911/M1911Materials.fbx");
-		//	secondEntity->SetMesh(mesh);
-		//}
-
-		//// Sphere Scene
-		//{
-		//	m_SphereScene = std::make_shared<Scene>("PBR Sphere Scene");
-		//	m_SphereScene->SetCamera(ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f)));
-
-		//	m_SphereScene->SetEnvironment(environment);
-
-		//	auto sphereMesh = std::make_shared<Mesh>("assets/models/Sphere1m.fbx");
-		//	m_SphereBaseMaterial = sphereMesh->GetMaterial();
-
-		//	float x = -4.0f;
-		//	float roughness = 0.0f;
-		//	for (int i = 0; i < 8; i++)
-		//	{
-		//		auto sphereEntity = m_SphereScene->CreateEntity();
-
-		//		std::shared_ptr<MaterialInstance> mi = std::make_shared<MaterialInstance>(m_SphereBaseMaterial);
-		//		mi->Set("u_Metalness", 1.0f);
-		//		mi->Set("u_Roughness", roughness);
-		//		x += 1.1f;
-		//		roughness += 0.15f;
-		//		m_MetalSphereMaterialInstances.push_back(mi);
-
-		//		sphereEntity->SetMesh(sphereMesh);
-		//		sphereEntity->SetMaterial(mi);
-		//		sphereEntity->Transform() = translate(mat4(1.0f), vec3(x, 0.0f, 0.0f));
-		//	}
-
-		//	x = -4.0f;
-		//	roughness = 0.0f;
-		//	for (int i = 0; i < 8; i++)
-		//	{
-		//		auto sphereEntity = m_SphereScene->CreateEntity();
-
-		//		std::shared_ptr<MaterialInstance> mi(new MaterialInstance(m_SphereBaseMaterial));
-		//		mi->Set("u_Metalness", 0.0f);
-		//		mi->Set("u_Roughness", roughness);
-		//		x += 1.1f;
-		//		roughness += 0.15f;
-		//		m_DielectricSphereMaterialInstances.push_back(mi);
-
-		//		sphereEntity->SetMesh(sphereMesh);
-		//		sphereEntity->SetMaterial(mi);
-		//		sphereEntity->Transform() = translate(mat4(1.0f), vec3(x, 1.2f, 0.0f));
-		//	}
-		//}
-
-		m_ActiveScene = m_Scene;
-		m_SceneHierarchyPanel = std::make_unique<SceneHierarchyPanel>(m_ActiveScene);
-
+		//create Editor panel
+		m_SceneHierarchyPanel = std::make_unique<SceneHierarchyPanel>(m_EditorScene);
 		m_AssetFilePanel = std::make_unique<FileSystemPanel>();
-
-		//m_PlaneMesh.reset(new Mesh("assets/models/Plane1m.obj"));
-
-		// Editor
-		//m_CheckerboardTex = Texture2D::Create("assets/editor/Checkerboard.tga");
-
-		//// Set lights
-		//auto& light = m_Scene->GetLight();
-		//light.Direction = { -0.5f, -0.5f, 1.0f };
-		//light.Radiance = { 1.0f, 1.0f, 1.0f };
-
-		//m_CurrentlySelectedTransform = &m_MeshEntity->Transform();
 
 		NewScene();
 	}
@@ -173,43 +49,12 @@ namespace SparkRabbit{
 
 	void EditorLayer::OnUpdate(TickTime ts)
 	{
-		// THINGS TO LOOK AT:
-		// - BRDF LUT
-		// - Tonemapping and proper HDR pipeline
 		using namespace SparkRabbit;
-		using namespace glm;
-
-		/*m_MeshMaterial->Set("u_AlbedoColor", m_AlbedoInput.Color);
-		m_MeshMaterial->Set("u_Metalness", m_MetalnessInput.Value);
-		m_MeshMaterial->Set("u_Roughness", m_RoughnessInput.Value);
-		m_MeshMaterial->Set("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
-		m_MeshMaterial->Set("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
-		m_MeshMaterial->Set("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
-		m_MeshMaterial->Set("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
-		m_MeshMaterial->Set("u_EnvMapRotation", m_EnvMapRotation);
-
-		m_SphereBaseMaterial->Set("u_AlbedoColor", m_AlbedoInput.Color);
-		m_SphereBaseMaterial->Set("lights", m_Scene->GetLight());
-		m_SphereBaseMaterial->Set("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
-		m_SphereBaseMaterial->Set("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
-		m_SphereBaseMaterial->Set("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
-		m_SphereBaseMaterial->Set("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
-		m_SphereBaseMaterial->Set("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
-		m_SphereBaseMaterial->Set("u_EnvMapRotation", m_EnvMapRotation);
-
-		if (m_AlbedoInput.TextureMap)
-			m_MeshMaterial->Set("u_AlbedoTexture", m_AlbedoInput.TextureMap);
-		if (m_NormalInput.TextureMap)
-			m_MeshMaterial->Set("u_NormalTexture", m_NormalInput.TextureMap);
-		if (m_MetalnessInput.TextureMap)
-			m_MeshMaterial->Set("u_MetalnessTexture", m_MetalnessInput.TextureMap);
-		if (m_RoughnessInput.TextureMap)
-			m_MeshMaterial->Set("u_RoughnessTexture", m_RoughnessInput.TextureMap);*/
 
 		if (m_AllowViewportCameraEvents)
 			m_ProjectiveCamera.OnUpdate(ts);
 
-		m_ActiveScene->OnRenderEditor(ts, m_ProjectiveCamera);
+		m_EditorScene->OnRenderEditor(ts, m_ProjectiveCamera);
 
 		if (m_DrawOnTopBoundingBoxes)
 		{
@@ -330,10 +175,32 @@ namespace SparkRabbit{
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = std::make_shared<Scene>("Empty Scene", true);
-		m_SceneHierarchyPanel->SetContext(m_ActiveScene);
+		m_EditorScene = std::make_shared<Scene>("Empty Scene", true);
+		m_SceneHierarchyPanel->SetContext(m_EditorScene);
 
 		m_ProjectiveCamera = ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f));
+		m_EditorScene->CreateEntity("assets/env/pink_sunrise_4k.hdr");
+	}
+
+	void EditorLayer::SelectEntity(Entity entity)
+	{
+		SelectedSubmesh selection;
+		if (entity.HasComponent<MeshComponent>())
+		{
+			auto& meshComp = entity.GetComponent<MeshComponent>();
+
+			if (meshComp.Mesh)
+			{
+				selection.Mesh = &meshComp.Mesh->GetSubmeshes()[0];
+			}
+		}
+		selection.Entity = entity;
+		m_SelectedSubmeshes.clear();
+		m_SelectedSubmeshes.push_back(selection);
+
+		m_EditorScene->SetSelectedEntity(entity);
+
+		m_Scene = m_EditorScene;
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -379,45 +246,15 @@ namespace SparkRabbit{
 		}
 
 		// Editor Panel ------------------------------------------------------------------------------
-		/*ImGui::Begin("Model");
-		if (ImGui::RadioButton("Spheres", (int*)&m_SceneType, (int)SceneType::Spheres))
-			m_ActiveScene = m_SphereScene;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Model", (int*)&m_SceneType, (int)SceneType::Model))
-			m_ActiveScene = m_Scene;
-
-		ImGui::Begin("Environment");
-
-		if (ImGui::Button("Load Environment Map"))
-		{
-			std::string filename = Application::Get().OpenFile("*.hdr");
-			if (filename != "")
-				m_ActiveScene->SetEnvironment(Environment::Load(filename));
-		}
-
-		ImGui::SliderFloat("Skybox LOD", &m_Scene->GetSkyboxLod(), 0.0f, 11.0f);
-
-		ImGui::Columns(2);
-		ImGui::AlignTextToFramePadding();
-
-		auto& light = m_Scene->GetLight();
-		Property("Light Direction", light.Direction);
-		Property("Light Radiance", light.Radiance, PropertyFlag::ColorProperty);
-		Property("Light Multiplier", light.Multiplier, 0.0f, 5.0f);
-		Property("Exposure", m_ActiveScene->GetCamera().GetExposure(), 0.0f, 5.0f);
-
-		Property("Radiance Prefiltering", m_RadiancePrefilter);
-		Property("Env Map Rotation", m_EnvMapRotation, -360.0f, 360.0f);*/
-
 		ImGui::Begin("Model");
 		ImGui::Begin("Environment");
 
-		ImGui::SliderFloat("Skybox LOD", &m_ActiveScene->GetSkyboxLod(), 0.0f, 11.0f);
+		ImGui::SliderFloat("Skybox LOD", &m_EditorScene->GetSkyboxLod(), 0.0f, 11.0f);
 
 		ImGui::Columns(2);
 		ImGui::AlignTextToFramePadding();
 
-		auto& light = m_ActiveScene->GetLight();
+		auto& light = m_EditorScene->GetLight();
 		Property("Light Direction", light.Direction);
 		Property("Light Radiance", light.Radiance, PropertyFlag::ColorProperty);
 		Property("Light Multiplier", light.Multiplier, 0.0f, 5.0f);
@@ -632,8 +469,10 @@ namespace SparkRabbit{
 		m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
 
 		// Gizmos
-		if (m_GizmoType != -1 && m_CurrentlySelectedTransform)
+		if (m_GizmoType != -1 && m_SelectedSubmeshes.size())
 		{
+			auto& selection = m_SelectedSubmeshes[0];
+
 			float rw = (float)ImGui::GetWindowWidth();
 			float rh = (float)ImGui::GetWindowHeight();
 			ImGuizmo::SetOrthographic(false);
@@ -641,13 +480,84 @@ namespace SparkRabbit{
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
 
 			bool snap = Input::IsKeyPressed(SR_KEY_LEFT_CONTROL);
-			ImGuizmo::Manipulate(glm::value_ptr(m_ProjectiveCamera.GetView()),
-				glm::value_ptr(m_ProjectiveCamera.GetProjection()),
-				(ImGuizmo::OPERATION)m_GizmoType,
-				ImGuizmo::LOCAL,
-				glm::value_ptr(*m_CurrentlySelectedTransform),
-				nullptr,
-				snap ? &m_SnapValue : nullptr);
+
+			TransformComponent& entityTransform = selection.Entity.Transform();
+			glm::mat4 transform = m_Scene->GetTransformRelativeToParent(selection.Entity);
+			float snapValue = GetSnapValue();
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			if (m_SelectionMode == SelectionMode::Entity)
+			{
+				ImGuizmo::Manipulate(glm::value_ptr(m_ProjectiveCamera.GetView()),
+					glm::value_ptr(m_ProjectiveCamera.GetProjectionMatrix()),
+					(ImGuizmo::OPERATION)m_GizmoType,
+					ImGuizmo::LOCAL,
+					glm::value_ptr(transform),
+					nullptr,
+					snap ? snapValues : nullptr);
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 translation, rotation, scale;
+					Math::DecomposeTransform(transform, translation, rotation, scale);
+
+					Entity parent = m_Scene->FindEntityByUUID(selection.Entity.GetParentUUID());
+					if (parent)
+					{
+						glm::vec3 parentTranslation, parentRotation, parentScale;
+						Math::DecomposeTransform(m_Scene->GetTransformRelativeToParent(parent), parentTranslation, parentRotation, parentScale);
+
+						glm::vec3 deltaRotation = (rotation - parentRotation) - entityTransform.Rotation;
+						entityTransform.Translation = translation - parentTranslation;
+						entityTransform.Rotation += deltaRotation;
+						entityTransform.Scale = scale;
+					}
+					else
+					{
+						glm::vec3 deltaRotation = rotation - entityTransform.Rotation;
+						entityTransform.Translation = translation;
+						entityTransform.Rotation += deltaRotation;
+						entityTransform.Scale = scale;
+					}
+				}
+			}
+			else
+			{
+				glm::mat4 transformBase = transform * selection.Mesh->Transform;
+				ImGuizmo::Manipulate(glm::value_ptr(m_ProjectiveCamera.GetView()),
+					glm::value_ptr(m_ProjectiveCamera.GetProjectionMatrix()),
+					(ImGuizmo::OPERATION)m_GizmoType,
+					ImGuizmo::LOCAL,
+					glm::value_ptr(transformBase),
+					nullptr,
+					snap ? snapValues : nullptr);
+
+				selection.Mesh->Transform = glm::inverse(transform) * transformBase;
+			}
+		}
+
+		//Drag and drop asset file from content browser to Scene
+		if (ImGui::BeginDragDropTarget())
+		{
+			auto data = ImGui::AcceptDragDropPayload("asset_payload");
+			if (data)
+			{
+				int count = data->DataSize / sizeof(AssetHandle);
+
+				for (int i = 0; i < count; i++)
+				{
+					AssetHandle assetHandle = *(((AssetHandle*)data->Data) + i);
+					std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(assetHandle);
+
+					if (asset->Type == AssetType::Mesh)
+					{
+						Entity entity = m_EditorScene->CreateEntity(asset->FileName);
+						//entity.AddComponent<MeshComponent>(std::make_shared<Mesh>(*asset));
+						SelectEntity(entity);
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
 		}
 
 		ImGui::End();
@@ -742,21 +652,21 @@ namespace SparkRabbit{
 				auto [origin, direction] = CastRay(mouseX, mouseY);
 
 				m_SelectedSubmeshes.clear();
-				m_ActiveScene->SetSelectedEntity({});
-				auto meshEntities = m_ActiveScene->GetAllEntitiesWith<MeshComponent>();
+				m_EditorScene->SetSelectedEntity({});
+				auto meshEntities = m_EditorScene->GetAllEntitiesWith<MeshComponent>();
 				for (auto e : meshEntities)
 				{
-					Entity entity = { e, m_ActiveScene.get()};
+					Entity entity = { e, m_EditorScene.get()};
 					auto mesh = entity.GetComponent<MeshComponent>().Mesh;
 					if (!mesh)
 						continue;
 
 					auto& submeshes = mesh->GetSubmeshes();
-					float lastT = std::numeric_limits<float>::max();
+					constexpr float lastT = std::numeric_limits<float>::max();
 					for (uint32_t i = 0; i < submeshes.size(); i++)
 					{
 						auto& submesh = submeshes[i];
-						glm::mat4 transform = m_ActiveScene->GetTransformRelativeToParent(entity);
+						glm::mat4 transform = m_EditorScene->GetTransformRelativeToParent(entity);
 						Ray ray = {
 							glm::inverse(transform * submesh.Transform) * glm::vec4(origin, 1.0f),
 							glm::inverse(glm::mat3(transform) * glm::mat3(submesh.Transform)) * direction
@@ -779,33 +689,6 @@ namespace SparkRabbit{
 						}
 					}
 				}
-				/*auto mesh = m_MeshEntity->GetMesh();
-				auto& submeshes = mesh->GetSubmeshes();
-				float lastT = std::numeric_limits<float>::max();
-				for (uint32_t i = 0; i < submeshes.size(); i++)
-				{
-					auto& submesh = submeshes[i];
-					Ray ray = {
-						glm::inverse(m_MeshEntity->GetTransform() * submesh.Transform) * glm::vec4(origin, 1.0f),
-						glm::inverse(glm::mat3(m_MeshEntity->GetTransform()) * glm::mat3(submesh.Transform)) * direction
-					};
-
-					float t;
-					bool intersects = ray.IntersectsBoundingBox(submesh.Box, t);
-					if (intersects)
-					{
-						const auto& triangleCache = mesh->GetTriangleCache(i);
-						for (const auto& triangle : triangleCache)
-						{
-							if (ray.IntersectsTriangle(triangle.V0.Position, triangle.V1.Position, triangle.V2.Position, t))
-							{
-								SPARK_WARN("INTERSECTION: {0}, t={1}", submesh.NodeName, t);
-								m_SelectedSubmeshes.push_back({ &submesh, t });
-								break;
-							}
-						}
-					}
-				}*/
 				std::sort(m_SelectedSubmeshes.begin(), m_SelectedSubmeshes.end(), [](auto& a, auto& b) { return a.Distance < b.Distance; });
 
 				if (m_SelectedSubmeshes.size())
@@ -841,10 +724,21 @@ namespace SparkRabbit{
 		return { rayPos, rayDir };
 	}
 
+	float EditorLayer::GetSnapValue()
+	{
+		switch (m_GizmoType)
+		{
+		case  ImGuizmo::OPERATION::TRANSLATE: return 0.5f;
+		case  ImGuizmo::OPERATION::ROTATE: return 45.0f;
+		case  ImGuizmo::OPERATION::SCALE: return 0.5f;
+		}
+		return 0.0f;
+	}
+
 	void EditorLayer::OnSelected(const SelectedSubmesh& m_SelectedSubmeshes)
 	{
 		m_SceneHierarchyPanel->SetSelected(m_SelectedSubmeshes.Entity);
-		m_ActiveScene->SetSelectedEntity(m_SelectedSubmeshes.Entity);
+		m_EditorScene->SetSelectedEntity(m_SelectedSubmeshes.Entity);
 	}
 
 }

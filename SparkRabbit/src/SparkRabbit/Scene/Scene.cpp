@@ -13,92 +13,6 @@
 
 namespace SparkRabbit {
 
-	//static const std::string DefaultEntityName = "Entity";
-
-	//Scene::Scene(const std::string& debugName)
-	//	: m_DebugName(debugName)
-	//{
-	//	Init();
-	//}
-
-	//Scene::~Scene()
-	//{
-	//	for (Entity* entity : m_Entities)
-	//		delete entity;
-	//}
-
-	//void Scene::Init()
-	//{
-	//	auto skyboxShader = Shader::Create("assets/shaders/Skybox.glsl");
-	//	m_SkyboxMaterial = MaterialInstance::Create(Material::Create(skyboxShader));
-	//	m_SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
-	//}
-
-	//void Scene::OnUpdate(TickTime ts)
-	//{
-	//	m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod);
-
-	//	// Update all entities
-	//	for (auto entity : m_Entities)
-	//	{
-	//		auto mesh = entity->GetMesh();
-	//		if (mesh)
-	//			mesh->OnUpdate(ts);
-	//	}
-
-	//	SceneRenderer::BeginScene(this);
-
-	//	// Render entities
-	//	for (auto entity : m_Entities)
-	//	{
-	//		// TODO: Should we render (logically)
-	//		SceneRenderer::SubmitEntity(entity);
-	//	}
-
-	//	SceneRenderer::EndScene();
-	//}
-
-	//void Scene::OnEvent(Event& e)
-	//{
-	//	m_Camera.OnEvent(e);
-	//}
-
-	//void Scene::SetCamera(const ProjectiveCamera& camera)
-	//{
-	//	m_Camera = camera;
-	//}
-
-	//void Scene::SetEnvironment(const Environment& environment)
-	//{
-	//	m_Environment = environment;
-	//	SetSkybox(environment.RadianceMap);
-	//}
-
-	//void Scene::SetSkybox(const std::shared_ptr<TextureCube>& skybox)
-	//{
-	//	m_SkyboxTexture = skybox;
-	//	m_SkyboxMaterial->Set("u_Texture", skybox);
-	//}
-
-	//void Scene::AddEntity(Entity* entity)
-	//{
-	//	m_Entities.push_back(entity);
-	//}
-
-	//Entity* Scene::CreateEntity(const std::string& name)
-	//{
-	//	const std::string& entityName = name.empty() ? DefaultEntityName : name;
-	//	Entity* entity = new Entity(entityName);
-	//	AddEntity(entity);
-	//	return entity;
-	//}
-
-	//Environment Environment::Load(const std::string& filepath)
-	//{
-	//	auto [radiance, irradiance] = SceneRenderer::CreateEnvironmentMap(filepath);
-	//	return { radiance, irradiance };
-	//}
-
 	static const std::string DefaultEntityName = "Entity";
 
 	std::unordered_map<UUID, Scene*> s_ActiveScenes;
@@ -163,7 +77,7 @@ namespace SparkRabbit {
 	void Scene::OnRenderEditor(TickTime ts, const ProjectiveCamera& projectiveCamera)
 	{
 
-		/*{
+		{
 			m_LightEnvironment = LightEnvironment();
 			auto lights = m_Registry.group<DirectionalLightComponent>(entt::get<TransformComponent>);
 			uint32_t directionalLightIndex = 0;
@@ -179,7 +93,7 @@ namespace SparkRabbit {
 					lightComponent.CastShadows
 				};
 			}
-		}*/
+		}
 
 		{
 			m_Environment = std::shared_ptr<Environments>();
@@ -416,12 +330,4 @@ namespace SparkRabbit {
 		CopyComponent<SpriteRendererComponent>(target->m_Registry, m_Registry, enttMap);
 
 	}
-
-	/*std::shared_ptr<Scene> Scene::GetScene(UUID uuid)
-	{
-		if (s_ActiveScenes.find(uuid) != s_ActiveScenes.end())
-			return s_ActiveScenes.at(uuid);
-
-		return {};
-	}*/
 }
