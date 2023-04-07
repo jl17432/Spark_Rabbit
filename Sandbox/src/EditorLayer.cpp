@@ -542,20 +542,23 @@ namespace SparkRabbit{
 			auto data = ImGui::AcceptDragDropPayload("Asset Load");
 			if (data)
 			{
-				int count = data->DataSize / sizeof(AssetHandle);
+				//int count = data->DataSize / sizeof(AssetHandle);
 
-				for (int i = 0; i < count; i++)
-				{
-					AssetHandle assetHandle = *(((AssetHandle*)data->Data) + i);
-					std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(assetHandle);
+				//for (int i = 0; i < count; i++)
+				//{
+				//	AssetHandle assetHandle = *(((AssetHandle*)data->Data) + i);
+				//	std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(assetHandle);
 
-					if (asset->Type == AssetType::Mesh)
-					{
-						Entity entity = m_EditorScene->CreateEntity(asset->FileName);
-						//entity.AddComponent<MeshComponent>(std::make_shared<Mesh>(*asset));
-						SelectEntity(entity);
-					}
-				}
+				//	if (asset->Type == AssetType::Mesh)
+				//	{
+				//		Entity entity = m_EditorScene->CreateEntity(asset->FileName);
+				//		//entity.AddComponent<MeshComponent>(std::make_shared<Mesh>(*asset));
+				//		SelectEntity(entity);
+				//	}
+				//}
+
+				std::string path(reinterpret_cast<const char*>(data->Data));
+				std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(path);
 			}
 			ImGui::EndDragDropTarget();
 		}

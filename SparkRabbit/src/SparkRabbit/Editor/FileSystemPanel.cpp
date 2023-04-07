@@ -49,8 +49,9 @@ namespace SparkRabbit {
 			if (ImGui::BeginDragDropSource())
 			{
 				std::filesystem::path relativePath(path);
-				const wchar_t* itemPath = relativePath.c_str();
-				ImGui::SetDragDropPayload("Asset Load", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+				std::string pathString = relativePath.string();
+				std::replace(pathString.begin(), pathString.end(), '\\', '/');
+				ImGui::SetDragDropPayload("Asset Load", pathString.c_str(), pathString.size() + 1);
 				ImGui::EndDragDropSource();
 			}
 
