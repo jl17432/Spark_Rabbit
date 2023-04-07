@@ -5,6 +5,7 @@
 #include <Commdlg.h>
 
 #include "SparkRabbit/Renderer/Renderer.h"
+#include"SparkRabbit/Asset/AssetManager.h"
 #include "SparkRabbit/Renderer/Framebuffer.h"
 #include <GLFW/glfw3.h>
 
@@ -33,6 +34,10 @@ namespace SparkRabbit{
 
 		Renderer::Init();
 		Renderer::WaitAndRender();
+
+		AssetTypes::Init();
+		AssetManager::Init();
+
 	}
 
 	Application::~Application()

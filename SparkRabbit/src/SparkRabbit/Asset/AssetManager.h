@@ -63,7 +63,7 @@ namespace SparkRabbit {
 			if (!asset->IsDataLoaded && loadData)
 				asset = AssetSerializer::LoadAssetData(asset);
 
-			return std::make_shared<T>();
+			return std::make_shared<T>(*asset);
 		}
 
 		template<typename T>
@@ -78,7 +78,8 @@ namespace SparkRabbit {
 		}
 	private:
 		static void ImportAsset(const std::string& filepath, AssetHandle parentHandle);
-		//static void ReloadAssets();
+		static void ReloadAssets();
+		static AssetHandle ProcessDirectory(const std::string& directoryPath, AssetHandle parentHandle);
 
 	private:
 		static std::unordered_map<AssetHandle, std::shared_ptr<Asset>> s_LoadedAssets;

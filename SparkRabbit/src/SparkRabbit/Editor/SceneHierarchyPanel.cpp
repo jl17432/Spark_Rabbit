@@ -497,14 +497,6 @@ namespace SparkRabbit {
 					ImGui::CloseCurrentPopup();
 				}
 			}
-			if (!m_SelectionContext.HasComponent<ScriptComponent>())
-			{
-				if (ImGui::Button("Script"))
-				{
-					m_SelectionContext.AddComponent<ScriptComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
 			if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
 			{
 				if (ImGui::Button("Sprite Renderer"))

@@ -179,7 +179,7 @@ namespace SparkRabbit{
 		m_SceneHierarchyPanel->SetContext(m_EditorScene);
 
 		m_ProjectiveCamera = ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f));
-		m_EditorScene->CreateEntity("assets/env/pink_sunrise_4k.hdr");
+		//m_EditorScene->SetSkybox(Environments::Load("assets/env/pink_sunrise_4k.hdr").IrradianceMap);
 	}
 
 	void EditorLayer::SelectEntity(Entity entity)
@@ -539,7 +539,7 @@ namespace SparkRabbit{
 		//Drag and drop asset file from content browser to Scene
 		if (ImGui::BeginDragDropTarget())
 		{
-			auto data = ImGui::AcceptDragDropPayload("asset_payload");
+			auto data = ImGui::AcceptDragDropPayload("Asset Load");
 			if (data)
 			{
 				int count = data->DataSize / sizeof(AssetHandle);

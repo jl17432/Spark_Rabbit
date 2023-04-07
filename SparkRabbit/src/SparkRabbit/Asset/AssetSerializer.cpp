@@ -33,8 +33,15 @@ namespace SparkRabbit {
 			asset->Type = type;
 		}
 		p.replace_extension("");
-		asset->Extension = extension;
-		asset->FileName = p.string();
+		if (extension == "")
+		{
+			asset->Extension = extension;
+		}
+		else {
+			asset->Extension = extension.substr(1);
+		}
+		std::filesystem::path temp(asset->FilePath);
+		asset->FileName = temp.stem().string();
 		asset->ParentDirectory = parentHandle;
 		asset->IsDataLoaded = false;
 

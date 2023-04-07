@@ -27,7 +27,7 @@ namespace SparkRabbit {
 
 	void AssetManager::Init()
 	{
-		//ReloadAssets();
+		ReloadAssets();
 	}
 
 	void AssetManager::SetAssetChangeCallback(const AssetsChangeEventFn& callback)
@@ -59,7 +59,7 @@ namespace SparkRabbit {
 	void AssetManager::ImportAsset(const std::string& filepath, AssetHandle parentHandle)
 	{
 		std::filesystem::path p(filepath);
-		std::string extension = p.extension().string();
+		std::string extension = p.extension().string().substr(1);
 		if (extension == "meta")
 			return;
 
@@ -75,6 +75,31 @@ namespace SparkRabbit {
 		}
 
 		s_LoadedAssets[asset->Handle] = asset;
+	}
+
+	AssetHandle AssetManager::ProcessDirectory(const std::string& directoryPath, AssetHandle parentHandle)
+	{
+		std::shared_ptr<Asset> temp = AssetSerializer::LoadAssetInfo(directoryPath, parentHandle, AssetType::Directory);
+		std::shared_ptr<Directory> dirInfo = std::static_pointer_cast<Directory>(temp);
+		s_LoadedAssets[dirInfo->Handle] = dirInfo;
+
+		if (IsAssetHandleValid(parentHandle))
+			std::static_pointer_cast<Directory>(s_LoadedAssets[parentHandle])->ChildDirectories.push_back(dirInfo->Handle);
+
+		for (auto entry : std::filesystem::directory_iterator(directoryPath))
+		{
+			if (entry.is_directory())
+				ProcessDirectory(entry.path().string(), dirInfo->Handle);
+			else
+				ImportAsset(entry.path().string(), dirInfo->Handle);
+		}
+
+		return dirInfo->Handle;
+	}
+
+	void AssetManager::ReloadAssets()
+	{
+		ProcessDirectory("assets", 0);
 	}
 
 	std::unordered_map<AssetHandle, std::shared_ptr<Asset>> AssetManager::s_LoadedAssets;

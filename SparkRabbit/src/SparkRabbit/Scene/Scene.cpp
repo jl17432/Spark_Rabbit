@@ -24,28 +24,9 @@ namespace SparkRabbit {
 
 	// TODO: PHYSICS
 
-	static void OnScriptComponentConstruct(entt::registry& registry, entt::entity entity)
-	{
-		auto sceneView = registry.view<SceneComponent>();
-		UUID sceneID = registry.get<SceneComponent>(sceneView.front()).SceneID;
-
-		Scene* scene = s_ActiveScenes[sceneID];
-	}
-
-	static void OnScriptComponentDestroy(entt::registry& registry, entt::entity entity)
-	{
-		auto sceneView = registry.view<SceneComponent>();
-		UUID sceneID = registry.get<SceneComponent>(sceneView.front()).SceneID;
-
-		Scene* scene = s_ActiveScenes[sceneID];
-	}
-
 	Scene::Scene(const std::string& debugName, bool isEditorScene)
 		: m_DebugName(debugName)
 	{
-		m_Registry.on_construct<ScriptComponent>().connect<&OnScriptComponentConstruct>();
-		m_Registry.on_destroy<ScriptComponent>().connect<&OnScriptComponentDestroy>();
-
 		m_SceneEntity = m_Registry.create();
 		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
 
@@ -56,8 +37,6 @@ namespace SparkRabbit {
 
 	Scene::~Scene()
 	{
-		m_Registry.on_destroy<ScriptComponent>().disconnect();
-
 		m_Registry.clear();
 		s_ActiveScenes.erase(m_SceneID);
 	}
@@ -255,7 +234,6 @@ namespace SparkRabbit {
 		CopyComponentIfExists<MeshComponent>(newEntity.m_EntityHandle, entity.m_EntityHandle, m_Registry);
 		CopyComponentIfExists<DirectionalLightComponent>(newEntity.m_EntityHandle, entity.m_EntityHandle, m_Registry);
 		CopyComponentIfExists<SkyLightComponent>(newEntity.m_EntityHandle, entity.m_EntityHandle, m_Registry);
-		CopyComponentIfExists<ScriptComponent>(newEntity.m_EntityHandle, entity.m_EntityHandle, m_Registry);
 		CopyComponentIfExists<CameraComponent>(newEntity.m_EntityHandle, entity.m_EntityHandle, m_Registry);
 		CopyComponentIfExists<SpriteRendererComponent>(newEntity.m_EntityHandle, entity.m_EntityHandle, m_Registry);
 	}
@@ -325,7 +303,6 @@ namespace SparkRabbit {
 		CopyComponent<MeshComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<DirectionalLightComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<SkyLightComponent>(target->m_Registry, m_Registry, enttMap);
-		CopyComponent<ScriptComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<CameraComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<SpriteRendererComponent>(target->m_Registry, m_Registry, enttMap);
 
