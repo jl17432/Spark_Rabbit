@@ -20,7 +20,6 @@ namespace SparkRabbit {
 		using AssetsChangeEventFn = std::function<void()>;
 	public:
 		static void Init();
-		static void SetAssetChangeCallback(const AssetsChangeEventFn& callback);
 		static void Shutdown();
 
 		static bool IsAssetHandleValid(AssetHandle assetHandle);

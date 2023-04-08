@@ -162,6 +162,7 @@ namespace SparkRabbit {
 
 		std::shared_ptr<VertexArray> m_VertexArray;
 
+
 		std::vector<Vertex> m_StaticVertices;
 		std::vector<AnimatedVertex> m_AnimatedVertices;
 		std::vector<Index> m_Indices;

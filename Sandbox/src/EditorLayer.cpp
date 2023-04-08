@@ -40,6 +40,9 @@ namespace SparkRabbit{
 		m_SceneHierarchyPanel = std::make_unique<SceneHierarchyPanel>(m_EditorScene);
 		m_AssetFilePanel = std::make_unique<FileSystemPanel>();
 
+		m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&EditorLayer::SelectEntity, this, std::placeholders::_1));
+		m_SceneHierarchyPanel->SetEntityDeletedCallback(std::bind(&EditorLayer::OnEntityDeleted, this, std::placeholders::_1));
+
 		NewScene();
 	}
 
@@ -49,11 +52,6 @@ namespace SparkRabbit{
 
 	void EditorLayer::OnUpdate(TickTime ts)
 	{
-
-		auto [x, y] = GetMouseViewportSpace();
-
-		SceneRenderer::SetFocusPoint({ x * 0.5f + 0.5f, y * 0.5f + 0.5f });
-
 		if (m_AllowViewportCameraEvents)
 			m_ProjectiveCamera.OnUpdate(ts);
 
@@ -65,17 +63,6 @@ namespace SparkRabbit{
 			auto viewProj = m_ProjectiveCamera.GetViewProjection();
 			Renderer2D::BeginScene(viewProj, false);
 			//Renderer::DrawBoundingBox(m_MeshEntity->GetMesh(), m_MeshEntity->Transform());
-			Renderer2D::EndScene();
-			Renderer::EndRenderPass();
-		}
-
-		if (m_SelectedSubmeshes.size())
-		{
-			Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
-			auto viewProj = m_ProjectiveCamera.GetViewProjection();
-			Renderer2D::BeginScene(viewProj, false);
-			auto& submesh = m_SelectedSubmeshes[0];
-			Renderer::DrawBoundingBox(submesh.Mesh->Box, submesh.Entity.Transform().GetTransform() * submesh.Mesh->Transform);
 			Renderer2D::EndScene();
 			Renderer::EndRenderPass();
 		}
@@ -182,7 +169,6 @@ namespace SparkRabbit{
 		m_SceneHierarchyPanel->SetContext(m_EditorScene);
 
 		m_ProjectiveCamera = ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f));
-		//m_EditorScene->SetSkybox(Environments::Load("assets/env/pink_sunrise_4k.hdr").IrradianceMap);
 	}
 
 	void EditorLayer::SelectEntity(Entity entity)
@@ -204,6 +190,15 @@ namespace SparkRabbit{
 		m_EditorScene->SetSelectedEntity(entity);
 
 		m_Scene = m_EditorScene;
+	}
+
+	void EditorLayer::OnEntityDeleted(Entity entity)
+	{
+		if (m_SelectedSubmeshes.size() > 0 && m_SelectedSubmeshes[0].Entity == entity)
+		{
+			m_SelectedSubmeshes.clear();
+			m_EditorScene->SetSelectedEntity({});
+		}
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -453,10 +448,12 @@ namespace SparkRabbit{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport");
 
+
 		auto viewportOffset = ImGui::GetCursorPos(); // includes tab bar
 		auto viewportSize = ImGui::GetContentRegionAvail();
 		SceneRenderer::SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-		m_ProjectiveCamera.SetProjection(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 10000.0f));
+		m_EditorScene->SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+		m_ProjectiveCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 1000.0f));
 		m_ProjectiveCamera.SetViewport((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		ImGui::Image((void*)SceneRenderer::GetFinalColorBufferRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
 
@@ -545,28 +542,14 @@ namespace SparkRabbit{
 			auto data = ImGui::AcceptDragDropPayload("Asset Load");
 			if (data)
 			{
-				//int count = data->DataSize / sizeof(AssetHandle);
-
-				//for (int i = 0; i < count; i++)
-				//{
-				//	AssetHandle assetHandle = *(((AssetHandle*)data->Data) + i);
-				//	std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(assetHandle);
-
-				//	if (asset->Type == AssetType::Mesh)
-				//	{
-				//		Entity entity = m_EditorScene->CreateEntity(asset->FileName);
-				//		//entity.AddComponent<MeshComponent>(std::make_shared<Mesh>(*asset));
-				//		SelectEntity(entity);
-				//	}
-				//}
-
 				std::string path(reinterpret_cast<const char*>(data->Data));
 				std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(path);
 				if (asset->Type == AssetType::Mesh)
 				{
 					Entity entity = m_EditorScene->CreateEntity(asset->FileName);
-					entity.AddComponent<MeshComponent>(std::dynamic_pointer_cast<Mesh>(asset));
-					//SelectEntity(entity);
+					std::shared_ptr<Mesh> temp = std::make_shared<Mesh>(asset->FilePath);
+					entity.AddComponent<MeshComponent>(temp);
+					SelectEntity(entity);
 				}
 			}
 			ImGui::EndDragDropTarget();
@@ -614,6 +597,8 @@ namespace SparkRabbit{
 	{
 		if (m_AllowViewportCameraEvents)
 			m_ProjectiveCamera.OnEvent(e);
+
+		m_EditorScene->OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SR_BIND_EVENT_FN(EditorLayer::OnKeyPressedEvent));

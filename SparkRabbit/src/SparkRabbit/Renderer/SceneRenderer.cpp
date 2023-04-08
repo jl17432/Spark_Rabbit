@@ -30,8 +30,6 @@ namespace SparkRabbit {
 		std::shared_ptr<RenderPass> GeoPass;
 		std::shared_ptr<RenderPass> CompositePass;
 
-		glm::vec2 FocusPoint = { 0.5f, 0.5f };
-		float BloomThreshold = 1.5f;
 
 		struct DrawCommand
 		{
@@ -223,6 +221,24 @@ namespace SparkRabbit {
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
 		}
 
+		for (auto& dc : s_Data.SelectedMeshDrawList)
+		{
+			auto baseMaterial = dc.Mesh->GetMaterial();
+			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
+			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
+
+			// Environment (TODO: don't do this per mesh)
+			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
+			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
+			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
+
+			// Set lights (TODO: move to light environment and don't do per mesh)
+			baseMaterial->Set("lights", s_Data.SceneData.ActiveLight);
+
+			auto overrideMaterial = nullptr; // dc.Material;
+			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
 		// Grid
 		if (GetOptions().ShowGrid)
 		{
@@ -250,10 +266,6 @@ namespace SparkRabbit {
 		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.Camera.GetExposure());
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
-		s_Data.CompositeShader->SetFloat2("u_ViewportSize", glm::vec2(compositeBuffer->GetWidth(), compositeBuffer->GetHeight()));
-		s_Data.CompositeShader->SetFloat2("u_FocusPoint", s_Data.FocusPoint);
-		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
-		s_Data.CompositeShader->SetFloat("u_BloomThreshold", s_Data.BloomThreshold);
 		Renderer::Submit([]()
 			{
 				glBindTextureUnit(1, s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID());
@@ -288,11 +300,6 @@ namespace SparkRabbit {
 	uint32_t SceneRenderer::GetFinalColorBufferRendererID()
 	{
 		return s_Data.CompositePass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
-	}
-
-	void SceneRenderer::SetFocusPoint(const glm::vec2& point)
-	{
-		s_Data.FocusPoint = point;
 	}
 
 	SceneRendererOptions& SceneRenderer::GetOptions()

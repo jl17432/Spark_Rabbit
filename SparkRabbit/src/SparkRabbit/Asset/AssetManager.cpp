@@ -30,11 +30,6 @@ namespace SparkRabbit {
 		ReloadAssets();
 	}
 
-	void AssetManager::SetAssetChangeCallback(const AssetsChangeEventFn& callback)
-	{
-		s_AssetsChangeCallback = callback;
-	}
-
 	void AssetManager::Shutdown()
 	{
 		s_LoadedAssets.clear();

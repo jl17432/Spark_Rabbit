@@ -26,7 +26,6 @@ namespace SparkRabbit{
 		inline void SetDistance(float distance) { m_Distance = distance; }
 
 		inline const glm::mat4& GetProjection() const { return m_ProjectionMatrix; }
-		inline void SetProjection(const glm::mat4& projectionMatrix) { m_ProjectionMatrix = projectionMatrix; }
 
 		inline const glm::mat4& GetView() const { return m_ViewMatrix; }
 		inline const glm::mat4& GetViewProjection() const { return m_ProjectionMatrix * m_ViewMatrix; }

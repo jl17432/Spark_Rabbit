@@ -50,6 +50,7 @@ namespace SparkRabbit {
 		void NewScene();
 
 		void SelectEntity(Entity entity);
+		void OnEntityDeleted(Entity entity);
 	private:
 		std::pair<float, float> GetMouseViewportSpace();
 		std::pair<glm::vec3, glm::vec3> CastRay(float mx, float my);
