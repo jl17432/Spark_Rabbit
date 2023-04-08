@@ -30,6 +30,9 @@ namespace SparkRabbit {
 		std::shared_ptr<RenderPass> GeoPass;
 		std::shared_ptr<RenderPass> CompositePass;
 
+		glm::vec2 FocusPoint = { 0.5f, 0.5f };
+		float BloomThreshold = 1.5f;
+
 		struct DrawCommand
 		{
 			std::shared_ptr<Mesh> Mesh;
@@ -240,11 +243,21 @@ namespace SparkRabbit {
 
 	void SceneRenderer::CompositePass()
 	{
+		auto& compositeBuffer = s_Data.CompositePass->GetSpecification().TargetFramebuffer;
+
 		Renderer::BeginRenderPass(s_Data.CompositePass);
 		s_Data.CompositeShader->Bind();
 		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.Camera.GetExposure());
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
+		s_Data.CompositeShader->SetFloat2("u_ViewportSize", glm::vec2(compositeBuffer->GetWidth(), compositeBuffer->GetHeight()));
+		s_Data.CompositeShader->SetFloat2("u_FocusPoint", s_Data.FocusPoint);
+		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
+		s_Data.CompositeShader->SetFloat("u_BloomThreshold", s_Data.BloomThreshold);
+		Renderer::Submit([]()
+			{
+				glBindTextureUnit(1, s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID());
+			});
 		Renderer::SubmitFullscreenQuad(nullptr);
 		Renderer::EndRenderPass();
 	}
@@ -275,6 +288,11 @@ namespace SparkRabbit {
 	uint32_t SceneRenderer::GetFinalColorBufferRendererID()
 	{
 		return s_Data.CompositePass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
+	}
+
+	void SceneRenderer::SetFocusPoint(const glm::vec2& point)
+	{
+		s_Data.FocusPoint = point;
 	}
 
 	SceneRendererOptions& SceneRenderer::GetOptions()

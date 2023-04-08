@@ -49,7 +49,10 @@ namespace SparkRabbit{
 
 	void EditorLayer::OnUpdate(TickTime ts)
 	{
-		using namespace SparkRabbit;
+
+		auto [x, y] = GetMouseViewportSpace();
+
+		SceneRenderer::SetFocusPoint({ x * 0.5f + 0.5f, y * 0.5f + 0.5f });
 
 		if (m_AllowViewportCameraEvents)
 			m_ProjectiveCamera.OnUpdate(ts);
@@ -559,6 +562,12 @@ namespace SparkRabbit{
 
 				std::string path(reinterpret_cast<const char*>(data->Data));
 				std::shared_ptr<Asset> asset = AssetManager::GetAsset<Asset>(path);
+				if (asset->Type == AssetType::Mesh)
+				{
+					Entity entity = m_EditorScene->CreateEntity(asset->FileName);
+					entity.AddComponent<MeshComponent>(std::dynamic_pointer_cast<Mesh>(asset));
+					//SelectEntity(entity);
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}

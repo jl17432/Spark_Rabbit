@@ -801,6 +801,13 @@ namespace SparkRabbit {
 			});
 	}
 
+	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
+	{
+		Renderer::Submit([=]() {
+			UploadUniformFloat2(name, value);
+			});
+	}
+
 	void OpenGLShader::SetMat4FromRenderThread(const std::string& name, const glm::mat4& value, bool bind)
 	{
 		if (bind)
@@ -927,6 +934,16 @@ namespace SparkRabbit {
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		if (location != -1)
 			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
+		else
+			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
+	}
+
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
+	{
+		glUseProgram(m_RendererID);
+		auto location = glGetUniformLocation(m_RendererID, name.c_str());
+		if (location != -1)
+			glUniform2f(location, values.x, values.y);
 		else
 			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
 	}

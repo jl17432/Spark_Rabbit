@@ -39,6 +39,7 @@ namespace SparkRabbit {
 
 		// TODO: Temp
 		static uint32_t GetFinalColorBufferRendererID();
+		static void SetFocusPoint(const glm::vec2& point);
 
 		static SceneRendererOptions& GetOptions();
 	private:
