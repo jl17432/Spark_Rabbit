@@ -51,7 +51,7 @@ namespace SparkRabbit {
 		
 		static void SubmitQuad(const std::shared_ptr<MaterialInstance>& material, const glm::mat4& transform = glm::mat4(1.0f));
 		static void SubmitFullscreenQuad(const std::shared_ptr<MaterialInstance>& material);
-		static void SubmitMesh(const std::shared_ptr<Mesh>& mesh, const glm::mat4& transform, const std::shared_ptr<MaterialInstance>& overrideMaterial = nullptr);
+		static void SubmitMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform, std::shared_ptr<MaterialInstance> overrideMaterial = nullptr);
 		
 
 		static void DrawBoundingBox(const BoundingBox& box, const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));

@@ -159,18 +159,15 @@ namespace SparkRabbit {
 		Renderer::DrawIndexed(6, PrimitiveType::Triangles, depthTest);
 	}
 
-	void Renderer::SubmitMesh(const std::shared_ptr<Mesh>& mesh, const glm::mat4& transform, const std::shared_ptr<MaterialInstance>& overrideMaterial)
+	void Renderer::SubmitMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform,std::shared_ptr<MaterialInstance> overrideMaterial)
 	{
-		// auto material = overrideMaterial ? overrideMaterial : mesh->GetMaterialInstance();
-		// auto shader = material->GetShader();
-		// TODO: Sort this out
 		mesh->m_VertexArray->Bind();
 
 		auto& materials = mesh->GetMaterials();
 		for (Submesh& submesh : mesh->m_Submeshes)
 		{
 			// Material
-			auto material = materials[submesh.MaterialIndex];
+			auto material = overrideMaterial ? overrideMaterial : materials[submesh.MaterialIndex];
 			auto shader = material->GetShader();
 			material->Bind();
 

@@ -43,7 +43,7 @@ namespace SparkRabbit {
 
 		// Grid
 		std::shared_ptr<MaterialInstance> GridMaterial;
-
+		std::shared_ptr<MaterialInstance> OutlineMaterial, OutlineAnimMaterial;
 		SceneRendererOptions Options;
 	};
 
@@ -81,6 +81,11 @@ namespace SparkRabbit {
 		float gridScale = 16.025f, gridSize = 0.025f;
 		s_Data.GridMaterial->Set("u_Scale", gridScale);
 		s_Data.GridMaterial->Set("u_Res", gridSize);
+
+		//Outline
+		auto outlineShader = Shader::Create("assets/shaders/Outline.glsl");
+		s_Data.OutlineMaterial = MaterialInstance::Create(Material::Create(outlineShader));
+		s_Data.OutlineMaterial->SetFlag(MaterialFlag::DepthTest, false);
 	}
 
 	void SceneRenderer::SetViewportSize(uint32_t width, uint32_t height)
@@ -265,6 +270,45 @@ namespace SparkRabbit {
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilFunc(GL_NOTEQUAL, 1, 0xff);
+					glStencilMask(0);
+
+					glLineWidth(10);
+					glEnable(GL_LINE_SMOOTH);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glDisable(GL_DEPTH_TEST);
+				});
+
+			// Draw outline here
+			s_Data.OutlineMaterial->Set("u_ViewProjection", viewProjection);
+			for (auto& dc : s_Data.SelectedMeshDrawList)
+			{
+				Renderer::SubmitMesh(dc.Mesh, dc.Transform, s_Data.OutlineMaterial);
+			}
+			Renderer::Submit([]()
+				{
+					glPointSize(10);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+				});
+
+			for (auto& dc : s_Data.SelectedMeshDrawList)
+			{
+				Renderer::SubmitMesh(dc.Mesh, dc.Transform, s_Data.OutlineMaterial);
+			}
+
+			Renderer::Submit([]()
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glStencilMask(0xff);
+					glStencilFunc(GL_ALWAYS, 1, 0xff);
+					glEnable(GL_DEPTH_TEST);
+				});
 		}
 
 		// Grid

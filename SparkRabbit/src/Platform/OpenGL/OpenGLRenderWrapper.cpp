@@ -36,6 +36,7 @@ namespace SparkRabbit {
 
 		glEnable(GL_DEPTH_TEST);
 		//glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glFrontFace(GL_CCW);
 
@@ -43,6 +44,7 @@ namespace SparkRabbit {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_STENCIL_TEST);
 
 		auto& caps = RenderAPI::GetInfo();
 
@@ -54,13 +56,13 @@ namespace SparkRabbit {
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &caps.MaxAnisotropy);
 
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &caps.MaxTextureUnits);
-		/*
+		
 		GLenum error = glGetError();
 		while (error != GL_NO_ERROR)
 		{
 			SPARK_CORE_ERROR("OpenGL Error {0}", error);
 			error = glGetError();
-		}*/
+		}
 
 		//LoadRequiredAssets(); 
 	}
@@ -73,7 +75,7 @@ namespace SparkRabbit {
 	void RenderAPI::Clear(float r, float g, float b, float a)
 	{
 		glClearColor(r, g, b, a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
 	void RenderAPI::SetClearColor(float r, float g, float b, float a)
