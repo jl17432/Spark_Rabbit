@@ -2,7 +2,7 @@
 #include "FileSystemPanel.h"
 
 #include <imgui/imgui.h>
-#include"SparkRabbit/Asset/AssetPath.h"
+#include"SparkRabbit/Asset/AssetManager.h"
 
 namespace SparkRabbit {
 	static const std::filesystem::path m_AssetDirectory = "assets";
@@ -40,6 +40,11 @@ namespace SparkRabbit {
 		{
 			const auto& path = directoryEntry.path();
 			std::string filenameString = path.filename().string();
+			std::string extensionString = path.extension().string();
+			if (extensionString == ".meta")
+			{
+				continue;
+			}
 
 			ImGui::PushID(filenameString.c_str());
 			std::shared_ptr<Texture2D> icon = directoryEntry.is_directory() ? m_DirectoryIcon : m_FileIcon;

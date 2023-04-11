@@ -1,5 +1,4 @@
 #pragma once
-#include"AssetPath.h"
 #include"Asset.h"
 namespace SparkRabbit {
 	class AssetSerializer

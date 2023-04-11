@@ -1,6 +1,7 @@
 #pragma once
 #include"SparkRabbit/UUID.h"
 #include<entt/include/entt.hpp>
+#include<filesystem>
 
 namespace SparkRabbit {
 	enum class AssetType
