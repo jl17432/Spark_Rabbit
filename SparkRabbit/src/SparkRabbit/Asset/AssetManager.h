@@ -62,7 +62,7 @@ namespace SparkRabbit {
 			if (!asset->IsDataLoaded && loadData)
 				asset = AssetSerializer::LoadAssetData(asset);
 
-			return std::static_pointer_cast<T>(asset);
+			return std::dynamic_pointer_cast<T>(asset);
 		}
 
 		template<typename T>

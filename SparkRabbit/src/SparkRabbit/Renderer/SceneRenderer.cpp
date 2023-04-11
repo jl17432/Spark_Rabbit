@@ -10,7 +10,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace SparkRabbit {
-
 	struct SceneRendererData
 	{
 		const Scene* ActiveScene = nullptr;
@@ -21,8 +20,10 @@ namespace SparkRabbit {
 			// Resources
 			std::shared_ptr<MaterialInstance> SkyboxMaterial;
 			std::shared_ptr<Environments> SceneEnvironment;
+			float SceneEnvironmentIntensity;
 			Light ActiveLight;
-		} SceneData;
+			LightEnvironment SceneLightEnvironment;
+		}SceneData;
 
 		std::shared_ptr<Texture2D> BRDFLUT;
 		std::shared_ptr<Shader> CompositeShader;
@@ -93,11 +94,12 @@ namespace SparkRabbit {
 		SPARK_CORE_ASSERT(!s_Data.ActiveScene, "");
 
 		s_Data.ActiveScene = scene;
-
 		s_Data.SceneData.SceneCamera = camera;
 		s_Data.SceneData.SkyboxMaterial = scene->m_SkyboxMaterial;
 		s_Data.SceneData.SceneEnvironment = scene->m_Environment;
+		s_Data.SceneData.SceneEnvironmentIntensity = scene->m_EnvironmentIntensity;
 		s_Data.SceneData.ActiveLight = scene->m_Light;
+		s_Data.SceneData.SceneLightEnvironment = scene->m_LightEnvironment;
 	}
 
 	void SceneRenderer::EndScene()
@@ -188,7 +190,26 @@ namespace SparkRabbit {
 
 	void SceneRenderer::GeometryPass()
 	{
+
+		bool outline = s_Data.SelectedMeshDrawList.size() > 0;
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				});
+		}
+
 		Renderer::BeginRenderPass(s_Data.GeoPass);
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilMask(0);
+				});
+		}
 
 		auto& sceneCamera = s_Data.SceneData.SceneCamera;
 
@@ -197,6 +218,7 @@ namespace SparkRabbit {
 		// Skybox
 		auto skyboxShader = s_Data.SceneData.SkyboxMaterial->GetShader();
 		s_Data.SceneData.SkyboxMaterial->Set("u_InverseVP", glm::inverse(viewProjection));
+		s_Data.SceneData.SkyboxMaterial->Set("u_SkyIntensity", s_Data.SceneData.SceneEnvironmentIntensity);
 		Renderer::SubmitFullscreenQuad(s_Data.SceneData.SkyboxMaterial);
 
 		// Render entities
@@ -212,10 +234,19 @@ namespace SparkRabbit {
 			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
 
 			// Set lights (TODO: move to light environment and don't do per mesh)
-			baseMaterial->Set("lights", s_Data.SceneData.ActiveLight);
+			baseMaterial->Set("lights", s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0]);
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilFunc(GL_ALWAYS, 1, 0xff);
+					glStencilMask(0xff);
+				});
 		}
 
 		for (auto& dc : s_Data.SelectedMeshDrawList)
@@ -224,8 +255,13 @@ namespace SparkRabbit {
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
 			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
 
+			// Environment (TODO: don't do this per mesh)
+			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
+			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
+			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
+
 			// Set lights (TODO: move to light environment and don't do per mesh)
-			baseMaterial->Set("lights", s_Data.SceneData.ActiveLight);
+			baseMaterial->Set("lights", s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0]);
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);

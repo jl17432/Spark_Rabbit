@@ -75,11 +75,11 @@ namespace SparkRabbit {
 	AssetHandle AssetManager::ProcessDirectory(const std::string& directoryPath, AssetHandle parentHandle)
 	{
 		std::shared_ptr<Asset> temp = AssetSerializer::LoadAssetInfo(directoryPath, parentHandle, AssetType::Directory);
-		std::shared_ptr<Directory> dirInfo = std::static_pointer_cast<Directory>(temp);
+		std::shared_ptr<Directory> dirInfo = std::dynamic_pointer_cast<Directory>(temp);
 		s_LoadedAssets[dirInfo->Handle] = dirInfo;
 
 		if (IsAssetHandleValid(parentHandle))
-			std::static_pointer_cast<Directory>(s_LoadedAssets[parentHandle])->ChildDirectories.push_back(dirInfo->Handle);
+			std::dynamic_pointer_cast<Directory>(s_LoadedAssets[parentHandle])->ChildDirectories.push_back(dirInfo->Handle);
 
 		for (auto entry : std::filesystem::directory_iterator(directoryPath))
 		{

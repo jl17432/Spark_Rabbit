@@ -23,11 +23,11 @@ namespace SparkRabbit {
 		std::shared_ptr<VertexArray> m_FullscreenQuadVertexArray;
 	};
 
-	static RendererData s_Data;
+	static RendererData r_Data;
 
 	void Renderer::Init()
 	{
-		s_Data.m_ShaderLibrary = std::make_unique<ShaderLibrary>();
+		r_Data.m_ShaderLibrary = std::make_unique<ShaderLibrary>();
 		Renderer::Submit([]() { RenderAPI::Init(); });
 
 		Renderer::GetShaderLibrary()->Load("assets/shaders/PBR_Static.glsl");//
@@ -58,7 +58,7 @@ namespace SparkRabbit {
 		data[3].Position = glm::vec3(x, y + height, 0.1f);
 		data[3].TexCoord = glm::vec2(0, 1);
 
-		s_Data.m_FullscreenQuadVertexArray = VertexArray::Create();
+		r_Data.m_FullscreenQuadVertexArray = VertexArray::Create();
 		auto quadVB = VertexBuffer::Create(data, 4 * sizeof(QuadVertex));
 		quadVB->SetLayout({
 			{ ShaderDataType::Vec3, "a_Position" },
@@ -68,15 +68,15 @@ namespace SparkRabbit {
 		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
 		auto quadIB = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 
-		s_Data.m_FullscreenQuadVertexArray->AddVertexBuffer(quadVB);
-		s_Data.m_FullscreenQuadVertexArray->SetIndexBuffer(quadIB);
+		r_Data.m_FullscreenQuadVertexArray->AddVertexBuffer(quadVB);
+		r_Data.m_FullscreenQuadVertexArray->SetIndexBuffer(quadIB);
 
 		Renderer2D::Init();
 	}
 
 	const std::unique_ptr<ShaderLibrary>& Renderer::GetShaderLibrary()
 	{
-		return s_Data.m_ShaderLibrary;
+		return r_Data.m_ShaderLibrary;
 	}
 
 
@@ -103,7 +103,7 @@ namespace SparkRabbit {
 
 	void Renderer::WaitAndRender()
 	{
-		s_Data.m_CmdQueue.Execute();
+		r_Data.m_CmdQueue.Execute();
 	}
 
 	void Renderer::BeginRenderPass(const std::shared_ptr<RenderPass>& renderPass, bool clear)
@@ -111,7 +111,7 @@ namespace SparkRabbit {
 		SPARK_CORE_ASSERT(renderPass, "Render pass cannot be null!");
 
 		// TODO: Convert all of this into a render command buffer
-		s_Data.m_ActiveRenderPass = renderPass;
+		r_Data.m_ActiveRenderPass = renderPass;
 
 		renderPass->GetSpecification().TargetFramebuffer->Bind();
 		if (clear)
@@ -125,9 +125,9 @@ namespace SparkRabbit {
 
 	void Renderer::EndRenderPass()
 	{
-		SPARK_CORE_ASSERT(s_Data.m_ActiveRenderPass, "No active render pass! Have you called Renderer::EndRenderPass twice?");
-		s_Data.m_ActiveRenderPass->GetSpecification().TargetFramebuffer->Unbind();
-		s_Data.m_ActiveRenderPass = nullptr;
+		SPARK_CORE_ASSERT(r_Data.m_ActiveRenderPass, "No active render pass! Have you called Renderer::EndRenderPass twice?");
+		r_Data.m_ActiveRenderPass->GetSpecification().TargetFramebuffer->Unbind();
+		r_Data.m_ActiveRenderPass = nullptr;
 	}
 
 	void Renderer::SubmitQuad(const std::shared_ptr<MaterialInstance>& material, const glm::mat4& transform)
@@ -142,7 +142,7 @@ namespace SparkRabbit {
 			shader->SetMat4("u_Transform", transform);
 		}
 
-		s_Data.m_FullscreenQuadVertexArray->Bind();
+		r_Data.m_FullscreenQuadVertexArray->Bind();
 		Renderer::DrawIndexed(6, PrimitiveType::Triangles, depthTest);
 	}
 
@@ -155,7 +155,7 @@ namespace SparkRabbit {
 			depthTest = material->GetFlag(MaterialFlag::DepthTest);
 		}
 
-		s_Data.m_FullscreenQuadVertexArray->Bind();
+		r_Data.m_FullscreenQuadVertexArray->Bind();
 		Renderer::DrawIndexed(6, PrimitiveType::Triangles, depthTest);
 	}
 
@@ -235,7 +235,7 @@ namespace SparkRabbit {
 
 	CmdQueue& Renderer::GetRenderCommandQueue()
 	{
-		return s_Data.m_CmdQueue;
+		return r_Data.m_CmdQueue;
 	}
 
 	

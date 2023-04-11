@@ -551,7 +551,7 @@ namespace SparkRabbit{
 				if (asset->Type == AssetType::Mesh)
 				{
 					Entity entity = m_EditorScene->CreateEntity(asset->FileName);
-					entity.AddComponent<MeshComponent>(std::static_pointer_cast<Mesh>(asset));
+					entity.AddComponent<MeshComponent>(std::dynamic_pointer_cast<Mesh>(asset));
 					SelectEntity(entity);
 				}
 			}

@@ -310,9 +310,7 @@ namespace SparkRabbit {
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 		if (entity.HasComponent<T>())
 		{
-			// NOTE(Peter):
-			//	This fixes an issue where the first "+" button would display the "Remove" buttons for ALL components on an Entity.
-			//	This is due to ImGui::TreeNodeEx only pushing the id for it's children if it's actually open
+
 			ImGui::PushID((void*)typeid(T).hash_code());
 			auto& component = entity.GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
@@ -517,12 +515,12 @@ namespace SparkRabbit {
 				DrawVec3Control("Scale", component.Scale, 1.0f);
 			});
 
-		/*DrawComponent<MeshComponent>("Mesh", entity, [](MeshComponent& mc)
+		DrawComponent<MeshComponent>("Mesh", entity, [](MeshComponent& mc)
 			{
 				UI::BeginPropertyGrid();
 				UI::PropertyAssetReference("Mesh", mc.Mesh, AssetType::Mesh);
 				UI::EndPropertyGrid();
-			});*/
+			});
 
 		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& cc)
 			{
@@ -579,10 +577,6 @@ namespace SparkRabbit {
 				}
 
 				UI::EndPropertyGrid();
-			});
-
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& mc)
-			{
 			});
 
 		DrawComponent<DirectionalLightComponent>("Directional Light", entity, [](DirectionalLightComponent& dlc)

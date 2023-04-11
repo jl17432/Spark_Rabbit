@@ -75,7 +75,7 @@ namespace SparkRabbit {
 		}
 
 		{
-			m_Environment = std::shared_ptr<Environments>();
+			m_Environment = std::make_shared<Environments>();
 			auto lights = m_Registry.group<SkyLightComponent>(entt::get<TransformComponent>);
 			for (auto entity : lights)
 			{

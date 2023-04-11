@@ -1,6 +1,7 @@
 #pragma once
 #include"SparkRabbit/Asset/Asset.h"
 #include"imgui/imgui.h"
+#include"SparkRabbit/Asset/AssetManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -284,7 +285,7 @@ namespace SparkRabbit::UI {
 		return changed;
 	}
 
-	/*template<typename T>
+	template<typename T>
 	static bool PropertyAssetReference(const char* label, std::shared_ptr<T>& object, AssetType supportedType)
 	{
 		bool modified = false;
@@ -321,7 +322,7 @@ namespace SparkRabbit::UI {
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		return modified;
-	}*/
+	}
 
 	static void EndPropertyGrid()
 	{
