@@ -39,7 +39,6 @@ namespace SparkRabbit {
 		};
 		std::vector<DrawCommand> DrawList;
 		std::vector<DrawCommand> SelectedMeshDrawList;
-		std::vector<DrawCommand> ShadowPassDrawList;
 
 		// Grid
 		std::shared_ptr<MaterialInstance> GridMaterial;
@@ -115,13 +114,11 @@ namespace SparkRabbit {
 		// TODO: Culling, sorting, etc.
 
 		s_Data.DrawList.push_back({ mesh, overrideMaterial, transform });
-		s_Data.ShadowPassDrawList.push_back({ mesh, overrideMaterial, transform });
 	}
 
 	void SceneRenderer::SubmitSelectedMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform)
 	{
 		s_Data.SelectedMeshDrawList.push_back({ mesh, nullptr, transform });
-		s_Data.ShadowPassDrawList.push_back({ mesh, nullptr, transform });
 	}
 
 	static std::shared_ptr<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
@@ -227,11 +224,6 @@ namespace SparkRabbit {
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
 			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
 
-			// Environment (TODO: don't do this per mesh)
-			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
-			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
-			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
-
 			// Set lights (TODO: move to light environment and don't do per mesh)
 			baseMaterial->Set("lights", s_Data.SceneData.ActiveLight);
 
@@ -282,6 +274,7 @@ namespace SparkRabbit {
 		CompositePass();
 
 		s_Data.DrawList.clear();
+		s_Data.SelectedMeshDrawList.clear();
 		s_Data.SceneData = {};
 	}
 

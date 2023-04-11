@@ -243,6 +243,9 @@ namespace SparkRabbit{
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
 		}
 
+		m_SceneHierarchyPanel->OnImGuiRender();
+		m_AssetFilePanel->OnImGuiRender();
+
 		// Editor Panel ------------------------------------------------------------------------------
 		ImGui::Begin("Model");
 		ImGui::Begin("Environment");
@@ -536,6 +539,7 @@ namespace SparkRabbit{
 			}
 		}
 
+
 		//Drag and drop asset file from content browser to Scene
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -547,8 +551,7 @@ namespace SparkRabbit{
 				if (asset->Type == AssetType::Mesh)
 				{
 					Entity entity = m_EditorScene->CreateEntity(asset->FileName);
-					std::shared_ptr<Mesh> temp = std::make_shared<Mesh>(asset->FilePath);
-					entity.AddComponent<MeshComponent>(temp);
+					entity.AddComponent<MeshComponent>(std::static_pointer_cast<Mesh>(asset));
 					SelectEntity(entity);
 				}
 			}
@@ -586,9 +589,6 @@ namespace SparkRabbit{
 
 			ImGui::EndMenuBar();
 		}
-
-		m_SceneHierarchyPanel->OnImGuiRender();
-		m_AssetFilePanel->OnImGuiRender();
 
 		ImGui::End();
 	}

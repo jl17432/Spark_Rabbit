@@ -64,8 +64,6 @@ namespace SparkRabbit {
 		std::shared_ptr<Scene> m_EditorScene;
 		std::shared_ptr<Scene> m_PlayScene;
 
-		Entity* m_MeshEntity = nullptr;
-
 		ProjectiveCamera m_ProjectiveCamera;
 
 		std::shared_ptr<Shader> m_BrushShader;

@@ -32,17 +32,19 @@ namespace SparkRabbit{
 		m_ImGuiLayer = new ImGuiLayer("ImGui");
 		PushOverlay(m_ImGuiLayer);
 
-		Renderer::Init();
-		Renderer::WaitAndRender();
-
 		AssetTypes::Init();
 		AssetManager::Init();
+
+
+		Renderer::Init();
+		Renderer::WaitAndRender();
 
 	}
 
 	Application::~Application()
 	{
-
+		for (Layer* layer : m_LayerStack)
+			layer->OnDetach();
 	}
 
 	void Application::PushLayer(Layer* layer)

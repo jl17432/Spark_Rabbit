@@ -8,6 +8,10 @@
 #include"SceneRenderer.h"
 #include "Renderer2D.h"
 
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+
 namespace SparkRabbit {
 	RenderAPI::API RenderAPI::s_API = RenderAPI::API::OpenGL;  // for now
 

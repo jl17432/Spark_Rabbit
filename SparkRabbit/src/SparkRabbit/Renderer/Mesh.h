@@ -11,6 +11,7 @@
 #include "VertexArray.h"
 #include "Material.h"
 #include "SparkRabbit/Math/BoundingBox.h"
+#include"SparkRabbit/Asset/Asset.h"
 
 struct aiNode;
 struct aiAnimation;
@@ -153,7 +154,7 @@ namespace SparkRabbit {
 	private:
 		std::vector<Submesh> m_Submeshes;
 
-		std::unique_ptr<Assimp::Importer> m_Importer;
+		std::shared_ptr<Assimp::Importer> m_Importer;
 
 		glm::mat4 m_InverseTransform;
 
@@ -161,7 +162,6 @@ namespace SparkRabbit {
 		std::vector<BoneInfo> m_BoneInfo;
 
 		std::shared_ptr<VertexArray> m_VertexArray;
-
 
 		std::vector<Vertex> m_StaticVertices;
 		std::vector<AnimatedVertex> m_AnimatedVertices;

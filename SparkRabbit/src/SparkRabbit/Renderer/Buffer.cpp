@@ -31,6 +31,7 @@ namespace SparkRabbit {
 
 	}
 
+
 	std::shared_ptr<IndexBuffer> IndexBuffer::Create(void* data, uint32_t size)
 	{
 		switch (Renderer::GetAPI())

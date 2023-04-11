@@ -64,7 +64,7 @@ namespace SparkRabbit {
 		LogStream::Initialize();
 		SPARK_CORE_INFO("Loading mesh: {0}", filename.c_str());
 		
-		m_Importer = std::make_unique<Assimp::Importer>();
+		m_Importer = std::make_shared<Assimp::Importer>();
 
 		const aiScene* scene = m_Importer->ReadFile(filename, s_MeshImportFlags);
 		if (!scene || !scene->HasMeshes())
@@ -370,7 +370,7 @@ namespace SparkRabbit {
 				{ ShaderDataType::Vec2, "a_TexCoord" },
 				{ ShaderDataType::Ivec4, "a_BoneIDs" },
 				{ ShaderDataType::Vec4, "a_BoneWeights" },
-			});
+				});
 			m_VertexArray->AddVertexBuffer(vb);
 		}
 		else
@@ -382,7 +382,7 @@ namespace SparkRabbit {
 				{ ShaderDataType::Vec3, "a_Tangent" },
 				{ ShaderDataType::Vec3, "a_Binormal" },
 				{ ShaderDataType::Vec2, "a_TexCoord" },
-			});
+				});
 			m_VertexArray->AddVertexBuffer(vb);
 		}
 

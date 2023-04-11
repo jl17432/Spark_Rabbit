@@ -56,13 +56,13 @@ namespace SparkRabbit {
 		template<typename T>
 		static std::shared_ptr<T> GetAsset(AssetHandle assetHandle, bool loadData = true)
 		{
-			SPARK_CORE_ASSERT(true,s_LoadedAssets.find(assetHandle) != s_LoadedAssets.end());
+			//SPARK_CORE_ASSERT(true,s_LoadedAssets.find(assetHandle) != s_LoadedAssets.end());
 			std::shared_ptr<Asset> asset = s_LoadedAssets[assetHandle];
 
 			if (!asset->IsDataLoaded && loadData)
 				asset = AssetSerializer::LoadAssetData(asset);
 
-			return std::make_shared<T>(*asset);
+			return std::static_pointer_cast<T>(asset);
 		}
 
 		template<typename T>

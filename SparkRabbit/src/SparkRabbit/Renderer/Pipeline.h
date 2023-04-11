@@ -1,10 +1,13 @@
 #pragma once
-#include"Platform/OpenGL/OpenGLShader.h"
+#include "SparkRabbit/Renderer/Buffer.h"
+#include "SparkRabbit/Renderer/Shader.h"
 
 namespace SparkRabbit {
+
 	struct PipelineSpecification
 	{
 		std::shared_ptr<SparkRabbit::Shader> Shader;
+		BufferLayout Layout;
 	};
 
 	class Pipeline
@@ -22,4 +25,5 @@ namespace SparkRabbit {
 
 		static std::shared_ptr<Pipeline> Create(const PipelineSpecification& spec);
 	};
+
 }
