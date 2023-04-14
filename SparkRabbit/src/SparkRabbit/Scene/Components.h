@@ -62,6 +62,9 @@ namespace SparkRabbit {
 				* glm::toMat4(glm::quat(Rotation))
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}
+
+		operator glm::mat4& () { return GetTransform(); }
+		operator const glm::mat4& () const { return GetTransform(); }
 	};
 
 	struct MeshComponent
@@ -82,7 +85,8 @@ namespace SparkRabbit {
 		bool Primary = true;
 
 		CameraComponent() = default;
-		CameraComponent(const CameraComponent& other) = default;
+		CameraComponent(const CameraComponent& other)
+			: Camera(other.Camera), Primary(other.Primary) {}
 
 		operator SceneCamera& () { return Camera; }
 		operator const SceneCamera& () const { return Camera; }

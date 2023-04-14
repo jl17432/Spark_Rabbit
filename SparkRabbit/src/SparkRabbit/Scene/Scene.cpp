@@ -48,10 +48,71 @@ namespace SparkRabbit {
 		m_SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
 	}
 
-	//TODO: Scene::OnUpdate(TickTime ts), play mode
+	
 
-	//TODO: Scene::OnRenderRuntime(Timestep ts), pause mode
+	void Scene::OnUpdate(TickTime ts)
+	{
+		//update all entities
+		Camera* camera = nullptr;
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& comp = view.get<CameraComponent>(entity);
+			camera = &comp.Camera;
+			break;
+		}
+		SPARK_CORE_INFO("Scene::OnUpdate");
+		//TODO- physics here
+		
+	}
 
+	void Scene::OnRenderRuntime(TickTime ts)
+	{
+		Entity cameraEntity = GetMainCameraEntity();
+		if (!cameraEntity)
+			return;
+
+		glm::mat4 cameraViewMatrix = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+		SPARK_CORE_ASSERT(cameraEntity, "Scene does not contain any cameras!");
+		SceneCamera& camera = cameraEntity.GetComponent<CameraComponent>();
+		camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+
+		m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod);
+
+		auto group = m_Registry.group<MeshComponent>(entt::get<TransformComponent>);
+		SceneRenderer::BeginScene(this, { camera, cameraViewMatrix });
+		for (auto entity : group)
+		{
+			auto [transformComponent, meshComponent] = group.get<TransformComponent, MeshComponent>(entity);
+			if (meshComponent.Mesh)
+			{
+				meshComponent.Mesh->OnUpdate(ts);
+
+				// TODO: Should we render (logically)
+				SceneRenderer::SubmitMesh(meshComponent, transformComponent, nullptr);
+			}
+		}
+		SceneRenderer::EndScene();
+		/////////////////////////////////////////////////////////////////////
+
+#if 0
+		// Render all sprites
+		Renderer2D::BeginScene(*camera);
+		{
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRenderer>);
+			for (auto entity : group)
+			{
+				auto [transformComponent, spriteRendererComponent] = group.get<TransformComponent, SpriteRenderer>(entity);
+				if (spriteRendererComponent.Texture)
+					Renderer2D::DrawQuad(transformComponent.Transform, spriteRendererComponent.Texture, spriteRendererComponent.TilingFactor);
+				else
+					Renderer2D::DrawQuad(transformComponent.Transform, spriteRendererComponent.Color);
+			}
+		}
+
+		Renderer2D::EndScene();
+#endif
+	}
 	//Editor mode
 	void Scene::OnRenderEditor(TickTime ts, const ProjectiveCamera& projectiveCamera)
 	{
@@ -132,6 +193,16 @@ namespace SparkRabbit {
 
 	void Scene::OnEvent(Event& e)
 	{
+	}
+
+	void Scene::OnRuntimeStart()
+	{
+		m_IsPlaying = true;
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		m_IsPlaying = false;
 	}
 
 	//TODO: RunTime start and stop

@@ -35,6 +35,7 @@ namespace SparkRabbit{
 		using namespace glm;
 
 		m_CheckerboardTex = Texture2D::Create("assets/editor/Checkerboard.tga");
+		m_PlayButtonTex = Texture2D::Create("assets/editor/PlayButton.png");
 
 		//create Editor panel
 		m_SceneHierarchyPanel = std::make_unique<SceneHierarchyPanel>(m_EditorScene);
@@ -50,22 +51,88 @@ namespace SparkRabbit{
 	{
 	}
 
+	void EditorLayer::OnScenePlay()
+	{
+		m_SelectedSubmeshes.clear();
+
+		m_SceneState = SceneState::Play;
+
+		m_PlayScene = std::make_shared<Scene>();
+		m_EditorScene->CopyTo(m_PlayScene);
+		m_PlayScene->OnRuntimeStart();
+		m_SceneHierarchyPanel->SetContext(m_PlayScene);
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_PlayScene->OnRuntimeStop();
+		m_SceneState = SceneState::Edit;
+
+		//upload runtime scene
+		m_PlayScene = nullptr;
+
+		m_SelectedSubmeshes.clear();
+		m_SceneHierarchyPanel->SetContext(m_EditorScene);
+	}
+
 	void EditorLayer::OnUpdate(TickTime ts)
 	{
-		if (m_AllowViewportCameraEvents)
-			m_ProjectiveCamera.OnUpdate(ts);
-
-		m_EditorScene->OnRenderEditor(ts, m_ProjectiveCamera);
-
-		if (m_DrawOnTopBoundingBoxes)
+		switch (m_SceneState)
 		{
-			Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
-			auto viewProj = m_ProjectiveCamera.GetViewProjection();
-			Renderer2D::BeginScene(viewProj, false);
-			//Renderer::DrawBoundingBox(m_MeshEntity->GetMesh(), m_MeshEntity->Transform());
-			Renderer2D::EndScene();
-			Renderer::EndRenderPass();
+			case SceneState::Edit:
+			{
+				if (m_AllowViewportCameraEvents)
+					m_ProjectiveCamera.OnUpdate(ts);
+
+				m_EditorScene->OnRenderEditor(ts, m_ProjectiveCamera);
+
+				if (m_DrawOnTopBoundingBoxes)
+				{
+					Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
+					auto viewProj = m_ProjectiveCamera.GetViewProjection();
+					Renderer2D::BeginScene(viewProj, false);
+					//Renderer::DrawBoundingBox(m_MeshEntity->GetMesh(), m_MeshEntity->Transform());
+					Renderer2D::EndScene();
+					Renderer::EndRenderPass();
+				}
+
+				if (m_SelectedSubmeshes.size() && false)
+				{
+					auto& selection = m_SelectedSubmeshes[0];
+
+					if (selection.Mesh && selection.Entity.HasComponent<MeshComponent>())
+					{
+						Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
+						auto viewProj = m_ProjectiveCamera.GetViewProjection();
+						Renderer2D::BeginScene(viewProj, false);
+						glm::vec4 color = (m_SelectionMode == SelectionMode::Entity) ? glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f } : glm::vec4{ 0.2f, 0.9f, 0.2f, 1.0f };
+						Renderer::DrawBoundingBox(selection.Mesh->Box, selection.Entity.GetComponent<TransformComponent>().GetTransform() * selection.Mesh->Transform, color);
+						Renderer2D::EndScene();
+						Renderer::EndRenderPass();
+					}
+				}
+				break;
+			}
+
+			case SceneState::Play:
+			{
+				if (m_AllowViewportCameraEvents)
+					m_ProjectiveCamera.OnUpdate(ts);
+				m_PlayScene->OnUpdate(ts);
+				m_PlayScene->OnRenderRuntime(ts);
+				break;
+			}
+
+			case SceneState::Pause:
+			{
+				if(m_AllowViewportCameraEvents)
+					m_ProjectiveCamera.OnUpdate(ts);
+
+				m_PlayScene->OnRenderRuntime(ts);
+				break;
+			}
 		}
+		
 	}
 
 	bool EditorLayer::Property(const std::string& name, bool& value)
@@ -451,6 +518,38 @@ namespace SparkRabbit{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport");
 
+		if (m_SceneState == SceneState::Edit)
+		{
+			if (ImGui::ImageButton((ImTextureID)(m_PlayButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(0.9f, 0.9f, 0.9f, 1.0f)))
+			{
+				OnScenePlay();
+			}
+		}
+		else if (m_SceneState == SceneState::Play)
+		{
+			if (ImGui::ImageButton((ImTextureID)(m_PlayButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(1.0f, 1.0f, 1.0f, 0.2f)))
+			{
+				OnSceneStop();
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::ImageButton((ImTextureID)(m_PlayButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1.0f, 1.0f, 1.0f, 0.6f)))
+		{
+			SPARK_CORE_INFO("PLAY!");
+		}
+		/*ImGui::End();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::Begin("Viewport");
+
+		m_ViewportPanelMouseOver = ImGui::IsWindowHovered();
+		m_ViewportPanelFocused = ImGui::IsWindowFocused();*/
 
 		auto viewportOffset = ImGui::GetCursorPos(); // includes tab bar
 		auto viewportSize = ImGui::GetContentRegionAvail();

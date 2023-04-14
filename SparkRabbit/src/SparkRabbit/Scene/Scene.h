@@ -43,8 +43,14 @@ namespace SparkRabbit {
 		~Scene();
 
 		void Init();
+		void OnUpdate(TickTime ts);
+		void OnRenderRuntime(TickTime ts);
 		void OnRenderEditor(TickTime ts, const ProjectiveCamera& projectiveCamera);
 		void OnEvent(Event& e);
+
+		//Runtime
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 
 		void SetViewportSize(uint32_t width, uint32_t height);
 
