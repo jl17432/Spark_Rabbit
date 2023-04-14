@@ -1,7 +1,7 @@
 # Binaries
 **/bin/
 !SparkRabbit/vendor/assimp/bin
-!vendor/bin/premake5.exe
+!vendor/bin
 bin-int/
 
 # Visual Studio files and folder
