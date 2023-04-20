@@ -11,6 +11,7 @@
 #include "VertexArray.h"
 #include "Material.h"
 #include "SparkRabbit/Math/BoundingBox.h"
+#include"SparkRabbit/Asset/Asset.h"
 
 struct aiNode;
 struct aiAnimation;
@@ -46,7 +47,7 @@ namespace SparkRabbit {
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
-				if (Weights[i] == 0.0f)
+				if (Weights[i] = 0.0f)
 				{
 					IDs[i] = boneID;
 					Weights[i] = weight;
@@ -54,8 +55,8 @@ namespace SparkRabbit {
 				}
 			}
 			//--to much mesages in console, uncomment it when debugging this
-			SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight); 
-		}	
+			//SPARK_CORE_WARN("Vertex has more than 4 bones,(BoneID={0}, Weight={1})", boneID, weight); 
+		}
 	};
 
 	static const int NumAttributes = 5;
@@ -119,17 +120,20 @@ namespace SparkRabbit {
 		std::string NodeName, MeshName;
 	};
 
-	class Mesh
+	class Mesh : public Asset
 	{
 	public:
 		Mesh(const std::string& filename);
 		~Mesh();
 
-		void OnUpdate(TickTime ts); 
+		void OnUpdate(TickTime ts);
 		//void DumpVertexBuffer();
 
 		std::vector<Submesh>& GetSubmeshes() { return m_Submeshes; }
 		const std::vector<Submesh>& GetSubmeshes() const { return m_Submeshes; }
+
+		std::vector<Vertex>& GetStaticVertices() { return m_StaticVertices; }
+		std::vector<AnimatedVertex>& GetAnimatedVertices() { return m_AnimatedVertices; }
 
 		std::shared_ptr<Shader> GetMeshShader() { return m_MeshShader; }
 		std::shared_ptr<Material> GetMaterial() { return m_BaseMaterial; }
@@ -153,7 +157,7 @@ namespace SparkRabbit {
 	private:
 		std::vector<Submesh> m_Submeshes;
 
-		std::unique_ptr<Assimp::Importer> m_Importer;
+		std::shared_ptr<Assimp::Importer> m_Importer;
 
 		glm::mat4 m_InverseTransform;
 

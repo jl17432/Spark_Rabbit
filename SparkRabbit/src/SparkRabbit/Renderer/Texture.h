@@ -2,6 +2,7 @@
 
 #include "SparkRabbit/Buffer.h"
 #include "RenderAPI.h"
+#include"SparkRabbit/Asset/Asset.h"
 
 namespace SparkRabbit{
 	enum class TextureFormat
@@ -14,7 +15,7 @@ namespace SparkRabbit{
 		None = 0,Clamp, Repeat
 	};
 
-	class Texture
+	class Texture : public Asset
 	{
 	public:
 

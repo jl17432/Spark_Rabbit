@@ -18,10 +18,28 @@ IncludeDir["GLFW"] = "SparkRabbit/vendor/GLFW/include"
 IncludeDir["Glad"] = "SparkRabbit/vendor/Glad/include"
 IncludeDir["ImGui"] = "SparkRabbit/vendor/imgui"
 IncludeDir["glm"] = "SparkRabbit/vendor/glm"
+IncludeDir["entt"] = "SparkRabbit/vendor/entt/include"
+IncludeDir["yaml_cpp"] = "SparkRabbit/vendor/yaml-cpp/include"
+IncludeDir["Box2D"] = "SparkRabbit/vendor/Box2D/include"
+IncludeDir["bullet3"] = "SparkRabbit/vendor/bullet3/include"
 
 include "SparkRabbit/vendor/GLFW"
 include "SparkRabbit/vendor/Glad"
 include "SparkRabbit/vendor/imgui"
+include "SparkRabbit/vendor/yaml-cpp"
+include "SparkRabbit/vendor/Box2D"
+
+LibraryDir = {}
+LibraryDir["Bullet3Collision"] = "vendor/bullet3/lib/%{cfg.buildcfg}/Bullet3Collision_Debug.lib"
+LibraryDir["Bullet3Common"] = "vendor/bullet3/lib/%{cfg.buildcfg}/Bullet3Common_Debug.lib"
+LibraryDir["Bullet3Dynamics"] = "vendor/bullet3/lib/%{cfg.buildcfg}/Bullet3Dynamics_Debug.lib"
+LibraryDir["Bullet3Geometry"] = "vendor/bullet3/lib/%{cfg.buildcfg}/Bullet3Geometry_Debug.lib"
+LibraryDir["Bullet3OpenCL_clew"] = "vendor/bullet3/lib/%{cfg.buildcfg}/Bullet3OpenCL_clew_Debug.lib"
+LibraryDir["BulletCollision"] = "vendor/bullet3/lib/%{cfg.buildcfg}/BulletCollision_Debug.lib"
+LibraryDir["BulletDynamics"] = "vendor/bullet3/lib/%{cfg.buildcfg}/BulletDynamics_Debug.lib"
+LibraryDir["BulletSoftBody"] = "vendor/bullet3/lib/%{cfg.buildcfg}/BulletSoftBody_Debug.lib"
+LibraryDir["BulletWorldImporter"] = "vendor/bullet3/lib/%{cfg.buildcfg}/BulletWorldImporter_Debug.lib"
+LibraryDir["LinearMath"] = "vendor/bullet3/lib/%{cfg.buildcfg}/LinearMath_Debug.lib"
 
 project "SparkRabbit"
 	location "SparkRabbit"
@@ -61,7 +79,10 @@ project "SparkRabbit"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{prj.name}/vendor/assimp/include",
-		"%{prj.name}/vendor/stb/include"
+		"%{prj.name}/vendor/stb/include",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.Box2D}"
 	}
 
 	links 
@@ -69,8 +90,24 @@ project "SparkRabbit"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		"opengl32.lib"
+		"yaml-cpp",
+		"opengl32.lib",
+		"%{LibraryDir.Bullet3Collision}",
+		"Box2D",
+       	"%{LibraryDir.Bullet3Common}",
+       	"%{LibraryDir.Bullet3Dynamics}",
+       	"%{LibraryDir.Bullet3Geometry}",
+      	"%{LibraryDir.Bullet3OpenCL_clew}",
+       	"%{LibraryDir.BulletCollision}",
+       	"%{LibraryDir.BulletDynamics}",
+        	"%{LibraryDir.BulletSoftBody}",
+        	"%{LibraryDir.BulletWorldImporter}",
+        	"%{LibraryDir.LinearMath}"
 	}
+
+	defines { "BT_USE_STATIC_LIBS" }
+      pchheader "PrecompileH.h"
+      pchsource "SparkRabbit/src/PrecompileH.cpp"
 
 	filter "system:windows"
 		systemversion "latest"
@@ -121,7 +158,9 @@ project "Sandbox"
 		"SparkRabbit/vendor",
 		"SparkRabbit/src",
 		"%{prj.name}/src",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}"
 	}
 
 	links

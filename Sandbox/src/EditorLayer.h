@@ -12,6 +12,8 @@
 
 #include <string>
 #include "SparkRabbit/Editor/SceneHierarchyPanel.h"
+#include"SparkRabbit/Editor/FileSystemPanel.h"
+
 
 namespace SparkRabbit {
 	class EditorLayer : public Layer
@@ -45,17 +47,28 @@ namespace SparkRabbit {
 		void Property(const std::string& name, glm::vec4& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
 
 		void ShowBoundingBoxes(bool show, bool onTop = false);
+
+		void NewScene();
+
+		void SelectEntity(Entity entity);
+		void OnEntityDeleted(Entity entity);
+
+		void OnScenePlay();
+		void OnSceneStop();
 	private:
 		std::pair<float, float> GetMouseViewportSpace();
 		std::pair<glm::vec3, glm::vec3> CastRay(float mx, float my);
+
+		float GetSnapValue();
 	private:
 		std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		std::unique_ptr<FileSystemPanel> m_AssetFilePanel;
 
 		std::shared_ptr<Scene> m_Scene;
-		std::shared_ptr<Scene> m_SphereScene;
-		std::shared_ptr<Scene> m_ActiveScene;
+		std::shared_ptr<Scene> m_EditorScene;
+		std::shared_ptr<Scene> m_PlayScene;//runtime
 
-		Entity* m_MeshEntity = nullptr;
+		ProjectiveCamera m_ProjectiveCamera;
 
 		std::shared_ptr<Shader> m_BrushShader;
 		std::shared_ptr<Mesh> m_PlaneMesh;
@@ -112,6 +125,7 @@ namespace SparkRabbit {
 
 		// Editor resources
 		std::shared_ptr<Texture2D> m_CheckerboardTex;
+		std::shared_ptr<Texture2D> m_PlayButtonTex;
 
 		glm::vec2 m_ViewportBounds[2];
 		int m_GizmoType = -1; // -1 = no gizmo
@@ -122,13 +136,32 @@ namespace SparkRabbit {
 		bool m_UIShowBoundingBoxes = false;
 		bool m_UIShowBoundingBoxesOnTop = false;
 
+		bool m_ViewportPanelMouseOver = false;
+		bool m_ViewportPanelFocused = false;
+
+		enum class SceneState
+		{
+			Edit = 0, Play = 1, Pause = 2
+		};
+		SceneState m_SceneState = SceneState::Edit;
+
 		struct SelectedSubmesh
 		{
-			Submesh* Mesh;
-			float Distance;
+			SparkRabbit::Entity Entity;
+			Submesh* Mesh = nullptr;
+			float Distance = 0.0f;
 		};
+
+		enum class SelectionMode
+		{
+			None = 0, Entity = 1, SubMesh = 2
+		};
+
+		void OnSelected(const SelectedSubmesh& m_SelectedSubmeshes);
+
 		std::vector<SelectedSubmesh> m_SelectedSubmeshes;
 		glm::mat4* m_CurrentlySelectedTransform = nullptr;
+		SelectionMode m_SelectionMode = SelectionMode::Entity;
 	};
 }
 

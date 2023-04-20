@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>SR_PLATFORM_WINDOWS;SPARK_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\SparkRabbit\vendor\spdlog\include;..\SparkRabbit\vendor;..\SparkRabbit\src;src;..\SparkRabbit\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SparkRabbit\vendor\spdlog\include;..\SparkRabbit\vendor;..\SparkRabbit\src;src;..\SparkRabbit\vendor\glm;..\SparkRabbit\vendor\entt\include;..\SparkRabbit\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -101,7 +101,7 @@ IF EXIST "..\SparkRabbit\vendor\assimp\bin\Debug\assimp-vc141-mtd.dll"\ (xcopy /
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>SR_PLATFORM_WINDOWS;SPARK_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\SparkRabbit\vendor\spdlog\include;..\SparkRabbit\vendor;..\SparkRabbit\src;src;..\SparkRabbit\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SparkRabbit\vendor\spdlog\include;..\SparkRabbit\vendor;..\SparkRabbit\src;src;..\SparkRabbit\vendor\glm;..\SparkRabbit\vendor\entt\include;..\SparkRabbit\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -127,7 +127,7 @@ IF EXIST "..\SparkRabbit\vendor\assimp\bin\Release\assimp-vc141-mt.dll"\ (xcopy 
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>SR_PLATFORM_WINDOWS;SPARK_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\SparkRabbit\vendor\spdlog\include;..\SparkRabbit\vendor;..\SparkRabbit\src;src;..\SparkRabbit\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SparkRabbit\vendor\spdlog\include;..\SparkRabbit\vendor;..\SparkRabbit\src;src;..\SparkRabbit\vendor\glm;..\SparkRabbit\vendor\entt\include;..\SparkRabbit\vendor\yaml-cpp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>

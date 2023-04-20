@@ -73,11 +73,14 @@ namespace SparkRabbit {
 	{
 		m_LocalData = Buffer::Copy(data, size);
 
-		Renderer::Submit([this]() { 
-			glCreateBuffers(1, &m_RendererID);
-			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, GL_STATIC_DRAW);
+		OpenGLIndexBuffer* instance = this;
+
+		Renderer::Submit([instance]() { 
+			glCreateBuffers(1, &instance->m_RendererID);
+			glNamedBufferData(instance->m_RendererID, instance->m_Size, instance->m_LocalData.Data, GL_STATIC_DRAW);
 			});
 	}
+
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{

@@ -16,6 +16,9 @@ namespace SparkRabbit {
 
 		void BindTexture(uint32_t slot = 0) const override;
 
+		virtual uint32_t GetWidth() const override { return m_Specification.Width; }
+		virtual uint32_t GetHeight() const override { return m_Specification.Height; }
+
 		uint32_t GetColorAttachmentRendererID() const override { return m_ColorAttachment; }
 		uint32_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment; }
 		uint32_t GetRendererID() const override { return m_RendererID; }

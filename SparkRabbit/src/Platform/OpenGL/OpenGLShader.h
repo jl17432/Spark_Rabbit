@@ -28,6 +28,7 @@ namespace SparkRabbit {
 		void SetFloat(const std::string& name, float value) override;
 		void SetInt(const std::string& name, int value) override;
 		void SetMat4(const std::string& name, const glm::mat4& value) override;
+		virtual void SetFloat2(const std::string& name, const glm::vec2& value) override;
 		void SetMat4FromRenderThread(const std::string& name, const glm::mat4& value, bool bind = true) override;
 
 		void SetIntArray(const std::string& name, int* values, uint32_t size) override;

@@ -5,6 +5,7 @@
 #include <Commdlg.h>
 
 #include "SparkRabbit/Renderer/Renderer.h"
+#include"SparkRabbit/Asset/AssetManager.h"
 #include "SparkRabbit/Renderer/Framebuffer.h"
 #include <GLFW/glfw3.h>
 
@@ -31,13 +32,19 @@ namespace SparkRabbit{
 		m_ImGuiLayer = new ImGuiLayer("ImGui");
 		PushOverlay(m_ImGuiLayer);
 
+		AssetTypes::Init();
+		AssetManager::Init();
+
+
 		Renderer::Init();
 		Renderer::WaitAndRender();
+
 	}
 
 	Application::~Application()
 	{
-
+		for (Layer* layer : m_LayerStack)
+			layer->OnDetach();
 	}
 
 	void Application::PushLayer(Layer* layer)

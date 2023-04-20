@@ -4,7 +4,9 @@
 #include "VertexArray.h"
 
 namespace SparkRabbit {
-	
+
+	using RendererID = uint32_t;
+
 	struct RenderAPIInfo
 	{
 		std::string vendor;

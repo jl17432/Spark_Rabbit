@@ -76,8 +76,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PrecompileH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SR_PLATFORM_WINDOWS;GLFW_INCLUDE_NONE;SPARK_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\assimp\include;vendor\stb\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_USE_STATIC_LIBS;SR_PLATFORM_WINDOWS;GLFW_INCLUDE_NONE;SPARK_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\assimp\include;vendor\stb\include;vendor\entt\include;vendor\yaml-cpp\include;vendor\Box2D\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -89,7 +89,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;vendor\bullet3\lib\Debug\Bullet3Collision_Debug.lib;vendor\bullet3\lib\Debug\Bullet3Common_Debug.lib;vendor\bullet3\lib\Debug\Bullet3Dynamics_Debug.lib;vendor\bullet3\lib\Debug\Bullet3Geometry_Debug.lib;vendor\bullet3\lib\Debug\Bullet3OpenCL_clew_Debug.lib;vendor\bullet3\lib\Debug\BulletCollision_Debug.lib;vendor\bullet3\lib\Debug\BulletDynamics_Debug.lib;vendor\bullet3\lib\Debug\BulletSoftBody_Debug.lib;vendor\bullet3\lib\Debug\BulletWorldImporter_Debug.lib;vendor\bullet3\lib\Debug\LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -97,8 +97,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PrecompileH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SR_PLATFORM_WINDOWS;GLFW_INCLUDE_NONE;SPARK_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\assimp\include;vendor\stb\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_USE_STATIC_LIBS;SR_PLATFORM_WINDOWS;GLFW_INCLUDE_NONE;SPARK_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\assimp\include;vendor\stb\include;vendor\entt\include;vendor\yaml-cpp\include;vendor\Box2D\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -114,7 +114,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;vendor\bullet3\lib\Release\Bullet3Collision_Debug.lib;vendor\bullet3\lib\Release\Bullet3Common_Debug.lib;vendor\bullet3\lib\Release\Bullet3Dynamics_Debug.lib;vendor\bullet3\lib\Release\Bullet3Geometry_Debug.lib;vendor\bullet3\lib\Release\Bullet3OpenCL_clew_Debug.lib;vendor\bullet3\lib\Release\BulletCollision_Debug.lib;vendor\bullet3\lib\Release\BulletDynamics_Debug.lib;vendor\bullet3\lib\Release\BulletSoftBody_Debug.lib;vendor\bullet3\lib\Release\BulletWorldImporter_Debug.lib;vendor\bullet3\lib\Release\LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -122,8 +122,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PrecompileH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SR_PLATFORM_WINDOWS;GLFW_INCLUDE_NONE;SPARK_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\assimp\include;vendor\stb\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BT_USE_STATIC_LIBS;SR_PLATFORM_WINDOWS;GLFW_INCLUDE_NONE;SPARK_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\assimp\include;vendor\stb\include;vendor\entt\include;vendor\yaml-cpp\include;vendor\Box2D\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -139,7 +139,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;vendor\bullet3\lib\Dist\Bullet3Collision_Debug.lib;vendor\bullet3\lib\Dist\Bullet3Common_Debug.lib;vendor\bullet3\lib\Dist\Bullet3Dynamics_Debug.lib;vendor\bullet3\lib\Dist\Bullet3Geometry_Debug.lib;vendor\bullet3\lib\Dist\Bullet3OpenCL_clew_Debug.lib;vendor\bullet3\lib\Dist\BulletCollision_Debug.lib;vendor\bullet3\lib\Dist\BulletDynamics_Debug.lib;vendor\bullet3\lib\Dist\BulletSoftBody_Debug.lib;vendor\bullet3\lib\Dist\BulletWorldImporter_Debug.lib;vendor\bullet3\lib\Dist\LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -156,14 +156,19 @@
     <ClInclude Include="src\PrecompileH.h" />
     <ClInclude Include="src\SparkAPI.h" />
     <ClInclude Include="src\SparkRabbit\Application.h" />
+    <ClInclude Include="src\SparkRabbit\Asset\Asset.h" />
+    <ClInclude Include="src\SparkRabbit\Asset\AssetManager.h" />
+    <ClInclude Include="src\SparkRabbit\Asset\AssetSerializer.h" />
     <ClInclude Include="src\SparkRabbit\Buffer.h" />
     <ClInclude Include="src\SparkRabbit\Core.h" />
+    <ClInclude Include="src\SparkRabbit\Editor\FileSystemPanel.h" />
     <ClInclude Include="src\SparkRabbit\Editor\SceneHierarchyPanel.h" />
     <ClInclude Include="src\SparkRabbit\EntryPoint.h" />
     <ClInclude Include="src\SparkRabbit\Events\ApplicationEvent.h" />
     <ClInclude Include="src\SparkRabbit\Events\Event.h" />
     <ClInclude Include="src\SparkRabbit\Events\KeyEvent.h" />
     <ClInclude Include="src\SparkRabbit\Events\MouseEvent.h" />
+    <ClInclude Include="src\SparkRabbit\ImGui\ImGui.h" />
     <ClInclude Include="src\SparkRabbit\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\SparkRabbit\ImGui\ImGuizmo.h" />
     <ClInclude Include="src\SparkRabbit\Input.h" />
@@ -172,27 +177,34 @@
     <ClInclude Include="src\SparkRabbit\LayerStack.h" />
     <ClInclude Include="src\SparkRabbit\Log.h" />
     <ClInclude Include="src\SparkRabbit\Math\BoundingBox.h" />
+    <ClInclude Include="src\SparkRabbit\Math\Math.h" />
     <ClInclude Include="src\SparkRabbit\Math\Ray.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Buffer.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Camera.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\CmdQueue.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Framebuffer.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Material.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Mesh.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\OrthographicCamera.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\Pipeline.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\ProjectiveCamera.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\RenderAPI.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\RenderContext.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\RenderPass.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Renderer.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Renderer2D.h" />
+    <ClInclude Include="src\SparkRabbit\Renderer\SceneEnvironment.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Shader.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\ShaderUniform.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Texture.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\VertexArray.h" />
+    <ClInclude Include="src\SparkRabbit\Scene\Components.h" />
     <ClInclude Include="src\SparkRabbit\Scene\Entity.h" />
     <ClInclude Include="src\SparkRabbit\Scene\Scene.h" />
+    <ClInclude Include="src\SparkRabbit\Scene\SceneCamera.h" />
     <ClInclude Include="src\SparkRabbit\TickTime.h" />
+    <ClInclude Include="src\SparkRabbit\UUID.h" />
     <ClInclude Include="src\SparkRabbit\Window.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
@@ -573,6 +585,9 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Application.cpp" />
+    <ClCompile Include="src\SparkRabbit\Asset\AssetManager.cpp" />
+    <ClCompile Include="src\SparkRabbit\Asset\AssetSerializer.cpp" />
+    <ClCompile Include="src\SparkRabbit\Editor\FileSystemPanel.cpp" />
     <ClCompile Include="src\SparkRabbit\Editor\SceneHierarchyPanel.cpp" />
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuiLayer.cpp" />
@@ -580,23 +595,29 @@
     <ClCompile Include="src\SparkRabbit\Layer.cpp" />
     <ClCompile Include="src\SparkRabbit\LayerStack.cpp" />
     <ClCompile Include="src\SparkRabbit\Log.cpp" />
+    <ClCompile Include="src\SparkRabbit\Math\Math.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\Camera.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\CmdQueue.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Material.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Mesh.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\Pipeline.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\ProjectiveCamera.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\RenderPass.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Renderer.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Renderer2D.cpp" />
+    <ClCompile Include="src\SparkRabbit\Renderer\SceneEnvironment.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Shader.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Texture.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\SparkRabbit\Scene\Entity.cpp" />
     <ClCompile Include="src\SparkRabbit\Scene\Scene.cpp" />
-    <ClCompile Include="src\SparkRabbit\stb_image.cpp" />
+    <ClCompile Include="src\SparkRabbit\Scene\SceneCamera.cpp" />
     <ClCompile Include="src\SparkRabbit\TickTime.cpp" />
+    <ClCompile Include="src\SparkRabbit\UUID.cpp" />
+    <ClCompile Include="src\SparkRabbit\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">
@@ -607,6 +628,12 @@
     </ProjectReference>
     <ProjectReference Include="vendor\imgui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\yaml-cpp\yaml-cpp.vcxproj">
+      <Project>{88F1A057-74BE-FB62-9DD7-E90A890331F1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\Box2D\Box2D.vcxproj">
+      <Project>{A434E80C-1049-10BE-D9CA-B31D459E0CEF}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

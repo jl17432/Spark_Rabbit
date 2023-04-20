@@ -1,5 +1,6 @@
 #include "PrecompileH.h"
 #include "SceneRenderer.h"
+#include"SceneEnvironment.h"
 
 #include "Renderer.h"
 #include "Renderer2D.h"
@@ -9,25 +10,27 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace SparkRabbit {
-
 	struct SceneRendererData
 	{
 		const Scene* ActiveScene = nullptr;
 		struct SceneInfo
 		{
-			ProjectiveCamera SceneCamera;
+			SceneRendererCamera SceneCamera;
 
 			// Resources
 			std::shared_ptr<MaterialInstance> SkyboxMaterial;
-			Environment SceneEnvironment;
+			std::shared_ptr<Environments> SceneEnvironment;
+			float SceneEnvironmentIntensity;
 			Light ActiveLight;
-		} SceneData;
+			LightEnvironment SceneLightEnvironment;
+		}SceneData;
 
 		std::shared_ptr<Texture2D> BRDFLUT;
 		std::shared_ptr<Shader> CompositeShader;
 
 		std::shared_ptr<RenderPass> GeoPass;
 		std::shared_ptr<RenderPass> CompositePass;
+
 
 		struct DrawCommand
 		{
@@ -36,10 +39,11 @@ namespace SparkRabbit {
 			glm::mat4 Transform;
 		};
 		std::vector<DrawCommand> DrawList;
+		std::vector<DrawCommand> SelectedMeshDrawList;
 
 		// Grid
 		std::shared_ptr<MaterialInstance> GridMaterial;
-
+		std::shared_ptr<MaterialInstance> OutlineMaterial, OutlineAnimMaterial;
 		SceneRendererOptions Options;
 	};
 
@@ -77,6 +81,11 @@ namespace SparkRabbit {
 		float gridScale = 16.025f, gridSize = 0.025f;
 		s_Data.GridMaterial->Set("u_Scale", gridScale);
 		s_Data.GridMaterial->Set("u_Res", gridSize);
+
+		//Outline
+		auto outlineShader = Shader::Create("assets/shaders/Outline.glsl");
+		s_Data.OutlineMaterial = MaterialInstance::Create(Material::Create(outlineShader));
+		s_Data.OutlineMaterial->SetFlag(MaterialFlag::DepthTest, false);
 	}
 
 	void SceneRenderer::SetViewportSize(uint32_t width, uint32_t height)
@@ -85,16 +94,17 @@ namespace SparkRabbit {
 		s_Data.CompositePass->GetSpecification().TargetFramebuffer->Resize(width, height, false); 
 	}
 
-	void SceneRenderer::BeginScene(const Scene* scene)
+	void SceneRenderer::BeginScene(const Scene* scene, const SceneRendererCamera& camera)
 	{
 		SPARK_CORE_ASSERT(!s_Data.ActiveScene, "");
 
 		s_Data.ActiveScene = scene;
-
-		s_Data.SceneData.SceneCamera = scene->m_Camera;
+		s_Data.SceneData.SceneCamera = camera;
 		s_Data.SceneData.SkyboxMaterial = scene->m_SkyboxMaterial;
 		s_Data.SceneData.SceneEnvironment = scene->m_Environment;
+		s_Data.SceneData.SceneEnvironmentIntensity = scene->m_EnvironmentIntensity;
 		s_Data.SceneData.ActiveLight = scene->m_Light;
+		s_Data.SceneData.SceneLightEnvironment = scene->m_LightEnvironment;
 	}
 
 	void SceneRenderer::EndScene()
@@ -106,15 +116,16 @@ namespace SparkRabbit {
 		FlushDrawList();
 	}
 
-	void SceneRenderer::SubmitEntity(Entity* entity)
+	void SceneRenderer::SubmitMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform, std::shared_ptr<MaterialInstance> overrideMaterial)
 	{
 		// TODO: Culling, sorting, etc.
 
-		auto mesh = entity->GetMesh();
-		if (!mesh)
-			return;
+		s_Data.DrawList.push_back({ mesh, overrideMaterial, transform });
+	}
 
-		s_Data.DrawList.push_back({ mesh, entity->GetMaterial(), entity->GetTransform() });
+	void SceneRenderer::SubmitSelectedMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform)
+	{
+		s_Data.SelectedMeshDrawList.push_back({ mesh, nullptr, transform });
 	}
 
 	static std::shared_ptr<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
@@ -184,13 +195,35 @@ namespace SparkRabbit {
 
 	void SceneRenderer::GeometryPass()
 	{
+
+		bool outline = s_Data.SelectedMeshDrawList.size() > 0;
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				});
+		}
+
 		Renderer::BeginRenderPass(s_Data.GeoPass);
 
-		auto viewProjection = s_Data.SceneData.SceneCamera.GetViewProjection();
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilMask(0);
+				});
+		}
+
+		auto& sceneCamera = s_Data.SceneData.SceneCamera;
+
+		auto viewProjection = sceneCamera.Camera.GetProjectionMatrix() * sceneCamera.ViewMatrix;
 
 		// Skybox
 		auto skyboxShader = s_Data.SceneData.SkyboxMaterial->GetShader();
 		s_Data.SceneData.SkyboxMaterial->Set("u_InverseVP", glm::inverse(viewProjection));
+		s_Data.SceneData.SkyboxMaterial->Set("u_SkyIntensity", s_Data.SceneData.SceneEnvironmentIntensity);
 		Renderer::SubmitFullscreenQuad(s_Data.SceneData.SkyboxMaterial);
 
 		// Render entities
@@ -198,18 +231,84 @@ namespace SparkRabbit {
 		{
 			auto baseMaterial = dc.Mesh->GetMaterial();
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
-			baseMaterial->Set("u_CameraPosition", s_Data.SceneData.SceneCamera.GetPosition());
+			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
 
 			// Environment (TODO: don't do this per mesh)
-			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment.RadianceMap);
-			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment.IrradianceMap);
+			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
+			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
 			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
 
 			// Set lights (TODO: move to light environment and don't do per mesh)
-			baseMaterial->Set("lights", s_Data.SceneData.ActiveLight);
+			baseMaterial->Set("lights", s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0]);
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilFunc(GL_ALWAYS, 1, 0xff);
+					glStencilMask(0xff);
+				});
+		}
+
+		for (auto& dc : s_Data.SelectedMeshDrawList)
+		{
+			auto baseMaterial = dc.Mesh->GetMaterial();
+			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
+			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
+
+			// Environment (TODO: don't do this per mesh)
+			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
+			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
+			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
+
+			// Set lights (TODO: move to light environment and don't do per mesh)
+			baseMaterial->Set("lights", s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0]);
+
+			auto overrideMaterial = nullptr; // dc.Material;
+			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
+		}
+
+		if (outline)
+		{
+			Renderer::Submit([]()
+				{
+					glStencilFunc(GL_NOTEQUAL, 1, 0xff);
+					glStencilMask(0);
+
+					glLineWidth(10);
+					glEnable(GL_LINE_SMOOTH);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glDisable(GL_DEPTH_TEST);
+				});
+
+			// Draw outline here
+			s_Data.OutlineMaterial->Set("u_ViewProjection", viewProjection);
+			for (auto& dc : s_Data.SelectedMeshDrawList)
+			{
+				Renderer::SubmitMesh(dc.Mesh, dc.Transform, s_Data.OutlineMaterial);
+			}
+			Renderer::Submit([]()
+				{
+					glPointSize(10);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+				});
+
+			for (auto& dc : s_Data.SelectedMeshDrawList)
+			{
+				Renderer::SubmitMesh(dc.Mesh, dc.Transform, s_Data.OutlineMaterial);
+			}
+
+			Renderer::Submit([]()
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glStencilMask(0xff);
+					glStencilFunc(GL_ALWAYS, 1, 0xff);
+					glEnable(GL_DEPTH_TEST);
+				});
 		}
 
 		// Grid
@@ -232,11 +331,17 @@ namespace SparkRabbit {
 
 	void SceneRenderer::CompositePass()
 	{
+		auto& compositeBuffer = s_Data.CompositePass->GetSpecification().TargetFramebuffer;
+
 		Renderer::BeginRenderPass(s_Data.CompositePass);
 		s_Data.CompositeShader->Bind();
-		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.GetExposure());
+		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.Camera.GetExposure());
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
+		Renderer::Submit([]()
+			{
+				glBindTextureUnit(1, s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID());
+			});
 		Renderer::SubmitFullscreenQuad(nullptr);
 		Renderer::EndRenderPass();
 	}
@@ -249,6 +354,7 @@ namespace SparkRabbit {
 		CompositePass();
 
 		s_Data.DrawList.clear();
+		s_Data.SelectedMeshDrawList.clear();
 		s_Data.SceneData = {};
 	}
 

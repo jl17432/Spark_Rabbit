@@ -55,35 +55,34 @@ namespace SparkRabbit {
 		uint32_t LineIndexCount = 0;
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
-
 		glm::mat4 CameraViewProj;
 		bool DepthTest = true;
 
 		Renderer2D::Statistics Stats;
 	};
 
-	static Renderer2DData s_Data;
+	static Renderer2DData r2_Data;
 
 	void Renderer2D::Init()
 	{
-		s_Data.QuadVertexArray = VertexArray::Create();
+		r2_Data.QuadVertexArray = VertexArray::Create();
 
-		s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-		s_Data.QuadVertexBuffer->SetLayout({
+		r2_Data.QuadVertexBuffer = VertexBuffer::Create(r2_Data.MaxVertices * sizeof(QuadVertex));
+		r2_Data.QuadVertexBuffer->SetLayout({
 			{ ShaderDataType::Vec3, "a_Position" },
 			{ ShaderDataType::Vec4, "a_Color" },
 			{ ShaderDataType::Vec2, "a_TexCoord" },
 			{ ShaderDataType::Float, "a_TexIndex" },
 			{ ShaderDataType::Float, "a_TilingFactor" }
 			});
-		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
+		r2_Data.QuadVertexArray->AddVertexBuffer(r2_Data.QuadVertexBuffer);
 
-		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
+		r2_Data.QuadVertexBufferBase = new QuadVertex[r2_Data.MaxVertices];
 
-		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
+		uint32_t* quadIndices = new uint32_t[r2_Data.MaxIndices];
 
 		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+		for (uint32_t i = 0; i < r2_Data.MaxIndices; i += 6)
 		{
 			quadIndices[i + 0] = offset + 0;
 			quadIndices[i + 1] = offset + 1;
@@ -96,45 +95,45 @@ namespace SparkRabbit {
 			offset += 4;
 		}
 
-		std::shared_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
-		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
+		std::shared_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, r2_Data.MaxIndices);
+		r2_Data.QuadVertexArray->SetIndexBuffer(quadIB);
 		delete[] quadIndices;
 
-		s_Data.WhiteTexture = Texture2D::Create(TextureFormat::RGBA, 1, 1);
+		r2_Data.WhiteTexture = Texture2D::Create(TextureFormat::RGBA, 1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
-		s_Data.WhiteTexture->Lock();
-		s_Data.WhiteTexture->GetWritableBuffer().Write(&whiteTextureData, sizeof(uint32_t));
-		s_Data.WhiteTexture->Unlock();
+		r2_Data.WhiteTexture->Lock();
+		r2_Data.WhiteTexture->GetWritableBuffer().Write(&whiteTextureData, sizeof(uint32_t));
+		r2_Data.WhiteTexture->Unlock();
 
-		s_Data.TextureShader = Shader::Create("assets/shaders/Renderer2D.glsl");
+		r2_Data.TextureShader = Shader::Create("assets/shaders/Renderer2D.glsl");
 
 		// Set all texture slots to 0
-		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+		r2_Data.TextureSlots[0] = r2_Data.WhiteTexture;
 
-		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
-		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+		r2_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+		r2_Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
+		r2_Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
+		r2_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
 		// Lines
-		s_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
-		s_Data.LineVertexArray = VertexArray::Create();
+		r2_Data.LineShader = Shader::Create("assets/shaders/Renderer2D_Line.glsl");
+		r2_Data.LineVertexArray = VertexArray::Create();
 
-		s_Data.LineVertexBuffer = VertexBuffer::Create(s_Data.MaxLineVertices * sizeof(LineVertex));
-		s_Data.LineVertexBuffer->SetLayout({
+		r2_Data.LineVertexBuffer = VertexBuffer::Create(r2_Data.MaxLineVertices * sizeof(LineVertex));
+		r2_Data.LineVertexBuffer->SetLayout({
 			{ ShaderDataType::Vec3, "a_Position" },
 			{ ShaderDataType::Vec4, "a_Color" }
 		});
-		s_Data.LineVertexArray->AddVertexBuffer(s_Data.LineVertexBuffer);
+		r2_Data.LineVertexArray->AddVertexBuffer(r2_Data.LineVertexBuffer);
 
-		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxLineVertices];
+		r2_Data.LineVertexBufferBase = new LineVertex[r2_Data.MaxLineVertices];
 
-		uint32_t* lineIndices = new uint32_t[s_Data.MaxLineIndices];
-		for (uint32_t i = 0; i < s_Data.MaxLineIndices; i++)
+		uint32_t* lineIndices = new uint32_t[r2_Data.MaxLineIndices];
+		for (uint32_t i = 0; i < r2_Data.MaxLineIndices; i++)
 			lineIndices[i] = i;
 
-		std::shared_ptr<IndexBuffer> lineIB = IndexBuffer::Create(lineIndices, s_Data.MaxLineIndices);
-		s_Data.LineVertexArray->SetIndexBuffer(lineIB);
+		std::shared_ptr<IndexBuffer> lineIB = IndexBuffer::Create(lineIndices, r2_Data.MaxLineIndices);
+		r2_Data.LineVertexArray->SetIndexBuffer(lineIB);
 		delete[] lineIndices;
 	}
 
@@ -144,51 +143,51 @@ namespace SparkRabbit {
 
 	void Renderer2D::BeginScene(const glm::mat4& viewProj, bool depthTest)
 	{
-		s_Data.CameraViewProj = viewProj;
-		s_Data.DepthTest = depthTest;
+		r2_Data.CameraViewProj = viewProj;
+		r2_Data.DepthTest = depthTest;
 
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
+		r2_Data.TextureShader->Bind();
+		r2_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		r2_Data.QuadIndexCount = 0;
+		r2_Data.QuadVertexBufferPtr = r2_Data.QuadVertexBufferBase;
 
-		s_Data.LineIndexCount = 0;
-		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+		r2_Data.LineIndexCount = 0;
+		r2_Data.LineVertexBufferPtr = r2_Data.LineVertexBufferBase;
 
-		s_Data.TextureSlotIndex = 1;
+		r2_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::EndScene()
 	{
-		uint32_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
+		uint32_t dataSize = (uint8_t*)r2_Data.QuadVertexBufferPtr - (uint8_t*)r2_Data.QuadVertexBufferBase;
 		if (dataSize)
 		{
-			s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+			r2_Data.QuadVertexBuffer->SetData(r2_Data.QuadVertexBufferBase, dataSize);
 
-			s_Data.TextureShader->Bind();
-			s_Data.TextureShader->SetMat4("u_ViewProjection", s_Data.CameraViewProj);
+			r2_Data.TextureShader->Bind();
+			r2_Data.TextureShader->SetMat4("u_ViewProjection", r2_Data.CameraViewProj);
 
-			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-				s_Data.TextureSlots[i]->Bind(i);
+			for (uint32_t i = 0; i < r2_Data.TextureSlotIndex; i++)
+				r2_Data.TextureSlots[i]->Bind(i);
 
-			s_Data.QuadVertexArray->Bind();
-			Renderer::DrawIndexed(s_Data.QuadIndexCount, PrimitiveType::Triangles, s_Data.DepthTest);
-			s_Data.Stats.DrawCalls++;
+			r2_Data.QuadVertexArray->Bind();
+			Renderer::DrawIndexed(r2_Data.QuadIndexCount, PrimitiveType::Triangles, r2_Data.DepthTest);
+			r2_Data.Stats.DrawCalls++;
 		}
 
-		dataSize = (uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase;
+		dataSize = (uint8_t*)r2_Data.LineVertexBufferPtr - (uint8_t*)r2_Data.LineVertexBufferBase;
 		if (dataSize)
 		{
-			s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
+			r2_Data.LineVertexBuffer->SetData(r2_Data.LineVertexBufferBase, dataSize);
 
-			s_Data.LineShader->Bind();
-			s_Data.LineShader->SetMat4("u_ViewProjection", s_Data.CameraViewProj);
+			r2_Data.LineShader->Bind();
+			r2_Data.LineShader->SetMat4("u_ViewProjection", r2_Data.CameraViewProj);
 
-			s_Data.LineVertexArray->Bind();
+			r2_Data.LineVertexArray->Bind();
 			Renderer::SetLineWidth(2.0f);
-			Renderer::DrawIndexed(s_Data.LineIndexCount, PrimitiveType::Lines, s_Data.DepthTest);
-			s_Data.Stats.DrawCalls++;
+			Renderer::DrawIndexed(r2_Data.LineIndexCount, PrimitiveType::Lines, r2_Data.DepthTest);
+			r2_Data.Stats.DrawCalls++;
 		}
 
 	}
@@ -198,10 +197,10 @@ namespace SparkRabbit {
 	{
 		EndScene();
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		r2_Data.QuadIndexCount = 0;
+		r2_Data.QuadVertexBufferPtr = r2_Data.QuadVertexBufferBase;
 
-		s_Data.TextureSlotIndex = 1;
+		r2_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::FlushAndResetLines()
@@ -216,7 +215,7 @@ namespace SparkRabbit {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+		if (r2_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 			FlushAndReset();
 
 		const float textureIndex = 0.0f; // White Texture
@@ -225,37 +224,37 @@ namespace SparkRabbit {
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[0];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[0];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[1];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[2];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[2];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[3];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[3];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadIndexCount += 6;
+		r2_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		r2_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const std::shared_ptr<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
@@ -265,15 +264,15 @@ namespace SparkRabbit {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const std::shared_ptr<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+		if (r2_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 			FlushAndReset();
 
 		constexpr glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+		for (uint32_t i = 1; i < r2_Data.TextureSlotIndex; i++)
 		{
-			if (*s_Data.TextureSlots[i].get() == *texture.get())
+			if (*r2_Data.TextureSlots[i].get() == *texture.get())
 			{
 				textureIndex = (float)i;
 				break;
@@ -282,45 +281,45 @@ namespace SparkRabbit {
 
 		if (textureIndex == 0.0f)
 		{
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-			s_Data.TextureSlotIndex++;
+			textureIndex = (float)r2_Data.TextureSlotIndex;
+			r2_Data.TextureSlots[r2_Data.TextureSlotIndex] = texture;
+			r2_Data.TextureSlotIndex++;
 		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[0];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[0];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[1];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[2];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[2];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[3];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[3];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadIndexCount += 6;
+		r2_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		r2_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
@@ -330,7 +329,7 @@ namespace SparkRabbit {
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
-		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+		if (r2_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 			FlushAndReset();
 
 		const float textureIndex = 0.0f; // White Texture
@@ -340,37 +339,37 @@ namespace SparkRabbit {
 			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[0];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[0];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[1];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[2];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[2];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[3];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[3];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadIndexCount += 6;
+		r2_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		r2_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const std::shared_ptr<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
@@ -380,15 +379,15 @@ namespace SparkRabbit {
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const std::shared_ptr<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+		if (r2_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 			FlushAndReset();
 
 		constexpr glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+		for (uint32_t i = 1; i < r2_Data.TextureSlotIndex; i++)
 		{
-			if (*s_Data.TextureSlots[i].get() == *texture.get())
+			if (*r2_Data.TextureSlots[i].get() == *texture.get())
 			{
 				textureIndex = (float)i;
 				break;
@@ -397,74 +396,74 @@ namespace SparkRabbit {
 
 		if (textureIndex == 0.0f)
 		{
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-			s_Data.TextureSlotIndex++;
+			textureIndex = (float)r2_Data.TextureSlotIndex;
+			r2_Data.TextureSlots[r2_Data.TextureSlotIndex] = texture;
+			r2_Data.TextureSlotIndex++;
 		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[0];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[0];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[1];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[2];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[2];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[3];
-		s_Data.QuadVertexBufferPtr->Color = color;
-		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-		s_Data.QuadVertexBufferPtr++;
+		r2_Data.QuadVertexBufferPtr->Position = transform * r2_Data.QuadVertexPositions[3];
+		r2_Data.QuadVertexBufferPtr->Color = color;
+		r2_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+		r2_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+		r2_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		r2_Data.QuadVertexBufferPtr++;
 
-		s_Data.QuadIndexCount += 6;
+		r2_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		r2_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color)
 	{
-		if (s_Data.LineIndexCount >= Renderer2DData::MaxLineIndices)
+		if (r2_Data.LineIndexCount >= Renderer2DData::MaxLineIndices)
 			FlushAndResetLines();
 
-		s_Data.LineVertexBufferPtr->Position = p0;
-		s_Data.LineVertexBufferPtr->Color = color;
-		s_Data.LineVertexBufferPtr++;
+		r2_Data.LineVertexBufferPtr->Position = p0;
+		r2_Data.LineVertexBufferPtr->Color = color;
+		r2_Data.LineVertexBufferPtr++;
 
-		s_Data.LineVertexBufferPtr->Position = p1;
-		s_Data.LineVertexBufferPtr->Color = color;
-		s_Data.LineVertexBufferPtr++;
+		r2_Data.LineVertexBufferPtr->Position = p1;
+		r2_Data.LineVertexBufferPtr->Color = color;
+		r2_Data.LineVertexBufferPtr++;
 
-		s_Data.LineIndexCount += 2;
+		r2_Data.LineIndexCount += 2;
 
-		s_Data.Stats.LineCount++;
+		r2_Data.Stats.LineCount++;
 	}
 
 	void Renderer2D::ResetStats()
 	{
-		memset(&s_Data.Stats, 0, sizeof(Statistics));
+		memset(&r2_Data.Stats, 0, sizeof(Statistics));
 	}
 
 	Renderer2D::Statistics Renderer2D::GetStats()
 	{
-		return s_Data.Stats;
+		return r2_Data.Stats;
 	}
 
 }
