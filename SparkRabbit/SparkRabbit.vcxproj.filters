@@ -1335,6 +1335,12 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="TImes.h">
+      <Filter>src\SparkRabbit</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SparkRabbit\Times.h">
+      <Filter>src\SparkRabbit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">

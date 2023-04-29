@@ -165,8 +165,10 @@ namespace SparkRabbit {
 			{
 				meshComponent.Mesh->OnUpdate(ts);
 
+				glm::mat4 transform = GetTransformRelativeToParent(Entity(entity, this));
+
 				// TODO: Should we render (logically)
-				SceneRenderer::SubmitMesh(meshComponent, transformComponent, nullptr);
+				SceneRenderer::SubmitMesh(meshComponent, transform, nullptr);
 			}
 		}
 		SceneRenderer::EndScene();
@@ -277,7 +279,6 @@ namespace SparkRabbit {
 	}
 	void Scene::OnRuntimeStart()
 	{
-		m_IsPlaying = true;
 		// 2D physics
 		m_2Dworld = new b2World({ 0.0f, -9.8f });
 		auto view = m_Registry.view<RigidBody2DComponent>();
@@ -515,7 +516,10 @@ namespace SparkRabbit {
 
 			rb3d.RuntimeBodyOJ = body;
 			m_dynamicsWorld->addRigidBody(body);
+
 		}
+
+		m_IsPlaying = true;
 	}
 
 	void Scene::OnRuntimeStop()
@@ -531,8 +535,6 @@ namespace SparkRabbit {
 		delete m_collisionConfiguration;
 		delete m_broadphase;
 	}
-
-	//TODO: RunTime start and stop
 
 	void Scene::SetViewportSize(uint32_t width, uint32_t height)
 	{

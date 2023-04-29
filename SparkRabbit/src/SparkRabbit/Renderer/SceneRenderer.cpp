@@ -9,6 +9,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <SparkRabbit/Times.h>
+
 namespace SparkRabbit {
 	struct SceneRendererData
 	{
@@ -47,7 +49,19 @@ namespace SparkRabbit {
 		SceneRendererOptions Options;
 	};
 
+	struct SceneRendererStats
+	{
+		float ShadowPass = 0.0f;
+		float GeometryPass = 0.0f;
+		float CompositePass = 0.0f;
+
+		Timer ShadowPassTimer;
+		Timer GeometryPassTimer;
+		Timer CompositePassTimer;
+	};
+
 	static SceneRendererData s_Data;
+	static SceneRendererStats s_Stats;
 
 	void SceneRenderer::Init()
 	{
@@ -350,9 +364,30 @@ namespace SparkRabbit {
 	{
 		SPARK_CORE_ASSERT(!s_Data.ActiveScene, "");
 
-		GeometryPass();
-		CompositePass();
+		{
+			Renderer::Submit([]()
+				{
+					s_Stats.GeometryPassTimer.Reset();
+				});
+			GeometryPass();
+			Renderer::Submit([]
+				{
+					s_Stats.GeometryPass = s_Stats.GeometryPassTimer.ElapsedMillis();
+				});
+		}
+		{
+			Renderer::Submit([]()
+				{
+					s_Stats.CompositePassTimer.Reset();
+				});
 
+			CompositePass();
+			Renderer::Submit([]
+				{
+					s_Stats.CompositePass = s_Stats.CompositePassTimer.ElapsedMillis();
+				});
+
+		}
 		s_Data.DrawList.clear();
 		s_Data.SelectedMeshDrawList.clear();
 		s_Data.SceneData = {};

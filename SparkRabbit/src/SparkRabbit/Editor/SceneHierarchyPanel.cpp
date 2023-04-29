@@ -16,13 +16,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-// TODO:
-// - Eventually change imgui node IDs to be entity/asset GUID - our future ECS system
-//   will use GUIDs to identify entities and assets, so we should use them here as well
-//TODO: Drag and drop to render meshes
-//TODO: Drag and drop to render materials
-//TODO: Drag and drop to render scenes
-
 namespace SparkRabbit {
 
 	glm::mat4 Mat4FromAssimpMat4(const aiMatrix4x4& matrix);

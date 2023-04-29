@@ -61,6 +61,7 @@ namespace SparkRabbit{
 		m_EditorScene->CopyTo(m_PlayScene);
 		m_PlayScene->OnRuntimeStart();
 		m_SceneHierarchyPanel->SetContext(m_PlayScene);
+		m_Scene = m_PlayScene;
 	}
 
 	void EditorLayer::OnSceneStop()
@@ -555,6 +556,8 @@ namespace SparkRabbit{
 		auto viewportSize = ImGui::GetContentRegionAvail();
 		SceneRenderer::SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		m_EditorScene->SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+		if(m_PlayScene)
+			m_PlayScene->SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		m_ProjectiveCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 1000.0f));
 		m_ProjectiveCamera.SetViewport((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		ImGui::Image((void*)SceneRenderer::GetFinalColorBufferRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
