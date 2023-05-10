@@ -177,7 +177,7 @@ namespace SparkRabbit {
 
 	std::vector<std::string> Tokenize(const std::string& string)
 	{
-		return SplitString(string, " \t\n");
+		return SplitString(string, " \t\n\r");
 	}
 
 	std::vector<std::string> GetLines(const std::string& string)
@@ -642,6 +642,9 @@ namespace SparkRabbit {
 		uint32_t offset = uniform->GetOffset();
 		switch (uniform->GetType())
 		{
+		case OpenGLShaderUniformDeclaration::Type::BOOL:
+			UploadUniformFloat(uniform->GetLocation(), *(bool*)&buffer.Data[offset]);
+			break;
 		case OpenGLShaderUniformDeclaration::Type::FLOAT32:
 			UploadUniformFloat(uniform->GetLocation(), *(float*)&buffer.Data[offset]);
 			break;
@@ -678,6 +681,9 @@ namespace SparkRabbit {
 		uint32_t offset = uniform->GetOffset();
 		switch (uniform->GetType())
 		{
+		case OpenGLShaderUniformDeclaration::Type::BOOL:
+			UploadUniformFloat(uniform->GetLocation(), *(bool*)&buffer.Data[offset]);
+			break;
 		case OpenGLShaderUniformDeclaration::Type::FLOAT32:
 			UploadUniformFloat(uniform->GetLocation(), *(float*)&buffer.Data[offset]);
 			break;
@@ -711,6 +717,9 @@ namespace SparkRabbit {
 	{
 		switch (field.GetType())
 		{
+		case OpenGLShaderUniformDeclaration::Type::BOOL:
+			UploadUniformFloat(field.GetLocation(), *(bool*)&data[offset]);
+			break;
 		case OpenGLShaderUniformDeclaration::Type::FLOAT32:
 			UploadUniformFloat(field.GetLocation(), *(float*)&data[offset]);
 			break;
@@ -798,6 +807,13 @@ namespace SparkRabbit {
 	{
 		Renderer::Submit([=]() {
 			UploadUniformMat4(name, value);
+			});
+	}
+
+	void OpenGLShader::SetBool(const std::string& name, bool value)
+	{
+		Renderer::Submit([=]() {
+			UploadUniformInt(name, value);
 			});
 	}
 
@@ -904,8 +920,8 @@ namespace SparkRabbit {
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		if (location != -1)
 			glUniform1f(location, value);
-		else
-			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
+		//else
+			//SPARK_CORE_WARN("Uniform '{0}' not found!", name);
 	}
 
 	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
@@ -914,8 +930,8 @@ namespace SparkRabbit {
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		if (location != -1)
 			glUniform3f(location, values.x, values.y, values.z);
-		else
-			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
+		/*else
+			SPARK_CORE_WARN("Uniform '{0}' not found!", name);*/
 	}
 
 	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& values)
@@ -924,8 +940,8 @@ namespace SparkRabbit {
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		if (location != -1)
 			glUniform4f(location, values.x, values.y, values.z, values.w);
-		else
-			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
+		/*else
+			SPARK_CORE_WARN("Uniform '{0}' not found!", name);*/
 	}
 
 	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& values)
@@ -934,8 +950,8 @@ namespace SparkRabbit {
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		if (location != -1)
 			glUniformMatrix4fv(location, 1, GL_FALSE, (const float*)&values);
-		else
-			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
+		/*else
+			SPARK_CORE_WARN("Uniform '{0}' not found!", name);*/
 	}
 
 	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& values)
@@ -944,7 +960,7 @@ namespace SparkRabbit {
 		auto location = glGetUniformLocation(m_RendererID, name.c_str());
 		if (location != -1)
 			glUniform2f(location, values.x, values.y);
-		else
-			SPARK_CORE_WARN("Uniform '{0}' not found!", name);
+		/*else
+			SPARK_CORE_WARN("Uniform '{0}' not found!", name);*/
 	}
 }

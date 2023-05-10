@@ -192,6 +192,28 @@ namespace SparkRabbit {
 		}
 	}
 
+	void Renderer::SubmitMeshWithShader(std::shared_ptr<Mesh> mesh, const glm::mat4& transform, std::shared_ptr<Shader> shader)
+	{
+		mesh->m_VertexArray->Bind();
+
+		for (Submesh& submesh : mesh->m_Submeshes)
+		{
+			if (mesh->m_IsAnimated)
+			{
+				for (size_t i = 0; i < mesh->m_BoneTransforms.size(); i++)
+				{
+					std::string uniformName = std::string("u_BoneTransforms[") + std::to_string(i) + std::string("]");
+					shader->SetMat4(uniformName, mesh->m_BoneTransforms[i]);
+				}
+			}
+			shader->SetMat4("u_Transform", transform * submesh.Transform);
+
+			Renderer::Submit([submesh]() {
+				glDrawElementsBaseVertex(GL_TRIANGLES, submesh.IndexCount, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * submesh.BaseIndex), submesh.BaseVertex);
+				});
+		}
+	}
+
 	void Renderer::DrawBoundingBox(const std::shared_ptr<Mesh>& mesh, const glm::mat4& transform, const glm::vec4& color)
 	{
 		for (Submesh& submesh : mesh->m_Submeshes)

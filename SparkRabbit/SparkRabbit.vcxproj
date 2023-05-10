@@ -207,7 +207,6 @@
     <ClInclude Include="src\SparkRabbit\Times.h" />
     <ClInclude Include="src\SparkRabbit\UUID.h" />
     <ClInclude Include="src\SparkRabbit\Window.h" />
-    <ClInclude Include="TImes.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_fixes.hpp" />

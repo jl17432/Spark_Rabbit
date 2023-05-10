@@ -30,11 +30,11 @@ namespace SparkRabbit {
 
 	}
 	
-	std::weak_ptr<Framebuffer> FramebufferPool::AllocateBuffer()
+	std::shared_ptr<Framebuffer> FramebufferPool::AllocateBuffer()
 	{
-		return std::weak_ptr<Framebuffer>();
+		return std::shared_ptr<Framebuffer>();
 	}
-	void FramebufferPool::Add(std::weak_ptr<Framebuffer> framebuffer)
+	void FramebufferPool::Add(std::shared_ptr<Framebuffer> framebuffer)
 	{
 		m_Pool.emplace_back(framebuffer);
 	}

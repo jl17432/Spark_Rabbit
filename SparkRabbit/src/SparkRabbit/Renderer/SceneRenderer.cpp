@@ -11,6 +11,8 @@
 
 #include <SparkRabbit/Times.h>
 
+#include <SparkRabbit/Renderer/Material.h>
+
 namespace SparkRabbit {
 	struct SceneRendererData
 	{
@@ -33,6 +35,30 @@ namespace SparkRabbit {
 		std::shared_ptr<RenderPass> GeoPass;
 		std::shared_ptr<RenderPass> CompositePass;
 
+		std::shared_ptr<Shader> ShadowMapShader, ShadowMapAnimShader;
+		std::shared_ptr<RenderPass> ShadowMapRenderPass[4];
+		float ShadowMapSize = 20.0f;
+		float LightDistance = 0.1f;
+		glm::mat4 LightMatrices[4];
+		glm::mat4 LightViewMatrix;
+		float CascadeSplitLambda = 0.91f;
+		glm::vec4 CascadeSplits;
+		float CascadeFarPlaneOffset = 15.0f, CascadeNearPlaneOffset = -15.0f;
+		bool ShowCascades = false;
+		bool SoftShadows = true;
+		float LightSize = 0.25f;
+		float MaxShadowDistance = 200.0f;
+		float ShadowFade = 25.0f;
+		float CascadeTransitionFade = 1.0f;
+		bool CascadeFading = true;
+
+		bool EnableBloom = false;
+		float BloomThreshold = 1.5f;
+
+		glm::vec2 FocusPoint = { 0.5f, 0.5f };
+
+		RendererID ShadowMapSampler;
+
 
 		struct DrawCommand
 		{
@@ -42,6 +68,7 @@ namespace SparkRabbit {
 		};
 		std::vector<DrawCommand> DrawList;
 		std::vector<DrawCommand> SelectedMeshDrawList;
+		std::vector<DrawCommand> ShadowPassDrawList;
 
 		// Grid
 		std::shared_ptr<MaterialInstance> GridMaterial;
@@ -66,9 +93,7 @@ namespace SparkRabbit {
 	void SceneRenderer::Init()
 	{
 		FramebufferSpecification geoFramebufferSpec;
-		geoFramebufferSpec.Width = 1280;
-		geoFramebufferSpec.Height = 720;
-		geoFramebufferSpec.Format = FramebufferFormat::RGBA16F;
+		geoFramebufferSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::Depth };
 		geoFramebufferSpec.Samples = 8;
 		geoFramebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
@@ -77,10 +102,8 @@ namespace SparkRabbit {
 		s_Data.GeoPass = RenderPass::Create(geoRenderPassSpec);
 
 		FramebufferSpecification compFramebufferSpec;
-		compFramebufferSpec.Width = 1280;
-		compFramebufferSpec.Height = 720;
-		compFramebufferSpec.Format = FramebufferFormat::RGBA8;
-		compFramebufferSpec.ClearColor = { 0.5f, 0.1f, 0.1f, 1.0f };
+		compFramebufferSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+		compFramebufferSpec.ClearColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 		RenderPassSpecification compRenderPassSpec;
 		compRenderPassSpec.TargetFramebuffer = Framebuffer::Create(compFramebufferSpec);
@@ -100,6 +123,36 @@ namespace SparkRabbit {
 		auto outlineShader = Shader::Create("assets/shaders/Outline.glsl");
 		s_Data.OutlineMaterial = MaterialInstance::Create(Material::Create(outlineShader));
 		s_Data.OutlineMaterial->SetFlag(MaterialFlag::DepthTest, false);
+
+		// Shadow Map
+		s_Data.ShadowMapShader = Shader::Create("assets/shaders/ShadowMap.glsl");
+		s_Data.ShadowMapAnimShader = Shader::Create("assets/shaders/ShadowMap_Anim.glsl");
+
+		FramebufferSpecification shadowMapFramebufferSpec;
+		shadowMapFramebufferSpec.Width = 4096;
+		shadowMapFramebufferSpec.Height = 4096;
+		shadowMapFramebufferSpec.Attachments = { FramebufferTextureFormat::DEPTH32F };
+		shadowMapFramebufferSpec.ClearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+		shadowMapFramebufferSpec.NoResize = true;
+
+		// 4 cascades
+		for (int i = 0; i < 4; i++)
+		{
+			RenderPassSpecification shadowMapRenderPassSpec;
+			shadowMapRenderPassSpec.TargetFramebuffer = Framebuffer::Create(shadowMapFramebufferSpec);
+			s_Data.ShadowMapRenderPass[i] = RenderPass::Create(shadowMapRenderPassSpec);
+		}
+
+		Renderer::Submit([]()
+			{
+				glGenSamplers(1, &s_Data.ShadowMapSampler);
+
+				// Setup the shadowmap depth sampler
+				glSamplerParameteri(s_Data.ShadowMapSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glSamplerParameteri(s_Data.ShadowMapSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glSamplerParameteri(s_Data.ShadowMapSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glSamplerParameteri(s_Data.ShadowMapSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			});
 	}
 
 	void SceneRenderer::SetViewportSize(uint32_t width, uint32_t height)
@@ -245,7 +298,22 @@ namespace SparkRabbit {
 		{
 			auto baseMaterial = dc.Mesh->GetMaterial();
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
+			baseMaterial->Set("u_ViewMatrix", sceneCamera.ViewMatrix);
 			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
+			baseMaterial->Set("u_LightMatrixCascade0", s_Data.LightMatrices[0]);
+			baseMaterial->Set("u_LightMatrixCascade1", s_Data.LightMatrices[1]);
+			baseMaterial->Set("u_LightMatrixCascade2", s_Data.LightMatrices[2]);
+			baseMaterial->Set("u_LightMatrixCascade3", s_Data.LightMatrices[3]);
+			baseMaterial->Set("u_ShowCascades", s_Data.ShowCascades);
+			baseMaterial->Set("u_LightView", s_Data.LightViewMatrix);
+			baseMaterial->Set("u_CascadeSplits", s_Data.CascadeSplits);
+			baseMaterial->Set("u_SoftShadows", s_Data.SoftShadows);
+			baseMaterial->Set("u_LightSize", s_Data.LightSize);
+			baseMaterial->Set("u_MaxShadowDistance", s_Data.MaxShadowDistance);
+			baseMaterial->Set("u_ShadowFade", s_Data.ShadowFade);
+			baseMaterial->Set("u_CascadeFading", s_Data.CascadeFading);
+			baseMaterial->Set("u_CascadeTransitionFade", s_Data.CascadeTransitionFade);
+			baseMaterial->Set("u_IBLContribution", s_Data.SceneData.SceneEnvironmentIntensity);
 
 			// Environment (TODO: don't do this per mesh)
 			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
@@ -253,7 +321,35 @@ namespace SparkRabbit {
 			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
 
 			// Set lights (TODO: move to light environment and don't do per mesh)
-			baseMaterial->Set("lights", s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0]);
+			auto directionalLight = s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0];
+			baseMaterial->Set("u_DirectionalLights", directionalLight);
+
+			auto rd = baseMaterial->FindResourceDeclaration("u_ShadowMapTexture");
+			if (rd)
+			{
+				auto reg = rd->GetRegister();
+
+				auto tex = s_Data.ShadowMapRenderPass[0]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+				auto tex1 = s_Data.ShadowMapRenderPass[1]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+				auto tex2 = s_Data.ShadowMapRenderPass[2]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+				auto tex3 = s_Data.ShadowMapRenderPass[3]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+
+				Renderer::Submit([reg, tex, tex1, tex2, tex3]() mutable
+					{
+						// 4 cascades
+						glBindTextureUnit(reg, tex);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+
+						glBindTextureUnit(reg, tex1);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+
+						glBindTextureUnit(reg, tex2);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+
+						glBindTextureUnit(reg, tex3);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+					});
+			}
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
@@ -272,15 +368,58 @@ namespace SparkRabbit {
 		{
 			auto baseMaterial = dc.Mesh->GetMaterial();
 			baseMaterial->Set("u_ViewProjectionMatrix", viewProjection);
+			baseMaterial->Set("u_ViewMatrix", sceneCamera.ViewMatrix);
 			baseMaterial->Set("u_CameraPosition", glm::inverse(s_Data.SceneData.SceneCamera.ViewMatrix)[3]);
+			baseMaterial->Set("u_CascadeSplits", s_Data.CascadeSplits);
+			baseMaterial->Set("u_ShowCascades", s_Data.ShowCascades);
+			baseMaterial->Set("u_SoftShadows", s_Data.SoftShadows);
+			baseMaterial->Set("u_LightSize", s_Data.LightSize);
+			baseMaterial->Set("u_MaxShadowDistance", s_Data.MaxShadowDistance);
+			baseMaterial->Set("u_ShadowFade", s_Data.ShadowFade);
+			baseMaterial->Set("u_CascadeFading", s_Data.CascadeFading);
+			baseMaterial->Set("u_CascadeTransitionFade", s_Data.CascadeTransitionFade);
+			baseMaterial->Set("u_IBLContribution", s_Data.SceneData.SceneEnvironmentIntensity);
 
 			// Environment (TODO: don't do this per mesh)
 			baseMaterial->Set("u_EnvRadianceTex", s_Data.SceneData.SceneEnvironment->RadianceMap);
 			baseMaterial->Set("u_EnvIrradianceTex", s_Data.SceneData.SceneEnvironment->IrradianceMap);
 			baseMaterial->Set("u_BRDFLUTTexture", s_Data.BRDFLUT);
 
+			baseMaterial->Set("u_LightMatrixCascade0", s_Data.LightMatrices[0]);
+			baseMaterial->Set("u_LightMatrixCascade1", s_Data.LightMatrices[1]);
+			baseMaterial->Set("u_LightMatrixCascade2", s_Data.LightMatrices[2]);
+			baseMaterial->Set("u_LightMatrixCascade3", s_Data.LightMatrices[3]);
+
 			// Set lights (TODO: move to light environment and don't do per mesh)
-			baseMaterial->Set("lights", s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0]);
+			auto directionalLight = s_Data.SceneData.SceneLightEnvironment.DirectionalLights[0];
+			baseMaterial->Set("u_DirectionalLights", directionalLight);
+
+			auto rd = baseMaterial->FindResourceDeclaration("u_ShadowMapTexture");
+			if (rd)
+			{
+				auto reg = rd->GetRegister();
+
+				auto tex = s_Data.ShadowMapRenderPass[0]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+				auto tex1 = s_Data.ShadowMapRenderPass[1]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+				auto tex2 = s_Data.ShadowMapRenderPass[2]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+				auto tex3 = s_Data.ShadowMapRenderPass[3]->GetSpecification().TargetFramebuffer->GetDepthAttachmentRendererID();
+
+				Renderer::Submit([reg, tex, tex1, tex2, tex3]() mutable
+					{
+						// 4 cascades
+						glBindTextureUnit(reg, tex);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+
+						glBindTextureUnit(reg, tex1);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+
+						glBindTextureUnit(reg, tex2);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+
+						glBindTextureUnit(reg, tex3);
+						glBindSampler(reg++, s_Data.ShadowMapSampler);
+					});
+			}
 
 			auto overrideMaterial = nullptr; // dc.Material;
 			Renderer::SubmitMesh(dc.Mesh, dc.Transform, overrideMaterial);
@@ -351,6 +490,10 @@ namespace SparkRabbit {
 		s_Data.CompositeShader->Bind();
 		s_Data.CompositeShader->SetFloat("u_Exposure", s_Data.SceneData.SceneCamera.Camera.GetExposure());
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
+		s_Data.CompositeShader->SetFloat2("u_ViewportSize", glm::vec2(compositeBuffer->GetWidth(), compositeBuffer->GetHeight()));
+		s_Data.CompositeShader->SetFloat2("u_FocusPoint", s_Data.FocusPoint);
+		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
+		s_Data.CompositeShader->SetFloat("u_BloomThreshold", s_Data.BloomThreshold);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Renderer::Submit([]()
 			{
@@ -360,9 +503,199 @@ namespace SparkRabbit {
 		Renderer::EndRenderPass();
 	}
 
+	struct FrustumBounds
+	{
+		float r, l, b, t, f, n;
+	};
+
+	struct CascadeData
+	{
+		glm::mat4 ViewProj;
+		glm::mat4 View;
+		float SplitDepth;
+	};
+
+	static void CalculateCascades(CascadeData* cascades, const glm::vec3& lightDirection)
+	{
+		FrustumBounds frustumBounds[3];
+
+		auto& sceneCamera = s_Data.SceneData.SceneCamera;
+		auto viewProjection = sceneCamera.Camera.GetProjectionMatrix() * sceneCamera.ViewMatrix;
+
+		const int SHADOW_MAP_CASCADE_COUNT = 4;
+		float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
+
+		// TODO: less hard-coding!
+		float nearClip = 0.1f;
+		float farClip = 1000.0f;
+		float clipRange = farClip - nearClip;
+
+		float minZ = nearClip;
+		float maxZ = nearClip + clipRange;
+
+		float range = maxZ - minZ;
+		float ratio = maxZ / minZ;
+
+		// Calculate split depths based on view camera frustum
+		// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
+		for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+		{
+			float p = (i + 1) / static_cast<float>(SHADOW_MAP_CASCADE_COUNT);
+			float log = minZ * std::pow(ratio, p);
+			float uniform = minZ + range * p;
+			float d = s_Data.CascadeSplitLambda * (log - uniform) + uniform;
+			cascadeSplits[i] = (d - nearClip) / clipRange;
+		}
+
+		cascadeSplits[3] = 0.3f;
+
+		// Manually set cascades here
+		// cascadeSplits[0] = 0.05f;
+		// cascadeSplits[1] = 0.15f;
+		// cascadeSplits[2] = 0.3f;
+		// cascadeSplits[3] = 1.0f;
+
+		// Calculate orthographic projection matrix for each cascade
+		float lastSplitDist = 0.0;
+		for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+		{
+			float splitDist = cascadeSplits[i];
+
+			glm::vec3 frustumCorners[8] =
+			{
+				glm::vec3(-1.0f,  1.0f, -1.0f),
+				glm::vec3(1.0f,  1.0f, -1.0f),
+				glm::vec3(1.0f, -1.0f, -1.0f),
+				glm::vec3(-1.0f, -1.0f, -1.0f),
+				glm::vec3(-1.0f,  1.0f,  1.0f),
+				glm::vec3(1.0f,  1.0f,  1.0f),
+				glm::vec3(1.0f, -1.0f,  1.0f),
+				glm::vec3(-1.0f, -1.0f,  1.0f),
+			};
+
+			// Project frustum corners into world space
+			glm::mat4 invCam = glm::inverse(viewProjection);
+			for (uint32_t i = 0; i < 8; i++)
+			{
+				glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[i], 1.0f);
+				frustumCorners[i] = invCorner / invCorner.w;
+			}
+
+			for (uint32_t i = 0; i < 4; i++)
+			{
+				glm::vec3 dist = frustumCorners[i + 4] - frustumCorners[i];
+				frustumCorners[i + 4] = frustumCorners[i] + (dist * splitDist);
+				frustumCorners[i] = frustumCorners[i] + (dist * lastSplitDist);
+			}
+
+			// Get frustum center
+			glm::vec3 frustumCenter = glm::vec3(0.0f);
+			for (uint32_t i = 0; i < 8; i++)
+				frustumCenter += frustumCorners[i];
+
+			frustumCenter /= 8.0f;
+
+			//frustumCenter *= 0.01f;
+
+			float radius = 0.0f;
+			for (uint32_t i = 0; i < 8; i++)
+			{
+				float distance = glm::length(frustumCorners[i] - frustumCenter);
+				radius = glm::max(radius, distance);
+			}
+			radius = std::ceil(radius * 16.0f) / 16.0f;
+
+			glm::vec3 maxExtents = glm::vec3(radius);
+			glm::vec3 minExtents = -maxExtents;
+
+			glm::vec3 lightDir = -lightDirection;
+			glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + s_Data.CascadeNearPlaneOffset, maxExtents.z - minExtents.z + s_Data.CascadeFarPlaneOffset);
+
+			// Offset to texel space to avoid shimmering (from https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering)
+			glm::mat4 shadowMatrix = lightOrthoMatrix * lightViewMatrix;
+			const float ShadowMapResolution = 4096.0f;
+			glm::vec4 shadowOrigin = (shadowMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) * ShadowMapResolution / 2.0f;
+			glm::vec4 roundedOrigin = glm::round(shadowOrigin);
+			glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
+			roundOffset = roundOffset * 2.0f / ShadowMapResolution;
+			roundOffset.z = 0.0f;
+			roundOffset.w = 0.0f;
+
+			lightOrthoMatrix[3] += roundOffset;
+
+			// Store split distance and matrix in cascade
+			cascades[i].SplitDepth = (nearClip + splitDist * clipRange) * -1.0f;
+			cascades[i].ViewProj = lightOrthoMatrix * lightViewMatrix;
+			cascades[i].View = lightViewMatrix;
+
+			lastSplitDist = cascadeSplits[i];
+		}
+	}
+
+	void SceneRenderer::ShadowMapPass()
+	{
+		auto& directionalLights = s_Data.SceneData.SceneLightEnvironment.DirectionalLights;
+		if (directionalLights[0].Multiplier == 0.0f || !directionalLights[0].CastShadows)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				// Clear shadow maps
+				Renderer::BeginRenderPass(s_Data.ShadowMapRenderPass[i]);
+				Renderer::EndRenderPass();
+			}
+			return;
+		}
+
+		CascadeData cascades[4];
+		CalculateCascades(cascades, directionalLights[0].Direction);
+		s_Data.LightViewMatrix = cascades[0].View;
+
+		Renderer::Submit([]()
+			{
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_BACK);
+			});
+
+		for (int i = 0; i < 4; i++)
+		{
+			s_Data.CascadeSplits[i] = cascades[i].SplitDepth;
+
+			Renderer::BeginRenderPass(s_Data.ShadowMapRenderPass[i]);
+
+			glm::mat4 shadowMapVP = cascades[i].ViewProj;
+
+			static glm::mat4 scaleBiasMatrix = glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f }) * glm::translate(glm::mat4(1.0f), { 1, 1, 1 });
+			s_Data.LightMatrices[i] = scaleBiasMatrix * cascades[i].ViewProj;
+
+
+			// Render entities
+			for (auto& dc : s_Data.ShadowPassDrawList)
+			{
+				std::shared_ptr<Shader> shader = dc.Mesh->IsAnimated() ? s_Data.ShadowMapAnimShader : s_Data.ShadowMapShader;
+				shader->SetMat4("u_ViewProjection", shadowMapVP);
+				Renderer::SubmitMeshWithShader(dc.Mesh, dc.Transform, shader);
+			}
+
+			Renderer::EndRenderPass();
+		}
+	}
+
 	void SceneRenderer::FlushDrawList()
 	{
 		SPARK_CORE_ASSERT(!s_Data.ActiveScene, "");
+
+		{
+			Renderer::Submit([]()
+				{
+					s_Stats.ShadowPassTimer.Reset();
+				});
+			ShadowMapPass();
+			Renderer::Submit([]
+				{
+					s_Stats.ShadowPass = s_Stats.ShadowPassTimer.ElapsedMillis();
+				});
+		}
 
 		{
 			Renderer::Submit([]()
@@ -390,6 +723,7 @@ namespace SparkRabbit {
 		}
 		s_Data.DrawList.clear();
 		s_Data.SelectedMeshDrawList.clear();
+		s_Data.ShadowPassDrawList.clear();
 		s_Data.SceneData = {};
 	}
 

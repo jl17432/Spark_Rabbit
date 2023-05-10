@@ -45,5 +45,6 @@ namespace SparkRabbit {
 		static void FlushDrawList();
 		static void GeometryPass();
 		static void CompositePass();
+		static void ShadowMapPass();
 	};
 }

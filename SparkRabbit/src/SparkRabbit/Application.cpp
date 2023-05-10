@@ -13,6 +13,7 @@
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include <glad/glad.h>
 
 
 namespace SparkRabbit{
@@ -126,13 +127,14 @@ namespace SparkRabbit{
 			return false;
 		}
 		m_Minimized = false;
-
+		Renderer::Submit([=]() { glViewport(0, 0, width, height); });
 		auto& fbs = FramebufferPool::GetGlobal()->GetAll();
 		for (auto& fb : fbs)
 		{
-			if (auto fbp = fb.lock())
-				fbp->Resize(width, height,false);
+			if (!fb->GetSpecification().NoResize)
+				fb->Resize(width, height);
 		}
+
 		return false;
 	}
 

@@ -60,6 +60,8 @@ namespace SparkRabbit {
 		{
 			Set(name, (const std::shared_ptr<Texture>&)texture);
 		}
+
+		ShaderResourceDeclaration* FindResourceDeclaration(const std::string& name);
 	public:
 		static std::shared_ptr<Material> Create(const std::shared_ptr<Shader>& shader);
 	private:
@@ -68,7 +70,6 @@ namespace SparkRabbit {
 		void BindTextures() const;
 
 		ShaderUniformDeclaration* FindUniformDeclaration(const std::string& name);
-		ShaderResourceDeclaration* FindResourceDeclaration(const std::string& name);
 		Buffer& GetUniformBufferTarget(ShaderUniformDeclaration* uniformDeclaration);
 	private:
 		std::shared_ptr<Shader> m_Shader;

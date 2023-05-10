@@ -1,34 +1,41 @@
 #pragma once
 #include "SparkRabbit/Renderer/Framebuffer.h"
+#include <memory>
 
 namespace SparkRabbit {
 
-	class OpenGLFramebuffer : public Framebuffer
+	class OpenGLFramebuffer : public Framebuffer, public std::enable_shared_from_this<OpenGLFramebuffer>
 	{
 	public:
 		OpenGLFramebuffer(const FramebufferSpecification& spec);
-		//~OpenGLFramebuffer();
-		~OpenGLFramebuffer();
+		virtual ~OpenGLFramebuffer();
 
-		void Bind() const override;
-		void Unbind() const override;
-		virtual void Resize(uint32_t width, uint32_t height, bool recreate = false) override;
+		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) override;
 
-		void BindTexture(uint32_t slot = 0) const override;
+		virtual void Bind() const override;
+		virtual void Unbind() const override;
+
+		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const override;
 
 		virtual uint32_t GetWidth() const override { return m_Specification.Width; }
 		virtual uint32_t GetHeight() const override { return m_Specification.Height; }
 
-		uint32_t GetColorAttachmentRendererID() const override { return m_ColorAttachment; }
-		uint32_t GetDepthAttachmentRendererID() const override { return m_DepthAttachment; }
-		uint32_t GetRendererID() const override { return m_RendererID; }
+		virtual RendererID GetRendererID() const { return m_RendererID; }
+		virtual RendererID GetColorAttachmentRendererID(int index = 0) const { return m_ColorAttachments[index]; }
+		virtual RendererID GetDepthAttachmentRendererID() const { return m_DepthAttachment; }
 
-		const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
-
+		virtual const FramebufferSpecification& GetSpecification() const override { return m_Specification; }
 	private:
-		uint32_t m_RendererID = 0;
-		uint32_t m_ColorAttachment = 0, m_DepthAttachment = 0;
 		FramebufferSpecification m_Specification;
+		RendererID m_RendererID = 0;
+
+		std::vector<RendererID> m_ColorAttachments;
+		RendererID m_DepthAttachment;
+
+		std::vector<FramebufferTextureFormat> m_ColorAttachmentFormats;
+		FramebufferTextureFormat m_DepthAttachmentFormat = FramebufferTextureFormat::None;
+
+		uint32_t m_Width = 0, m_Height = 0;
 	};
 
 }

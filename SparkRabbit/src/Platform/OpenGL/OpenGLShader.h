@@ -25,6 +25,7 @@ namespace SparkRabbit {
 		void SetVSMaterialUniformBuffer(Buffer buffer) override;
 		void SetPSMaterialUniformBuffer(Buffer buffer) override;
 
+		void SetBool(const std::string& name, bool value) override;
 		void SetFloat(const std::string& name, float value) override;
 		void SetInt(const std::string& name, int value) override;
 		void SetMat4(const std::string& name, const glm::mat4& value) override;
