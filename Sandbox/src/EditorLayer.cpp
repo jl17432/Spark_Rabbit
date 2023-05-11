@@ -30,16 +30,16 @@ namespace SparkRabbit{
 
 	void EditorLayer::OnAttach()
 	{
-		SPARK_CORE_TRACE("EditorLayer::OnAttach() IS CALLED!!!!");
-
 		using namespace glm;
 
 		m_CheckerboardTex = Texture2D::Create("assets/editor/Checkerboard.tga");
-		m_PlayButtonTex = Texture2D::Create("assets/editor/PlayButton.png");
+		m_playButtonTex = Texture2D::Create("assets/editor/playButton.png");
+		m_stopButtonTex = Texture2D::Create("assets/editor/stopButton.png");
 
 		//create Editor panel
 		m_SceneHierarchyPanel = std::make_unique<SceneHierarchyPanel>(m_EditorScene);
 		m_AssetFilePanel = std::make_unique<FileSystemPanel>();
+		m_defaultAssetsPanel = std::make_unique<defaultAssetsPanel>();
 
 		m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&EditorLayer::SelectEntity, this, std::placeholders::_1));
 		m_SceneHierarchyPanel->SetEntityDeletedCallback(std::bind(&EditorLayer::OnEntityDeleted, this, std::placeholders::_1));
@@ -311,11 +311,7 @@ namespace SparkRabbit{
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
 		}
 
-		m_SceneHierarchyPanel->OnImGuiRender();
-		m_AssetFilePanel->OnImGuiRender();
-
 		// Editor Panel ------------------------------------------------------------------------------
-		ImGui::Begin("Model");
 		ImGui::Begin("Environment");
 
 		ImGui::SliderFloat("Skybox LOD", &m_EditorScene->GetSkyboxLod(), 0.0f, 11.0f);
@@ -342,218 +338,247 @@ namespace SparkRabbit{
 
 		ImGui::End();
 
-		ImGui::Separator();
-		{
-			ImGui::Text("Mesh");
-			//auto mesh = m_MeshEntity->GetMesh();
-			//std::string fullpath = mesh ? mesh->GetFilePath() : "None";
-			//size_t found = fullpath.find_last_of("/\\");
-			//std::string path = found != std::string::npos ? fullpath.substr(found + 1) : fullpath;
-			//ImGui::Text(path.c_str()); ImGui::SameLine();
-			//if (ImGui::Button("...##Mesh"))
-			//{
-			//	std::string filename = Application::Get().OpenFile("");
-			//	if (filename != "")
-			//	{
-			//		auto newMesh = std::make_shared<Mesh>(filename);
-			//		// m_MeshMaterial.reset(new MaterialInstance(newMesh->GetMaterial()));
-			//		// m_MeshEntity->SetMaterial(m_MeshMaterial);
-			//		m_MeshEntity->SetMesh(newMesh);
-			//	}
-			//}
-		}
-		ImGui::Separator();
+		m_SceneHierarchyPanel->OnImGuiRender();
+		m_AssetFilePanel->OnImGuiRender();
+		m_defaultAssetsPanel->OnImGuiRender();
 
-		// Textures ------------------------------------------------------------------------------
+		if (ImGui::BeginMenuBar())
 		{
-			// Albedo
-			if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::BeginMenu("File"))
 			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_AlbedoInput.TextureMap ? (void*)m_AlbedoInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_AlbedoInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_AlbedoInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_AlbedoInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_AlbedoInput.TextureMap = Texture2D::Create(filename, m_AlbedoInput.SRGB);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::BeginGroup();
-				ImGui::Checkbox("Use##AlbedoMap", &m_AlbedoInput.UseTexture);
-				if (ImGui::Checkbox("sRGB##AlbedoMap", &m_AlbedoInput.SRGB))
-				{
-					if (m_AlbedoInput.TextureMap)
-						m_AlbedoInput.TextureMap = Texture2D::Create(m_AlbedoInput.TextureMap->GetPath(), m_AlbedoInput.SRGB);
-				}
-				ImGui::EndGroup();
-				ImGui::SameLine();
-				ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(m_AlbedoInput.Color), ImGuiColorEditFlags_NoInputs);
+				if (ImGui::MenuItem("New Scene", "Ctrl+N"))
+					NewScene();
+				ImGui::EndMenu();
 			}
-		}
-		{
-			// Normals
-			if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_NormalInput.TextureMap ? (void*)m_NormalInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_NormalInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_NormalInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_NormalInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_NormalInput.TextureMap = Texture2D::Create(filename);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::Checkbox("Use##NormalMap", &m_NormalInput.UseTexture);
-			}
-		}
-		{
-			// Metalness
-			if (ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_MetalnessInput.TextureMap ? (void*)m_MetalnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_MetalnessInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_MetalnessInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_MetalnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_MetalnessInput.TextureMap = Texture2D::Create(filename);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::Checkbox("Use##MetalnessMap", &m_MetalnessInput.UseTexture);
-				ImGui::SameLine();
-				ImGui::SliderFloat("Value##MetalnessInput", &m_MetalnessInput.Value, 0.0f, 1.0f);
-			}
-		}
-		{
-			// Roughness
-			if (ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-				ImGui::Image(m_RoughnessInput.TextureMap ? (void*)m_RoughnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
-				ImGui::PopStyleVar();
-				if (ImGui::IsItemHovered())
-				{
-					if (m_RoughnessInput.TextureMap)
-					{
-						ImGui::BeginTooltip();
-						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-						ImGui::TextUnformatted(m_RoughnessInput.TextureMap->GetPath().c_str());
-						ImGui::PopTextWrapPos();
-						ImGui::Image((void*)m_RoughnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
-						ImGui::EndTooltip();
-					}
-					if (ImGui::IsItemClicked())
-					{
-						std::string filename = Application::Get().OpenFile("");
-						if (filename != "")
-							m_RoughnessInput.TextureMap = Texture2D::Create(filename);
-					}
-				}
-				ImGui::SameLine();
-				ImGui::Checkbox("Use##RoughnessMap", &m_RoughnessInput.UseTexture);
-				ImGui::SameLine();
-				ImGui::SliderFloat("Value##RoughnessInput", &m_RoughnessInput.Value, 0.0f, 1.0f);
-			}
+
+			ImGui::EndMenuBar();
 		}
 
-		ImGui::Separator();
+		ImGui::Begin("Materials");
 
-		if (ImGui::TreeNode("Shaders"))
+		if (m_SelectedSubmeshes.size())
 		{
-			auto& shaders = Shader::s_ShaderList;
-			for (auto& shader : shaders)
+			Entity selectedEntity = m_SelectedSubmeshes.front().Entity;
+			if (selectedEntity.HasComponent<MeshComponent>())
 			{
-				if (ImGui::TreeNode(shader->GetName().c_str()))
+				std::shared_ptr<Mesh> mesh = selectedEntity.GetComponent<MeshComponent>().Mesh;
+				if (mesh)
 				{
-					std::string buttonName = "Reload##" + shader->GetName();
-					if (ImGui::Button(buttonName.c_str()))
-						shader->Reload();
-					ImGui::TreePop();
+					auto& materials = mesh->GetMaterials();
+					static uint32_t selectedMaterialIndex = 0;
+					for (uint32_t i = 0; i < materials.size(); i++)
+					{
+						auto& materialInstance = materials[i];
+
+						ImGuiTreeNodeFlags node_flags = (selectedMaterialIndex == i ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_Leaf;
+						bool opened = ImGui::TreeNodeEx((void*)(&materialInstance), node_flags, materialInstance->GetName().c_str());
+						if (ImGui::IsItemClicked())
+						{
+							selectedMaterialIndex = i;
+						}
+						if (opened)
+							ImGui::TreePop();
+
+					}
+
+					ImGui::Separator();
+
+					// Selected material
+					if (selectedMaterialIndex < materials.size())
+					{
+						auto& materialInstance = materials[selectedMaterialIndex];
+						ImGui::Text("Shader: %s", materialInstance->GetShader()->GetName().c_str());
+						// Textures ------------------------------------------------------------------------------
+						{
+							// Albedo
+							if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+
+								auto& albedoColor = materialInstance->Get<glm::vec3>("u_AlbedoColor");
+								bool useAlbedoMap = materialInstance->Get<float>("u_AlbedoTexToggle");
+								std::shared_ptr<Texture2D> albedoMap = materialInstance->TryGetResource<Texture2D>("u_AlbedoTexture");
+								ImGui::Image(albedoMap ? (void*)albedoMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (albedoMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(albedoMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)albedoMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											albedoMap = Texture2D::Create(filename, true/*m_AlbedoInput.SRGB*/);
+											materialInstance->Set("u_AlbedoTexture", albedoMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								ImGui::BeginGroup();
+								if (ImGui::Checkbox("Use##AlbedoMap", &useAlbedoMap))
+									materialInstance->Set<float>("u_AlbedoTexToggle", useAlbedoMap ? 1.0f : 0.0f);
+
+								ImGui::EndGroup();
+								ImGui::SameLine();
+								ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(albedoColor), ImGuiColorEditFlags_NoInputs);
+							}
+						}
+						{
+							// Normals
+							if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+								bool useNormalMap = materialInstance->Get<float>("u_NormalTexToggle");
+								std::shared_ptr<Texture2D> normalMap = materialInstance->TryGetResource<Texture2D>("u_NormalTexture");
+								ImGui::Image(normalMap ? (void*)normalMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (normalMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(normalMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)normalMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											normalMap = Texture2D::Create(filename);
+											materialInstance->Set("u_NormalTexture", normalMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								if (ImGui::Checkbox("Use##NormalMap", &useNormalMap))
+									materialInstance->Set<float>("u_NormalTexToggle", useNormalMap ? 1.0f : 0.0f);
+							}
+						}
+						{
+							// Metalness
+							if (ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+								float& metalnessValue = materialInstance->Get<float>("u_Metalness");
+								bool useMetalnessMap = materialInstance->Get<float>("u_MetalnessTexToggle");
+								std::shared_ptr<Texture2D> metalnessMap = materialInstance->TryGetResource<Texture2D>("u_MetalnessTexture");
+								ImGui::Image(metalnessMap ? (void*)metalnessMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (metalnessMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(metalnessMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)metalnessMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											metalnessMap = Texture2D::Create(filename);
+											materialInstance->Set("u_MetalnessTexture", metalnessMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								if (ImGui::Checkbox("Use##MetalnessMap", &useMetalnessMap))
+									materialInstance->Set<float>("u_MetalnessTexToggle", useMetalnessMap ? 1.0f : 0.0f);
+								ImGui::SameLine();
+								ImGui::SliderFloat("Value##MetalnessInput", &metalnessValue, 0.0f, 1.0f);
+							}
+						}
+						{
+							// Roughness
+							if (ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+							{
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+								float& roughnessValue = materialInstance->Get<float>("u_Roughness");
+								bool useRoughnessMap = materialInstance->Get<float>("u_RoughnessTexToggle");
+								std::shared_ptr<Texture2D> roughnessMap = materialInstance->TryGetResource<Texture2D>("u_RoughnessTexture");
+								ImGui::Image(roughnessMap ? (void*)roughnessMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+								ImGui::PopStyleVar();
+								if (ImGui::IsItemHovered())
+								{
+									if (roughnessMap)
+									{
+										ImGui::BeginTooltip();
+										ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+										ImGui::TextUnformatted(roughnessMap->GetPath().c_str());
+										ImGui::PopTextWrapPos();
+										ImGui::Image((void*)roughnessMap->GetRendererID(), ImVec2(384, 384));
+										ImGui::EndTooltip();
+									}
+									if (ImGui::IsItemClicked())
+									{
+										std::string filename = Application::Get().OpenFile("");
+										if (filename != "")
+										{
+											roughnessMap = Texture2D::Create(filename);
+											materialInstance->Set("u_RoughnessTexture", roughnessMap);
+										}
+									}
+								}
+								ImGui::SameLine();
+								if (ImGui::Checkbox("Use##RoughnessMap", &useRoughnessMap))
+									materialInstance->Set<float>("u_RoughnessTexToggle", useRoughnessMap ? 1.0f : 0.0f);
+								ImGui::SameLine();
+								ImGui::SliderFloat("Value##RoughnessInput", &roughnessValue, 0.0f, 1.0f);
+							}
+						}
+					}
 				}
 			}
-			ImGui::TreePop();
 		}
-
 
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport");
 
+		auto viewportSize = ImGui::GetContentRegionAvail();
+		float buttonWidth = 32.0f;
+		float buttonPosX = (viewportSize.x - buttonWidth) / 2.0f;
+
 		if (m_SceneState == SceneState::Edit)
 		{
-			if (ImGui::ImageButton((ImTextureID)(m_PlayButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(0.9f, 0.9f, 0.9f, 1.0f)))
+			ImGui::SetCursorPosX(buttonPosX);
+			if (ImGui::ImageButton((ImTextureID)(m_playButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1.f, 1.f, 1.f, 1.f)))
 			{
 				OnScenePlay();
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Play");
 		}
 		else if (m_SceneState == SceneState::Play)
 		{
-			if (ImGui::ImageButton((ImTextureID)(m_PlayButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(1.0f, 1.0f, 1.0f, 0.2f)))
+			ImGui::SetCursorPosX(buttonPosX);
+			if (ImGui::ImageButton((ImTextureID)(m_stopButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1.0f, 1.0f, 1.0f, 1.f)))
 			{
 				OnSceneStop();
 			}
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip("Stop");
 		}
-		ImGui::SameLine();
-		if (ImGui::ImageButton((ImTextureID)(m_PlayButtonTex->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1.0f, 1.0f, 1.0f, 0.6f)))
-		{
-			SPARK_CORE_INFO("PLAY!");
-		}
-		/*ImGui::End();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::Begin("Viewport");
-
-		m_ViewportPanelMouseOver = ImGui::IsWindowHovered();
-		m_ViewportPanelFocused = ImGui::IsWindowFocused();*/
-
-		auto viewportOffset = ImGui::GetCursorPos(); // includes tab bar
-		auto viewportSize = ImGui::GetContentRegionAvail();
+		viewportSize = ImGui::GetContentRegionAvail();
+		auto viewportOffset = ImGui::GetCursorPos();
 		SceneRenderer::SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		m_EditorScene->SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		if(m_PlayScene)
@@ -662,35 +687,6 @@ namespace SparkRabbit{
 
 		ImGui::End();
 		ImGui::PopStyleVar();
-
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("Docking"))
-			{
-				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
-				// which we can't undo at the moment without finer window depth/z control.
-				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-
-				if (ImGui::MenuItem("Flag: NoSplit", "", (opt_flags & ImGuiDockNodeFlags_NoSplit) != 0))                 opt_flags ^= ImGuiDockNodeFlags_NoSplit;
-				if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (opt_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))  opt_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
-				if (ImGui::MenuItem("Flag: NoResize", "", (opt_flags & ImGuiDockNodeFlags_NoResize) != 0))                opt_flags ^= ImGuiDockNodeFlags_NoResize;
-				//if (ImGui::MenuItem("Flag: PassthruDockspace", "", (opt_flags & ImGuiDockNodeFlags_PassthruDockspace) != 0))       opt_flags ^= ImGuiDockNodeFlags_PassthruDockspace;
-				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (opt_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))          opt_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
-				ImGui::Separator();
-				if (ImGui::MenuItem("Close DockSpace", NULL, false, p_open != NULL))
-					p_open = false;
-				ImGui::EndMenu();
-			}
-			///////////////////////////////////////////come back later///////////////////////////////////////////////////////
-			ImGuiShowHelpMarker(
-				"Welcome to the SparkRabbit Engine Demo!" "\n"
-				"This demo app has implemented PBR¡¢HDR skybox and so on...." "\n\n"
-				"Guidance: for now we only have spining camera, by holding Alt with you mouse draging you can spin around the scene, try mouse left/middle/right button" "\n\n"
-				"Future tasks to do: our FPS prefabs, ECS system(high priority), file system in UI, dragging files to the scene and render""\n\n"
-			);
-
-			ImGui::EndMenuBar();
-		}
 
 		ImGui::End();
 	}

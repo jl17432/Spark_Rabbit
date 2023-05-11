@@ -157,10 +157,7 @@ namespace SparkRabbit{
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = "All\0*.*\0";
 		ofn.nFilterIndex = 1;
-		ofn.lpstrFileTitle = NULL;
-		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{

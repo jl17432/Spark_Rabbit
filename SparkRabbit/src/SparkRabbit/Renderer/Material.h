@@ -61,6 +61,25 @@ namespace SparkRabbit {
 			Set(name, (const std::shared_ptr<Texture>&)texture);
 		}
 
+		template<typename T>
+		T& Get(const std::string& name)
+		{
+			auto decl = m_Material->FindUniformDeclaration(name);
+			//SR_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			auto& buffer = GetUniformBufferTarget(decl);
+			return buffer.Read<T>(decl->GetOffset());
+		}
+
+		template<typename T>
+		std::shared_ptr<T> GetResource(const std::string& name)
+		{
+			auto decl = m_Material->FindResourceDeclaration(name);
+			//HZ_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			uint32_t slot = decl->GetRegister();
+			//HZ_CORE_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
+			return m_Textures[slot];
+		}
+
 		ShaderResourceDeclaration* FindResourceDeclaration(const std::string& name);
 	public:
 		static std::shared_ptr<Material> Create(const std::shared_ptr<Shader>& shader);
@@ -124,6 +143,39 @@ namespace SparkRabbit {
 			Set(name, (const std::shared_ptr<Texture>&)texture);
 		}
 
+		template<typename T>
+		T& Get(const std::string& name)
+		{
+			auto decl = m_Material->FindUniformDeclaration(name);
+			//SR_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			auto& buffer = GetUniformBufferTarget(decl);
+			return buffer.Read<T>(decl->GetOffset());
+		}
+
+		template<typename T>
+		std::shared_ptr<T> GetResource(const std::string& name)
+		{
+			auto decl = m_Material->FindResourceDeclaration(name);
+			//HZ_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
+			uint32_t slot = decl->GetRegister();
+			//HZ_CORE_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
+			return std::make_shared<T>(m_Textures[slot]);
+		}
+
+		template<typename T>
+		std::shared_ptr<T> TryGetResource(const std::string& name)
+		{
+			auto decl = m_Material->FindResourceDeclaration(name);
+			if (!decl)
+				return nullptr;
+
+			uint32_t slot = decl->GetRegister();
+			if (slot >= m_Textures.size())
+				return nullptr;
+
+			return std::dynamic_pointer_cast<T>(m_Textures[slot]);
+		}
+
 		void Bind() const;
 
 		uint32_t GetFlags() const { return m_Material->m_MaterialFlags; }
@@ -131,6 +183,8 @@ namespace SparkRabbit {
 		void SetFlag(MaterialFlag flag, bool value = true);
 
 		std::shared_ptr<Shader >GetShader() { return m_Material->m_Shader; }
+
+		const std::string& GetName() const { return m_Name; }
 	public:
 		static std::shared_ptr<MaterialInstance> Create(const std::shared_ptr<Material>& material);
 	private:
@@ -140,6 +194,8 @@ namespace SparkRabbit {
 		void OnMaterialValueUpdated(ShaderUniformDeclaration* decl);
 	private:
 		std::shared_ptr<Material> m_Material;
+
+		std::string m_Name;
 
 		Buffer m_VSUniformStorageBuffer;
 		Buffer m_PSUniformStorageBuffer;

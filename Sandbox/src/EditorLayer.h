@@ -13,6 +13,7 @@
 #include <string>
 #include "SparkRabbit/Editor/SceneHierarchyPanel.h"
 #include"SparkRabbit/Editor/FileSystemPanel.h"
+#include"SparkRabbit/Editor/defaultAssetsPanel.h"
 
 
 namespace SparkRabbit {
@@ -63,6 +64,7 @@ namespace SparkRabbit {
 	private:
 		std::unique_ptr<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		std::unique_ptr<FileSystemPanel> m_AssetFilePanel;
+		std::unique_ptr<defaultAssetsPanel> m_defaultAssetsPanel;
 
 		std::shared_ptr<Scene> m_Scene;
 		std::shared_ptr<Scene> m_EditorScene;
@@ -125,7 +127,8 @@ namespace SparkRabbit {
 
 		// Editor resources
 		std::shared_ptr<Texture2D> m_CheckerboardTex;
-		std::shared_ptr<Texture2D> m_PlayButtonTex;
+		std::shared_ptr<Texture2D> m_playButtonTex;
+		std::shared_ptr<Texture2D> m_stopButtonTex;
 
 		glm::vec2 m_ViewportBounds[2];
 		int m_GizmoType = -1; // -1 = no gizmo

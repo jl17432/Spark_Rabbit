@@ -110,18 +110,6 @@ namespace SparkRabbit {
 						newEntity.GetComponent<TransformComponent>().Rotation = glm::radians(glm::vec3{ 80.0f, 10.0f, 0.0f });
 						SetSelected(newEntity);
 					}
-					if (ImGui::MenuItem("Sky Light"))
-					{
-						auto newEntity = m_Context->CreateEntity("Sky Light");
-						newEntity.AddComponent<SkyLightComponent>();
-						SetSelected(newEntity);
-					}
-					if (ImGui::MenuItem("RigidBody2D"))
-					{
-						auto newEntity = m_Context->CreateEntity("RigidBody2D");
-						newEntity.AddComponent<RigidBody2DComponent>();
-						SetSelected(newEntity);
-					}
 					ImGui::EndMenu();
 				}
 				ImGui::EndPopup();
