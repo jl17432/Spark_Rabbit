@@ -138,8 +138,6 @@ namespace SparkRabbit {
 			camera = &comp.Camera;
 			break;
 		}
-		SPARK_CORE_INFO("Scene::OnUpdate");
-
 
 	}
 
@@ -151,10 +149,28 @@ namespace SparkRabbit {
 
 		glm::mat4 cameraViewMatrix = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
 		SPARK_CORE_ASSERT(cameraEntity, "Scene does not contain any cameras!");
-		SceneCamera& camera = cameraEntity.GetComponent<CameraComponent>();
-		camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		SceneCamera& camera = cameraEntity.GetComponent<CameraComponent>(); 
+		camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight); 
+		
+		{
+			m_LightEnvironment = LightEnvironment();
+			auto lights = m_Registry.group<DirectionalLightComponent>(entt::get<TransformComponent>);
+			uint32_t directionalLightIndex = 0;
+			for (auto entity : lights)
+			{
+				auto [transformComponent, lightComponent] = lights.get<TransformComponent, DirectionalLightComponent>(entity);
+				glm::vec3 direction = -glm::normalize(glm::mat3(transformComponent.GetTransform()) * glm::vec3(1.0f));
+				m_LightEnvironment.DirectionalLights[directionalLightIndex++] =
+				{
+					direction,
+					lightComponent.Radiance,
+					lightComponent.Intensity,
+					lightComponent.CastShadows
+				};
+			}
+		}
 
-		m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod);
+		m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod); 
 
 		auto group = m_Registry.group<MeshComponent>(entt::get<TransformComponent>);
 		SceneRenderer::BeginScene(this, { camera, cameraViewMatrix });

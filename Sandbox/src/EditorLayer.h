@@ -38,6 +38,7 @@ namespace SparkRabbit {
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
 		// ImGui UI helpers
+
 		bool Property(const std::string& name, bool& value);
 		void Property(const std::string& name, float& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
 		void Property(const std::string& name, glm::vec2& value, PropertyFlag flags);

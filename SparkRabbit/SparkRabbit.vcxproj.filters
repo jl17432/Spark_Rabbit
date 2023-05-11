@@ -120,6 +120,9 @@
     <ClInclude Include="src\SparkRabbit\Editor\SceneHierarchyPanel.h">
       <Filter>src\SparkRabbit\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\SparkRabbit\Editor\defaultAssetsPanel.h">
+      <Filter>src\SparkRabbit\Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\SparkRabbit\EntryPoint.h">
       <Filter>src\SparkRabbit</Filter>
     </ClInclude>
@@ -1338,9 +1341,6 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\SparkRabbit\Editor\defaultAssetsPanel.h">
-      <Filter>src\SparkRabbit\Editor</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
@@ -1392,6 +1392,9 @@
       <Filter>src\SparkRabbit\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Editor\SceneHierarchyPanel.cpp">
+      <Filter>src\SparkRabbit\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SparkRabbit\Editor\defaultAssersPanel.cpp">
       <Filter>src\SparkRabbit\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuiBuild.cpp">
@@ -1480,9 +1483,6 @@
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\stb_image.cpp">
       <Filter>src\SparkRabbit</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SparkRabbit\Editor\defaultAssersPanel.cpp">
-      <Filter>src\SparkRabbit\Editor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

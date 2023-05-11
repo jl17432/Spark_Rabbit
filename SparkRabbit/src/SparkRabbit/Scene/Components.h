@@ -80,14 +80,7 @@ namespace SparkRabbit {
 			: Mesh(mesh) {}
 
 		operator std::shared_ptr<SparkRabbit::Mesh>() { return Mesh; }
-		/*MeshComponent() { mMesh = CreateRef<Mesh>(); };
-		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(const std::string& path)
-			: Path(path), mMesh(CreateRef<Mesh>(path))
-		{
-		}
-		std::string Path = "None";
-		Ref<Mesh> mMesh;*/
+
 	};
 
 	struct CameraComponent

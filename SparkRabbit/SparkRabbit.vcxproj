@@ -161,9 +161,9 @@
     <ClInclude Include="src\SparkRabbit\Asset\AssetSerializer.h" />
     <ClInclude Include="src\SparkRabbit\Buffer.h" />
     <ClInclude Include="src\SparkRabbit\Core.h" />
-    <ClInclude Include="src\SparkRabbit\Editor\defaultAssetsPanel.h" />
     <ClInclude Include="src\SparkRabbit\Editor\FileSystemPanel.h" />
     <ClInclude Include="src\SparkRabbit\Editor\SceneHierarchyPanel.h" />
+    <ClInclude Include="src\SparkRabbit\Editor\defaultAssetsPanel.h" />
     <ClInclude Include="src\SparkRabbit\EntryPoint.h" />
     <ClInclude Include="src\SparkRabbit\Events\ApplicationEvent.h" />
     <ClInclude Include="src\SparkRabbit\Events\Event.h" />
@@ -589,9 +589,9 @@
     <ClCompile Include="src\SparkRabbit\Application.cpp" />
     <ClCompile Include="src\SparkRabbit\Asset\AssetManager.cpp" />
     <ClCompile Include="src\SparkRabbit\Asset\AssetSerializer.cpp" />
-    <ClCompile Include="src\SparkRabbit\Editor\defaultAssersPanel.cpp" />
     <ClCompile Include="src\SparkRabbit\Editor\FileSystemPanel.cpp" />
     <ClCompile Include="src\SparkRabbit\Editor\SceneHierarchyPanel.cpp" />
+    <ClCompile Include="src\SparkRabbit\Editor\defaultAssersPanel.cpp" />
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\SparkRabbit\ImGui\ImGuizmo.cpp" />
