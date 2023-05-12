@@ -185,14 +185,14 @@ namespace SparkRabbit {
 
 	void SceneRenderer::SubmitMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform, std::shared_ptr<MaterialInstance> overrideMaterial)
 	{
-		// TODO: Culling, sorting, etc.
-
 		s_Data.DrawList.push_back({ mesh, overrideMaterial, transform });
+		s_Data.ShadowPassDrawList.push_back({ mesh, overrideMaterial, transform });
 	}
 
 	void SceneRenderer::SubmitSelectedMesh(std::shared_ptr<Mesh> mesh, const glm::mat4& transform)
 	{
 		s_Data.SelectedMeshDrawList.push_back({ mesh, nullptr, transform });
+		s_Data.ShadowPassDrawList.push_back({ mesh, nullptr, transform });
 	}
 
 	static std::shared_ptr<Shader> equirectangularConversionShader, envFilteringShader, envIrradianceShader;
