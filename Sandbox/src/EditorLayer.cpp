@@ -92,7 +92,6 @@ namespace SparkRabbit{
 					Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
 					auto viewProj = m_ProjectiveCamera.GetViewProjection();
 					Renderer2D::BeginScene(viewProj, false);
-					//Renderer::DrawBoundingBox(m_MeshEntity->GetMesh(), m_MeshEntity->Transform());
 					Renderer2D::EndScene();
 					Renderer::EndRenderPass();
 				}
@@ -233,7 +232,7 @@ namespace SparkRabbit{
 
 	void EditorLayer::NewScene()
 	{
-		m_EditorScene = std::make_shared<Scene>("Empty Scene", true);
+		m_EditorScene = std::make_shared<Scene>("Scene 0 ", true);
 		m_SceneHierarchyPanel->SetContext(m_EditorScene);
 
 		m_ProjectiveCamera = ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f));
@@ -277,8 +276,7 @@ namespace SparkRabbit{
 		static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
 		bool opt_fullscreen = opt_fullscreen_persistant;
 
-		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-		// because it would be confusing to have two docking targets within each others.
+		// Set Imgui flags
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 		if (opt_fullscreen)
 		{
@@ -413,7 +411,7 @@ namespace SparkRabbit{
 										std::string filename = Application::Get().OpenFile("");
 										if (filename != "")
 										{
-											albedoMap = Texture2D::Create(filename, true/*m_AlbedoInput.SRGB*/);
+											albedoMap = Texture2D::Create(filename, true);
 											materialInstance->Set("u_AlbedoTexture", albedoMap);
 										}
 									}
@@ -793,7 +791,7 @@ namespace SparkRabbit{
 
 	std::pair<float, float> EditorLayer::GetMouseViewportSpace()
 	{
-		auto [mx, my] = ImGui::GetMousePos(); // Input::GetMousePosition();
+		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
 		auto viewportWidth = m_ViewportBounds[1].x - m_ViewportBounds[0].x;

@@ -489,43 +489,11 @@ namespace SparkRabbit {
 					ImGui::CloseCurrentPopup();
 				}
 			}
-			if (!m_SelectionContext.HasComponent<SkyLightComponent>())
-			{
-				if (ImGui::Button("Sky Light"))
-				{
-					m_SelectionContext.AddComponent<SkyLightComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
-			{
-				if (ImGui::Button("Sprite Renderer"))
-				{
-					m_SelectionContext.AddComponent<SpriteRendererComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
 			if (!m_SelectionContext.HasComponent<RigidBody2DComponent>())
 			{
 				if (ImGui::Button("RigidBody2D"))
 				{
 					m_SelectionContext.AddComponent<RigidBody2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			if (!m_SelectionContext.HasComponent<BoxCollider2DComponent>())
-			{
-				if (ImGui::Button("BoxCollider2D"))
-				{
-					m_SelectionContext.AddComponent<BoxCollider2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			if (!m_SelectionContext.HasComponent<CircleCollider2DComponent>())
-			{
-				if (ImGui::Button("CircleCollider2D"))
-				{
-					m_SelectionContext.AddComponent<CircleCollider2DComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
@@ -647,25 +615,6 @@ namespace SparkRabbit {
 				}
 				ImGui::Checkbox("Fixed Rotation", &rb2d.FixedRotation);
 			});
-
-		DrawComponent<BoxCollider2DComponent>("BoxCollider2D", entity, [](BoxCollider2DComponent& bc2d)
-			{
-				ImGui::DragFloat2("Offset", glm::value_ptr(bc2d.Offset));
-				ImGui::DragFloat2("Size", glm::value_ptr(bc2d.Size));
-				ImGui::DragFloat("Density", &bc2d.Density, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Friction", &bc2d.Friction, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Restitution", &bc2d.Restitution, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Restitution Threshold", &bc2d.RestitutionThreshold, 0.01f, 0.0f);
-			});
-		DrawComponent<CircleCollider2DComponent>("CircleCollider2D", entity, [](CircleCollider2DComponent& cc2d)
-			{
-				ImGui::DragFloat2("Offset", glm::value_ptr(cc2d.Offset));
-				ImGui::DragFloat("Radius", &cc2d.Radius);
-				ImGui::DragFloat("Density", &cc2d.Density, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Friction", &cc2d.Friction, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Restitution", &cc2d.Restitution, 0.01f, 0.0f, 1.0f);
-				ImGui::DragFloat("Restitution Threshold", &cc2d.RestitutionThreshold, 0.01f, 0.0f);
-			});
 		DrawComponent<Rigidbody3DComponent>("Rigidbody 3D", entity, [](auto& component)
 			{
 				const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
@@ -697,26 +646,6 @@ namespace SparkRabbit {
 				ImGui::Columns(2, nullptr, false);
 				ImGui::SetColumnWidth(0, 150.0f);
 				ImGui::Text("Collision Shape");
-				/*ImGui::NextColumn();
-				constexpr auto collisionShapes = magic_enum::enum_values<CollisionShape>();
-				if (ImGui::BeginCombo("##Collision Shape", magic_enum::enum_name(component.Shape).data()))
-				{
-					for (auto& shape : collisionShapes)
-					{
-						bool isSelected = component.Shape == shape;
-						if (ImGui::Selectable(magic_enum::enum_name(shape).data(), isSelected))
-						{
-							component.Shape = shape;
-						}
-
-						if (isSelected)
-							ImGui::SetItemDefaultFocus();
-					}
-
-					ImGui::EndCombo();
-				}
-				ImGui::EndColumns();*/
-				ImGui::NextColumn();
 				if (ImGui::BeginCombo("##Collision Shape", getCollisionShapeName(component.Shape).c_str()))
 				{
 					auto shapes = getCollisionShapes();

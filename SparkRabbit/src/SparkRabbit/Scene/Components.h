@@ -10,6 +10,7 @@
 #include"SparkRabbit/Asset/Asset.h"
 #include"SparkRabbit/Scene/SceneCamera.h"
 #include"SparkRabbit/Renderer/SceneEnvironment.h"
+#include"SparkRabbit/Math/Math.h"
 
 namespace SparkRabbit {
 	struct IDComponent
@@ -47,9 +48,9 @@ namespace SparkRabbit {
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
-		glm::vec3 Up = { 0.0F, 1.0F, 0.0F };
-		glm::vec3 Right = { 1.0F, 0.0F, 0.0F };
-		glm::vec3 Forward = { 0.0F, 0.0F, -1.0F };
+		glm::vec3 Up = { 0.0f, 1.0f, 0.0f };
+		glm::vec3 Right = { 1.0f, 0.0f, 0.0f };
+		glm::vec3 Forward = { 0.0f, 0.0f, -1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
@@ -65,6 +66,10 @@ namespace SparkRabbit {
 		glm::mat4 GetRotationMatrix() const
 		{
 			return glm::toMat4(glm::quat(Rotation));
+		}
+		void SetTransform(const glm::mat4& transform)
+		{
+			Math::DecomposeTransform(transform, Translation, Rotation, Scale);
 		}
 		operator glm::mat4& () { return GetTransform(); }
 		operator const glm::mat4& () const { return GetTransform(); }
