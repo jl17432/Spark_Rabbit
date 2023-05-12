@@ -163,12 +163,12 @@ namespace SparkRabbit {
 		transform.Up = glm::normalize(glm::mat3(rotation) * glm::vec3(0.0f, 1.0f, 0.0f));
 
 		float speed = 5.0f;
-		if (!Input::IsKeyPressed(SR_KEY_UP))    transform.Translation -= speed * ts * transform.Forward;
-		if (!Input::IsKeyPressed(SR_KEY_DOWN))  transform.Translation += speed * ts * transform.Forward;
+		if (!Input::IsKeyPressed(SR_KEY_W))    transform.Translation -= speed * ts * transform.Forward;
+		if (!Input::IsKeyPressed(SR_KEY_S))  transform.Translation += speed * ts * transform.Forward;
 		if (!Input::IsKeyPressed(SR_KEY_LEFT_SHIFT))    transform.Translation -= speed * ts * transform.Up;
 		if (!Input::IsKeyPressed(SR_KEY_LEFT_CONTROL))  transform.Translation += speed * ts * transform.Up;
-		if (!Input::IsKeyPressed(SR_KEY_LEFT))  transform.Translation += speed * ts * transform.Right;
-		if (!Input::IsKeyPressed(SR_KEY_RIGHT)) transform.Translation -= speed * ts * transform.Right;
+		if (!Input::IsKeyPressed(SR_KEY_A))  transform.Translation += speed * ts * transform.Right;
+		if (!Input::IsKeyPressed(SR_KEY_D)) transform.Translation -= speed * ts * transform.Right;
 
 		glm::mat4 cameraViewMatrix = glm::inverse(transform.GetTransform());
 

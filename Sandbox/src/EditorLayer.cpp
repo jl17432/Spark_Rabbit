@@ -594,7 +594,7 @@ namespace SparkRabbit{
 		m_AllowViewportCameraEvents = ImGui::IsMouseHoveringRect(minBound, maxBound);
 
 		// Gizmos
-		if (m_GizmoType != -1 && m_SelectedSubmeshes.size())
+		if (m_GizmoType != -1 && m_SelectedSubmeshes.size() && m_SceneState == SceneState::Edit)
 		{
 			auto& selection = m_SelectedSubmeshes[0];
 
