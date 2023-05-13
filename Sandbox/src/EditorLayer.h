@@ -1,19 +1,23 @@
 #pragma once
 #include "SparkAPI.h"
 
+#include <string>
+#include "SparkRabbit/Editor/SceneHierarchyPanel.h"
+#include "SparkRabbit/Editor/FileSystemPanel.h"
+#include "SparkRabbit/Editor/defaultAssetsPanel.h"
+#include "SparkRabbit/Renderer/Renderer2D.h"
+#include "SparkRabbit/Asset/AssetManager.h"
+#include "SparkRabbit/Math/Math.h"
+
 #include "SparkRabbit/ImGui/ImGuiLayer.h"
 #include "imgui/imgui_internal.h"
+#include "SparkRabbit/ImGui/ImGuizmo.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
-
-#include <string>
-#include "SparkRabbit/Editor/SceneHierarchyPanel.h"
-#include"SparkRabbit/Editor/FileSystemPanel.h"
-#include"SparkRabbit/Editor/defaultAssetsPanel.h"
 
 
 namespace SparkRabbit {
@@ -37,7 +41,6 @@ namespace SparkRabbit {
 		bool OnKeyPressedEvent(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		// ImGui UI helpers
 
 		bool Property(const std::string& name, bool& value);
 		void Property(const std::string& name, float& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
@@ -48,7 +51,7 @@ namespace SparkRabbit {
 		void Property(const std::string& name, glm::vec4& value, PropertyFlag flags);
 		void Property(const std::string& name, glm::vec4& value, float min = -1.0f, float max = 1.0f, PropertyFlag flags = PropertyFlag::None);
 
-		void ShowBoundingBoxes(bool show, bool onTop = false);
+		void ShowBoundingBoxes(bool show);
 
 		void NewScene();
 
@@ -69,23 +72,15 @@ namespace SparkRabbit {
 
 		std::shared_ptr<Scene> m_Scene;
 		std::shared_ptr<Scene> m_EditorScene;
-		std::shared_ptr<Scene> m_PlayScene;//runtime
+		std::shared_ptr<Scene> m_PlayScene;
 
-		ProjectiveCamera m_ProjectiveCamera;
-
-		std::shared_ptr<Shader> m_BrushShader;
-		std::shared_ptr<Mesh> m_PlaneMesh;
-		std::shared_ptr<Material> m_SphereBaseMaterial;
-
-		std::shared_ptr<Material> m_MeshMaterial;
-		std::vector<std::shared_ptr<MaterialInstance>> m_MetalSphereMaterialInstances;
-		std::vector<std::shared_ptr<MaterialInstance>> m_DielectricSphereMaterialInstances;
+		ProjectiveCamera m_EditorCamera;
 
 		float m_GridScale = 16.025f, m_GridSize = 0.025f;
 
 		struct AlbedoInput
 		{
-			glm::vec3 Color = { 0.972f, 0.96f, 0.915f }; // Silver, from https://docs.unrealengine.com/en-us/Engine/Rendering/Materials/PhysicallyBased
+			glm::vec3 Color = { 0.972f, 0.96f, 0.915f };
 			std::shared_ptr<Texture2D> TextureMap;
 			bool SRGB = true;
 			bool UseTexture = false;
@@ -115,16 +110,10 @@ namespace SparkRabbit {
 		};
 		RoughnessInput m_RoughnessInput;
 
-		// PBR params
+		// PBR parameters
 		bool m_RadiancePrefilter = false;
 
 		float m_EnvMapRotation = 0.0f;
-
-		enum class SceneType : uint32_t
-		{
-			Spheres = 0, Model = 1
-		};
-		SceneType m_SceneType;
 
 		// Editor resources
 		std::shared_ptr<Texture2D> m_CheckerboardTex;
@@ -132,20 +121,14 @@ namespace SparkRabbit {
 		std::shared_ptr<Texture2D> m_stopButtonTex;
 
 		glm::vec2 m_ViewportBounds[2];
-		int m_GizmoType = -1; // -1 = no gizmo
-		float m_SnapValue = 0.5f;
+		int m_GizmoType = -1; // no gizmo
 		bool m_AllowViewportCameraEvents = false;
 		bool m_DrawOnTopBoundingBoxes = false;
-
 		bool m_UIShowBoundingBoxes = false;
-		bool m_UIShowBoundingBoxesOnTop = false;
-
-		bool m_ViewportPanelMouseOver = false;
-		bool m_ViewportPanelFocused = false;
 
 		enum class SceneState
 		{
-			Edit = 0, Play = 1, Pause = 2
+			Edit = 0, Play = 1
 		};
 		SceneState m_SceneState = SceneState::Edit;
 
@@ -155,17 +138,16 @@ namespace SparkRabbit {
 			Submesh* Mesh = nullptr;
 			float Distance = 0.0f;
 		};
+		void OnSelected(const SelectedSubmesh& m_SelectedSubmeshes);
+		std::vector<SelectedSubmesh> m_SelectedSubmeshes;
 
 		enum class SelectionMode
 		{
 			None = 0, Entity = 1, SubMesh = 2
 		};
-
-		void OnSelected(const SelectedSubmesh& m_SelectedSubmeshes);
-
-		std::vector<SelectedSubmesh> m_SelectedSubmeshes;
-		glm::mat4* m_CurrentlySelectedTransform = nullptr;
 		SelectionMode m_SelectionMode = SelectionMode::Entity;
+
+		glm::mat4* m_CurrentlySelectedTransform = nullptr;
 	};
 }
 

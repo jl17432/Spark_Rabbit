@@ -1,6 +1,13 @@
 #pragma once
 #include "SparkRabbit/Scene/Scene.h"
-#include"SparkRabbit/Scene/Entity.h"
+#include "SparkRabbit/Scene/Entity.h"
+#include "SparkRabbit/Renderer/Mesh.h"
+#include "SparkRabbit/Math/Math.h"
+#include "SparkRabbit/Scene/Components.h"
+
+#include "imgui/imgui.h"
+#include <imgui/imgui_internal.h>
+#include "SparkRabbit/ImGui/ImGui.h"
 
 namespace SparkRabbit {
 

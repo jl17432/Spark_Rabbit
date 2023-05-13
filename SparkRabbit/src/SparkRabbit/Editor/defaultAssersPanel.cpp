@@ -5,7 +5,7 @@
 namespace SparkRabbit {
 	defaultAssetsPanel::defaultAssetsPanel()
 	{
-		m_CubeImage = Texture2D::Create("assets/editor/asset.png");
+		m_CubeImage = Texture2D::Create("Resources/Icons/asset.png");
 	}
 	void defaultAssetsPanel::OnImGuiRender()
 	{
@@ -14,14 +14,16 @@ namespace SparkRabbit {
 		std::string capsulePath = "assets/meshes/Capsule.fbx";
 		std::string cylinderPath = "assets/meshes/Cylindrical.fbx";
 		std::string torusPath = "assets/meshes/torus.fbx";
-		std::string chocolatePath = "assets/meshes/qiaokeli.fbx";
-		std::string gunPath = "assets/meshes/shougun.fbx";
+		std::string chocolatePath = "assets/meshes/chocolate.fbx";
+		std::string gunPath = "assets/meshes/gun.fbx";
+		std::string planePath = "assets/meshes/plane.fbx";
 
 
 		ImGui::Begin("Objects");
 		{
 			ImGui::BeginChild("##objects_window");
 			DrawObject("Cube", cubePath);
+			DrawObject("Plane", planePath);
 			DrawObject("Sphere", spherePath);
 			DrawObject("Capsule", capsulePath);
 			DrawObject("Cylinder", cylinderPath);

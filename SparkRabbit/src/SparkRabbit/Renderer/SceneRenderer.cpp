@@ -13,6 +13,8 @@
 
 #include <SparkRabbit/Renderer/Material.h>
 
+#include <SparkRabbit/ImGui/ImGui.h>
+
 namespace SparkRabbit {
 	struct SceneRendererData
 	{
@@ -51,9 +53,6 @@ namespace SparkRabbit {
 		float ShadowFade = 25.0f;
 		float CascadeTransitionFade = 1.0f;
 		bool CascadeFading = true;
-
-		bool EnableBloom = false;
-		float BloomThreshold = 1.5f;
 
 		glm::vec2 FocusPoint = { 0.5f, 0.5f };
 
@@ -493,7 +492,6 @@ namespace SparkRabbit {
 		s_Data.CompositeShader->SetFloat2("u_ViewportSize", glm::vec2(compositeBuffer->GetWidth(), compositeBuffer->GetHeight()));
 		s_Data.CompositeShader->SetFloat2("u_FocusPoint", s_Data.FocusPoint);
 		s_Data.CompositeShader->SetInt("u_TextureSamples", s_Data.GeoPass->GetSpecification().TargetFramebuffer->GetSpecification().Samples);
-		s_Data.CompositeShader->SetFloat("u_BloomThreshold", s_Data.BloomThreshold);
 		s_Data.GeoPass->GetSpecification().TargetFramebuffer->BindTexture();
 		Renderer::Submit([]()
 			{
@@ -549,11 +547,6 @@ namespace SparkRabbit {
 
 		cascadeSplits[3] = 0.3f;
 
-		// Manually set cascades here
-		// cascadeSplits[0] = 0.05f;
-		// cascadeSplits[1] = 0.15f;
-		// cascadeSplits[2] = 0.3f;
-		// cascadeSplits[3] = 1.0f;
 
 		// Calculate orthographic projection matrix for each cascade
 		float lastSplitDist = 0.0;
@@ -612,7 +605,7 @@ namespace SparkRabbit {
 			glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
 			glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + s_Data.CascadeNearPlaneOffset, maxExtents.z - minExtents.z + s_Data.CascadeFarPlaneOffset);
 
-			// Offset to texel space to avoid shimmering (from https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering)
+
 			glm::mat4 shadowMatrix = lightOrthoMatrix * lightViewMatrix;
 			const float ShadowMapResolution = 4096.0f;
 			glm::vec4 shadowOrigin = (shadowMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) * ShadowMapResolution / 2.0f;
@@ -651,11 +644,6 @@ namespace SparkRabbit {
 		CalculateCascades(cascades, directionalLights[0].Direction);
 		s_Data.LightViewMatrix = cascades[0].View;
 
-		Renderer::Submit([]()
-			{
-				//glEnable(GL_CULL_FACE);
-				glCullFace(GL_BACK);
-			});
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -727,12 +715,6 @@ namespace SparkRabbit {
 		s_Data.SceneData = {};
 	}
 
-	std::shared_ptr<Texture2D> SceneRenderer::GetFinalColorBuffer()
-	{
-		// return s_Data.CompositePass->GetSpecification().TargetFramebuffer;
-		SPARK_CORE_ASSERT(false, "Not implemented");
-		return nullptr;
-	}
 
 	std::shared_ptr<RenderPass> SceneRenderer::GetFinalRenderPass()
 	{
@@ -747,5 +729,35 @@ namespace SparkRabbit {
 	SceneRendererOptions& SceneRenderer::GetOptions()
 	{
 		return s_Data.Options;
+	}
+	void SceneRenderer::OnImGuiRender()
+	{
+		ImGui::Begin("Shadow Setting");
+
+		if (UI::BeginTreeNode("Shadows"))
+		{
+			UI::BeginPropertyGrid();
+			UI::Property("Soft Shadows", s_Data.SoftShadows);
+			UI::Property("Light Size", s_Data.LightSize, 0.01f);
+			UI::Property("Max Shadow Distance", s_Data.MaxShadowDistance, 1.0f);
+			UI::Property("Shadow Fade", s_Data.ShadowFade, 5.0f);
+			UI::EndPropertyGrid();
+			if (UI::BeginTreeNode("Shadow Map", false))
+			{
+				static int cascadeIndex = 0;
+				auto fb = s_Data.ShadowMapRenderPass[cascadeIndex]->GetSpecification().TargetFramebuffer;
+				auto id = fb->GetDepthAttachmentRendererID();
+
+				float size = ImGui::GetContentRegionAvailWidth();
+				UI::BeginPropertyGrid();
+				UI::PropertySlider("Cascade Index", cascadeIndex, 0, 3);
+				UI::EndPropertyGrid();
+				ImGui::Image((ImTextureID)id, { size, size }, { 0, 1 }, { 1, 0 });
+				UI::EndTreeNode();
+			}
+
+			UI::EndTreeNode();
+		}
+		ImGui::End();
 	}
 }

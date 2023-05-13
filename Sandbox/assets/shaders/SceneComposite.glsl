@@ -27,7 +27,6 @@ uniform float u_Exposure;
 uniform int u_TextureSamples;
 
 uniform bool u_EnableBloom;
-uniform float u_BloomThreshold;
 
 const float uFar = 1.0;
 

@@ -7,21 +7,25 @@ namespace SparkRabbit
 {
 	namespace Utils
 	{
+		// Determine the texture target type based on whether it is multisampled or not.
 		static GLenum TextureTarget(bool multisampled)
 		{
 			return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 		}
 
+		// Create OpenGL textures for rendering.
 		static void CreateTextures(bool multisampled, RendererID* outID, uint32_t count)
 		{
 			glCreateTextures(TextureTarget(multisampled), 1, outID);
 		}
 
+		// Bind the texture to the specified texture unit.
 		static void BindTexture(bool multisampled, RendererID id)
 		{
 			glBindTexture(TextureTarget(multisampled), id);
 		}
 
+		// Determine the data type for the given format.
 		static GLenum DataType(GLenum format)
 		{
 			switch (format)
@@ -34,10 +38,10 @@ namespace SparkRabbit
 			case GL_DEPTH24_STENCIL8: return GL_UNSIGNED_INT_24_8;
 			}
 
-			//SR_CORE_ASSERT(false, "Unknown format!");
 			return 0;
 		}
 
+		// Attach a color texture to the framebuffer.
 		static void AttachColorTexture(RendererID id, int samples, GLenum format, uint32_t width, uint32_t height, int index)
 		{
 			bool multisampled = samples > 1;
@@ -50,15 +54,18 @@ namespace SparkRabbit
 				// Only RGBA access for now
 				glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, DataType(format), nullptr);
 
+				// Set the texture parameters.
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			}
 
+			// Attach the texture to the framebuffer.
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, TextureTarget(multisampled), id, 0);
 		}
 
+		// Attach a depth texture to the framebuffer.
 		static void AttachDepthTexture(RendererID id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height)
 		{
 			bool multisampled = samples > 1;
@@ -70,15 +77,18 @@ namespace SparkRabbit
 			{
 				glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
 
+				// Set the texture parameters.
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(TextureTarget(multisampled), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			}
 
+			// Attach the texture to the framebuffer.
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(multisampled), id, 0);
 		}
 
+		// Check if the given format is a depth format.
 		static bool IsDepthFormat(FramebufferTextureFormat format)
 		{
 			switch (format)
@@ -89,11 +99,13 @@ namespace SparkRabbit
 			}
 			return false;
 		}
-
 	}
+
+	// OpenGL framebuffer class constructor.
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
 		: m_Specification(spec), m_Width(spec.Width), m_Height(spec.Height)
 	{
+		// Initialize color and depth attachment formats based on provided specification.
 		for (auto format : m_Specification.Attachments.Attachments)
 		{
 			if (!Utils::IsDepthFormat(format.TextureFormat))
@@ -107,13 +119,16 @@ namespace SparkRabbit
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
+		// Submit a task to delete the framebuffer when it's no longer needed.
 		Renderer::Submit([this]() {
 			glDeleteFramebuffers(1, &this->m_RendererID);
 			});
 	}
 
+	// Resize the framebuffer.
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height, bool forceRecreate)
 	{
+		// If the size hasn't changed and forceRecreate is not set, no need to resize.
 		if (!forceRecreate && (m_Width == width && m_Height == height))
 			return;
 
@@ -121,20 +136,10 @@ namespace SparkRabbit
 		m_Height = height;
 
 
+		// Submit a task to recreate the framebuffer and its attachments with the new size.
 		Renderer::Submit([this]() mutable
 			{
-				if (this->m_RendererID)
-				{
-					glDeleteFramebuffers(1, &this->m_RendererID);
-					glDeleteTextures(this->m_ColorAttachments.size(), this->m_ColorAttachments.data());
-					glDeleteTextures(1, &this->m_DepthAttachment);
-
-					this->m_ColorAttachments.clear();
-					this->m_DepthAttachment = 0;
-				}
-
-				glGenFramebuffers(1, &this->m_RendererID);
-				glBindFramebuffer(GL_FRAMEBUFFER, this->m_RendererID);
+				GenerateFramebuffer(&this->m_RendererID, this->m_ColorAttachments, &this->m_DepthAttachment);
 
 				bool multisample = this->m_Specification.Samples > 1;
 
@@ -184,7 +189,6 @@ namespace SparkRabbit
 
 				if (this->m_ColorAttachments.size() > 1)
 				{
-					//HZ_CORE_ASSERT(this->m_ColorAttachments.size() <= 4);
 					GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 					glDrawBuffers(this->m_ColorAttachments.size(), buffers);
 				}
@@ -194,110 +198,7 @@ namespace SparkRabbit
 					glDrawBuffer(GL_NONE);
 				}
 
-#if 0
 
-				if (multisample)
-				{
-					glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, &m_ColorAttachment);
-					glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_ColorAttachment);
-
-					// TODO: Create Hazel texture object based on format here
-					if (m_Specification.Format == FramebufferFormat::RGBA16F)
-					{
-						glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.Samples, GL_RGBA16F, m_Specification.Width, m_Specification.Height, GL_FALSE);
-					}
-					else if (m_Specification.Format == FramebufferFormat::RGBA8)
-					{
-						glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.Samples, GL_RGBA8, m_Specification.Width, m_Specification.Height, GL_FALSE);
-					}
-					// glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					// glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-				}
-				else
-				{
-					glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachment);
-					glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);
-
-					// TODO: Create Hazel texture object based on format here
-					if (m_Specification.Format == FramebufferFormat::RGBA16F)
-					{
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, GL_FLOAT, nullptr);
-					}
-					else if (m_Specification.Format == FramebufferFormat::RG32F) // "Shadow" for now
-					{
-						glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, m_Specification.Width, m_Specification.Height);
-						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ColorAttachment, 0);
-						glDrawBuffer(GL_NONE);
-					}
-					else if (m_Specification.Format == FramebufferFormat::RGBA8)
-					{
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-					}
-					else if (m_Specification.Format == FramebufferFormat::COMP)
-					{
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, GL_FLOAT, nullptr);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-						glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachment2);
-						glBindTexture(GL_TEXTURE_2D, m_ColorAttachment2);
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, GL_FLOAT, nullptr);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-					}
-
-					if (m_Specification.Format != FramebufferFormat::RG32F)
-					{
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment, 0);
-					}
-				}
-
-				if (multisample)
-				{
-					glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, &m_DepthAttachment);
-					glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_DepthAttachment);
-					glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.Samples, GL_DEPTH24_STENCIL8, m_Specification.Width, m_Specification.Height, GL_FALSE);
-					glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-				}
-				else if (m_Specification.Format != FramebufferFormat::RG32F)
-				{
-					glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment);
-					glBindTexture(GL_TEXTURE_2D, m_DepthAttachment);
-					glTexImage2D(
-						GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, m_Specification.Width, m_Specification.Height, 0,
-						GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL
-					);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthAttachment, 0);
-				}
-
-				if (m_Specification.Format != FramebufferFormat::RG32F)
-				{
-					if (multisample)
-					{
-						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_ColorAttachment, 0);
-					}
-					else
-					{
-						glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_ColorAttachment, 0);
-						if (m_Specification.Format == FramebufferFormat::COMP)
-						{
-							glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, m_ColorAttachment2, 0);
-							const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-							glDrawBuffers(2, buffers);
-						}
-					}
-
-					glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, m_DepthAttachment, 0);
-				}
-#endif
-
-				//SR_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			});
@@ -323,6 +224,27 @@ namespace SparkRabbit
 		Renderer::Submit([this, attachmentIndex, slot]() {
 			glBindTextureUnit(slot, this->m_ColorAttachments[attachmentIndex]);
 		});
+	}
+	void OpenGLFramebuffer::GenerateFramebuffer(RendererID* rendererID, std::vector<RendererID>& colorAttachments, RendererID* depthAttachment)
+	{
+		if (*rendererID) 
+		{
+			glDeleteFramebuffers(1, rendererID); 
+			glDeleteTextures(colorAttachments.size(), colorAttachments.data()); 
+			glDeleteTextures(1, depthAttachment); 
+
+			colorAttachments.clear(); 
+			*depthAttachment = 0; 
+		}
+
+		glGenFramebuffers(1, rendererID);  
+		glBindFramebuffer(GL_FRAMEBUFFER, *rendererID); 
+	}
+
+	OpenGLRenderPass::OpenGLRenderPass(const RenderPassSpecification& spec)
+		: m_Specification(spec)
+	{
+
 	}
 }
  

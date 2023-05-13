@@ -1,27 +1,11 @@
 #include "EditorLayer.h"
 
-#include "SparkRabbit/ImGui/ImGuizmo.h"
-#include "SparkRabbit/Renderer/Renderer2D.h"
-#include"SparkRabbit/Asset/AssetManager.h"
-#include"SparkRabbit/Math/Math.h"
-
 namespace SparkRabbit{
-	static void ImGuiShowHelpMarker(const char* desc)
-	{
-		ImGui::TextDisabled("(?)");
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(desc);
-			ImGui::PopTextWrapPos();
-			ImGui::EndTooltip();
-		}
-	}
-
 	EditorLayer::EditorLayer()
-		: m_SceneType(SceneType::Model), m_ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f))
+		: m_EditorCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f))
 	{
+		m_ViewportBounds[0] = glm::vec2(0.0f);
+		m_ViewportBounds[1] = glm::vec2(0.0f);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -32,18 +16,21 @@ namespace SparkRabbit{
 	{
 		using namespace glm;
 
-		m_CheckerboardTex = Texture2D::Create("assets/editor/Checkerboard.tga");
-		m_playButtonTex = Texture2D::Create("assets/editor/playButton.png");
-		m_stopButtonTex = Texture2D::Create("assets/editor/stopButton.png");
+		// Load button icon texture
+		m_CheckerboardTex = Texture2D::Create("Resources/Icons/Checkerboard.tga");
+		m_playButtonTex = Texture2D::Create("Resources/Icons/playButton.png");
+		m_stopButtonTex = Texture2D::Create("Resources/Icons/stopButton.png");
 
-		//create Editor panel
+		// Create Editor panel
 		m_SceneHierarchyPanel = std::make_unique<SceneHierarchyPanel>(m_EditorScene);
 		m_AssetFilePanel = std::make_unique<FileSystemPanel>();
 		m_defaultAssetsPanel = std::make_unique<defaultAssetsPanel>();
 
+		// Set scene hierarchy event callback
 		m_SceneHierarchyPanel->SetSelectionChangedCallback(std::bind(&EditorLayer::SelectEntity, this, std::placeholders::_1));
 		m_SceneHierarchyPanel->SetEntityDeletedCallback(std::bind(&EditorLayer::OnEntityDeleted, this, std::placeholders::_1));
 
+		// Create new Scene
 		NewScene();
 	}
 
@@ -55,6 +42,7 @@ namespace SparkRabbit{
 	{
 		m_SelectedSubmeshes.clear();
 
+		// Set local Scene to playmode
 		m_SceneState = SceneState::Play;
 
 		m_PlayScene = std::make_shared<Scene>();
@@ -69,7 +57,7 @@ namespace SparkRabbit{
 		m_PlayScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
 
-		//upload runtime scene
+		// Upload runtime scene
 		m_PlayScene = nullptr;
 
 		m_SelectedSubmeshes.clear();
@@ -83,33 +71,18 @@ namespace SparkRabbit{
 			case SceneState::Edit:
 			{
 				if (m_AllowViewportCameraEvents)
-					m_ProjectiveCamera.OnUpdate(ts);
+					m_EditorCamera.OnUpdate(ts);
 
-				m_EditorScene->OnRenderEditor(ts, m_ProjectiveCamera);
+				m_EditorScene->OnRenderEditor(ts, m_EditorCamera);
 
+				// Draw bounding box
 				if (m_DrawOnTopBoundingBoxes)
 				{
 					Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
-					auto viewProj = m_ProjectiveCamera.GetViewProjection();
+					auto viewProj = m_EditorCamera.GetViewProjection();
 					Renderer2D::BeginScene(viewProj, false);
 					Renderer2D::EndScene();
 					Renderer::EndRenderPass();
-				}
-
-				if (m_SelectedSubmeshes.size() && false)
-				{
-					auto& selection = m_SelectedSubmeshes[0];
-
-					if (selection.Mesh && selection.Entity.HasComponent<MeshComponent>())
-					{
-						Renderer::BeginRenderPass(SceneRenderer::GetFinalRenderPass(), false);
-						auto viewProj = m_ProjectiveCamera.GetViewProjection();
-						Renderer2D::BeginScene(viewProj, false);
-						glm::vec4 color = (m_SelectionMode == SelectionMode::Entity) ? glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f } : glm::vec4{ 0.2f, 0.9f, 0.2f, 1.0f };
-						Renderer::DrawBoundingBox(selection.Mesh->Box, selection.Entity.GetComponent<TransformComponent>().GetTransform() * selection.Mesh->Transform, color);
-						Renderer2D::EndScene();
-						Renderer::EndRenderPass();
-					}
 				}
 				break;
 			}
@@ -117,17 +90,8 @@ namespace SparkRabbit{
 			case SceneState::Play:
 			{
 				if (m_AllowViewportCameraEvents)
-					m_ProjectiveCamera.OnUpdate(ts);
+					m_EditorCamera.OnUpdate(ts);
 				m_PlayScene->OnUpdate(ts);
-				m_PlayScene->OnRenderRuntime(ts);
-				break;
-			}
-
-			case SceneState::Pause:
-			{
-				if(m_AllowViewportCameraEvents)
-					m_ProjectiveCamera.OnUpdate(ts);
-
 				m_PlayScene->OnRenderRuntime(ts);
 				break;
 			}
@@ -224,10 +188,9 @@ namespace SparkRabbit{
 		ImGui::NextColumn();
 	}
 
-	void EditorLayer::ShowBoundingBoxes(bool show, bool onTop)
+	void EditorLayer::ShowBoundingBoxes(bool show)
 	{
-		SceneRenderer::GetOptions().ShowBoundingBoxes = show && !onTop;
-		m_DrawOnTopBoundingBoxes = show && onTop;
+		SceneRenderer::GetOptions().ShowBoundingBoxes = show;
 	}
 
 	void EditorLayer::NewScene()
@@ -235,7 +198,7 @@ namespace SparkRabbit{
 		m_EditorScene = std::make_shared<Scene>("Scene 0 ", true);
 		m_SceneHierarchyPanel->SetContext(m_EditorScene);
 
-		m_ProjectiveCamera = ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f));
+		m_EditorCamera = ProjectiveCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f));
 	}
 
 	void EditorLayer::SelectEntity(Entity entity)
@@ -306,49 +269,70 @@ namespace SparkRabbit{
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
 		}
 
-		// Editor Panel ------------------------------------------------------------------------------
+		// Environment Panel
 		ImGui::Begin("Environment");
 
+		// Slider for controlling Skybox LOD
 		ImGui::SliderFloat("Skybox LOD", &m_EditorScene->GetSkyboxLod(), 0.0f, 11.0f);
 
+		// Create two columns for properties
 		ImGui::Columns(2);
 		ImGui::AlignTextToFramePadding();
 
+		// Get the light from the editor scene
 		auto& light = m_EditorScene->GetLight();
+
+		// Property for light direction
 		Property("Light Direction", light.Direction);
+
+		// Property for light radiance with color picker
 		Property("Light Radiance", light.Radiance, PropertyFlag::ColorProperty);
+
+		// Property for light multiplier with range
 		Property("Light Multiplier", light.Multiplier, 0.0f, 5.0f);
 
-		Property("Exposure", m_ProjectiveCamera.GetExposure(), 0.0f, 5.0f);
 
+		Property("Exposure", m_EditorCamera.GetExposure(), 0.0f, 5.0f);
+
+		// Property for radiance prefiltering
 		Property("Radiance Prefiltering", m_RadiancePrefilter);
+
+		// Property for environment map rotation with range
 		Property("Env Map Rotation", m_EnvMapRotation, -360.0f, 360.0f);
 
+		// Property for showing bounding boxes with checkbox
 		if (Property("Show Bounding Boxes", m_UIShowBoundingBoxes))
-			ShowBoundingBoxes(m_UIShowBoundingBoxes, m_UIShowBoundingBoxesOnTop);
-		if (m_UIShowBoundingBoxes && Property("On Top", m_UIShowBoundingBoxesOnTop))
-			ShowBoundingBoxes(m_UIShowBoundingBoxes, m_UIShowBoundingBoxesOnTop);
+			ShowBoundingBoxes(m_UIShowBoundingBoxes);
 
+		// End columns
 		ImGui::Columns(1);
 
 		ImGui::End();
 
+		// Render the scene hierarchy panel, asset file panel, and default assets panel
 		m_SceneHierarchyPanel->OnImGuiRender();
 		m_AssetFilePanel->OnImGuiRender();
 		m_defaultAssetsPanel->OnImGuiRender();
+		SceneRenderer::OnImGuiRender();
 
+		// Begin menu bar
 		if (ImGui::BeginMenuBar())
 		{
+			// File menu
 			if (ImGui::BeginMenu("File"))
 			{
+				// New Scene option
 				if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 					NewScene();
+
 				ImGui::EndMenu();
 			}
 
 			ImGui::EndMenuBar();
 		}
 
+
+		//Material Panel
 		ImGui::Begin("Materials");
 
 		if (m_SelectedSubmeshes.size())
@@ -361,12 +345,16 @@ namespace SparkRabbit{
 				{
 					auto& materials = mesh->GetMaterials();
 					static uint32_t selectedMaterialIndex = 0;
+
+					// Iterate through materials
 					for (uint32_t i = 0; i < materials.size(); i++)
 					{
 						auto& materialInstance = materials[i];
 
 						ImGuiTreeNodeFlags node_flags = (selectedMaterialIndex == i ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_Leaf;
 						bool opened = ImGui::TreeNodeEx((void*)(&materialInstance), node_flags, materialInstance->GetName().c_str());
+
+						// Check if material is clicked
 						if (ImGui::IsItemClicked())
 						{
 							selectedMaterialIndex = i;
@@ -382,8 +370,7 @@ namespace SparkRabbit{
 					if (selectedMaterialIndex < materials.size())
 					{
 						auto& materialInstance = materials[selectedMaterialIndex];
-						ImGui::Text("Shader: %s", materialInstance->GetShader()->GetName().c_str());
-						// Textures ------------------------------------------------------------------------------
+						// Textures
 						{
 							// Albedo
 							if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
@@ -393,8 +380,12 @@ namespace SparkRabbit{
 								auto& albedoColor = materialInstance->Get<glm::vec3>("u_AlbedoColor");
 								bool useAlbedoMap = materialInstance->Get<float>("u_AlbedoTexToggle");
 								std::shared_ptr<Texture2D> albedoMap = materialInstance->TryGetResource<Texture2D>("u_AlbedoTexture");
+
+								// Display albedo map
 								ImGui::Image(albedoMap ? (void*)albedoMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
 								ImGui::PopStyleVar();
+
+								// Show tooltip for albedo map
 								if (ImGui::IsItemHovered())
 								{
 									if (albedoMap)
@@ -406,6 +397,8 @@ namespace SparkRabbit{
 										ImGui::Image((void*)albedoMap->GetRendererID(), ImVec2(384, 384));
 										ImGui::EndTooltip();
 									}
+
+									// Open file dialog when albedo map is clicked
 									if (ImGui::IsItemClicked())
 									{
 										std::string filename = Application::Get().OpenFile("");
@@ -418,11 +411,15 @@ namespace SparkRabbit{
 								}
 								ImGui::SameLine();
 								ImGui::BeginGroup();
+
+								// Checkbox for enabling albedo map
 								if (ImGui::Checkbox("Use##AlbedoMap", &useAlbedoMap))
 									materialInstance->Set<float>("u_AlbedoTexToggle", useAlbedoMap ? 1.0f : 0.0f);
 
 								ImGui::EndGroup();
 								ImGui::SameLine();
+
+								// Color picker for albedo color
 								ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(albedoColor), ImGuiColorEditFlags_NoInputs);
 							}
 						}
@@ -433,8 +430,12 @@ namespace SparkRabbit{
 								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
 								bool useNormalMap = materialInstance->Get<float>("u_NormalTexToggle");
 								std::shared_ptr<Texture2D> normalMap = materialInstance->TryGetResource<Texture2D>("u_NormalTexture");
+
+								// Display normal map
 								ImGui::Image(normalMap ? (void*)normalMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
 								ImGui::PopStyleVar();
+
+								// Show tooltip for normal map
 								if (ImGui::IsItemHovered())
 								{
 									if (normalMap)
@@ -446,6 +447,8 @@ namespace SparkRabbit{
 										ImGui::Image((void*)normalMap->GetRendererID(), ImVec2(384, 384));
 										ImGui::EndTooltip();
 									}
+
+									// Open file dialog when normal map is clicked
 									if (ImGui::IsItemClicked())
 									{
 										std::string filename = Application::Get().OpenFile("");
@@ -457,6 +460,8 @@ namespace SparkRabbit{
 									}
 								}
 								ImGui::SameLine();
+
+								// Checkbox for enabling normal map
 								if (ImGui::Checkbox("Use##NormalMap", &useNormalMap))
 									materialInstance->Set<float>("u_NormalTexToggle", useNormalMap ? 1.0f : 0.0f);
 							}
@@ -469,8 +474,12 @@ namespace SparkRabbit{
 								float& metalnessValue = materialInstance->Get<float>("u_Metalness");
 								bool useMetalnessMap = materialInstance->Get<float>("u_MetalnessTexToggle");
 								std::shared_ptr<Texture2D> metalnessMap = materialInstance->TryGetResource<Texture2D>("u_MetalnessTexture");
+
+								// Display metalness map
 								ImGui::Image(metalnessMap ? (void*)metalnessMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
 								ImGui::PopStyleVar();
+
+								// Show tooltip for metalness map
 								if (ImGui::IsItemHovered())
 								{
 									if (metalnessMap)
@@ -482,6 +491,8 @@ namespace SparkRabbit{
 										ImGui::Image((void*)metalnessMap->GetRendererID(), ImVec2(384, 384));
 										ImGui::EndTooltip();
 									}
+
+									// Open file dialog when metalness map is clicked
 									if (ImGui::IsItemClicked())
 									{
 										std::string filename = Application::Get().OpenFile("");
@@ -493,6 +504,8 @@ namespace SparkRabbit{
 									}
 								}
 								ImGui::SameLine();
+
+								// Checkbox for enabling metalness map
 								if (ImGui::Checkbox("Use##MetalnessMap", &useMetalnessMap))
 									materialInstance->Set<float>("u_MetalnessTexToggle", useMetalnessMap ? 1.0f : 0.0f);
 								ImGui::SameLine();
@@ -507,8 +520,12 @@ namespace SparkRabbit{
 								float& roughnessValue = materialInstance->Get<float>("u_Roughness");
 								bool useRoughnessMap = materialInstance->Get<float>("u_RoughnessTexToggle");
 								std::shared_ptr<Texture2D> roughnessMap = materialInstance->TryGetResource<Texture2D>("u_RoughnessTexture");
+
+								// Display roughness map
 								ImGui::Image(roughnessMap ? (void*)roughnessMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
 								ImGui::PopStyleVar();
+
+								//// Show tooltip for roughness map
 								if (ImGui::IsItemHovered())
 								{
 									if (roughnessMap)
@@ -520,6 +537,8 @@ namespace SparkRabbit{
 										ImGui::Image((void*)roughnessMap->GetRendererID(), ImVec2(384, 384));
 										ImGui::EndTooltip();
 									}
+
+									// Open file dialog when roughness map is clicked
 									if (ImGui::IsItemClicked())
 									{
 										std::string filename = Application::Get().OpenFile("");
@@ -531,6 +550,8 @@ namespace SparkRabbit{
 									}
 								}
 								ImGui::SameLine();
+
+								// Checkbox for enabling roughness map
 								if (ImGui::Checkbox("Use##RoughnessMap", &useRoughnessMap))
 									materialInstance->Set<float>("u_RoughnessTexToggle", useRoughnessMap ? 1.0f : 0.0f);
 								ImGui::SameLine();
@@ -541,9 +562,10 @@ namespace SparkRabbit{
 				}
 			}
 		}
-
 		ImGui::End();
 
+
+		// Viewport Panel
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport");
 
@@ -551,6 +573,8 @@ namespace SparkRabbit{
 		float buttonWidth = 32.0f;
 		float buttonPosX = (viewportSize.x - buttonWidth) / 2.0f;
 
+		// Set play and stop button
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 		if (m_SceneState == SceneState::Edit)
 		{
 			ImGui::SetCursorPosX(buttonPosX);
@@ -571,15 +595,18 @@ namespace SparkRabbit{
 			if (ImGui::IsItemHovered())
 				ImGui::SetTooltip("Stop");
 		}
+		ImGui::PopStyleColor();
 
+
+		// Set viewport
 		viewportSize = ImGui::GetContentRegionAvail();
 		auto viewportOffset = ImGui::GetCursorPos();
 		SceneRenderer::SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		m_EditorScene->SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		if(m_PlayScene)
 			m_PlayScene->SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-		m_ProjectiveCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 1000.0f));
-		m_ProjectiveCamera.SetViewport((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+		m_EditorCamera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 1000.0f));
+		m_EditorCamera.SetViewport((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 		ImGui::Image((void*)SceneRenderer::GetFinalColorBufferRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
 
 		static int counter = 0;
@@ -598,23 +625,31 @@ namespace SparkRabbit{
 		{
 			auto& selection = m_SelectedSubmeshes[0];
 
+			// Get window dimensions
 			float rw = (float)ImGui::GetWindowWidth();
 			float rh = (float)ImGui::GetWindowHeight();
+
+			// Set up ImGuizmo
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
 
+			// Check if snap is enabled
 			bool snap = Input::IsKeyPressed(SR_KEY_LEFT_CONTROL);
 
+			// Get the transform component of the selected entity
 			TransformComponent& entityTransform = selection.Entity.Transform();
 			glm::mat4 transform = m_Scene->GetTransformRelativeToParent(selection.Entity);
+
+			// Set snap values for translation, rotation, and scale
 			float snapValue = GetSnapValue();
 			float snapValues[3] = { snapValue, snapValue, snapValue };
 
 			if (m_SelectionMode == SelectionMode::Entity)
 			{
-				ImGuizmo::Manipulate(glm::value_ptr(m_ProjectiveCamera.GetView()),
-					glm::value_ptr(m_ProjectiveCamera.GetProjectionMatrix()),
+				// Manipulate the entity transform using ImGuizmo
+				ImGuizmo::Manipulate(glm::value_ptr(m_EditorCamera.GetView()),
+					glm::value_ptr(m_EditorCamera.GetProjectionMatrix()),
 					(ImGuizmo::OPERATION)m_GizmoType,
 					ImGuizmo::LOCAL,
 					glm::value_ptr(transform),
@@ -623,9 +658,11 @@ namespace SparkRabbit{
 
 				if (ImGuizmo::IsUsing())
 				{
+					// Decompose the transform into translation, rotation, and scale
 					glm::vec3 translation, rotation, scale;
 					Math::DecomposeTransform(transform, translation, rotation, scale);
 
+					// Handle the case where the entity has a parent
 					Entity parent = m_Scene->FindEntityByUUID(selection.Entity.GetParentUUID());
 					if (parent)
 					{
@@ -639,6 +676,7 @@ namespace SparkRabbit{
 					}
 					else
 					{
+						// Handle the case where the entity does not have a parent
 						glm::vec3 deltaRotation = rotation - entityTransform.Rotation;
 						entityTransform.Translation = translation;
 						entityTransform.Rotation += deltaRotation;
@@ -648,15 +686,17 @@ namespace SparkRabbit{
 			}
 			else
 			{
+				// Manipulate the submesh transform using ImGuizmo
 				glm::mat4 transformBase = transform * selection.Mesh->Transform;
-				ImGuizmo::Manipulate(glm::value_ptr(m_ProjectiveCamera.GetView()),
-					glm::value_ptr(m_ProjectiveCamera.GetProjectionMatrix()),
+				ImGuizmo::Manipulate(glm::value_ptr(m_EditorCamera.GetView()),
+					glm::value_ptr(m_EditorCamera.GetProjectionMatrix()),
 					(ImGuizmo::OPERATION)m_GizmoType,
 					ImGuizmo::LOCAL,
 					glm::value_ptr(transformBase),
 					nullptr,
 					snap ? snapValues : nullptr);
 
+				// Update the submesh transform
 				selection.Mesh->Transform = glm::inverse(transform) * transformBase;
 			}
 		}
@@ -679,7 +719,6 @@ namespace SparkRabbit{
 			}
 			ImGui::EndDragDropTarget();
 		}
-
 		ImGui::End();
 		ImGui::PopStyleVar();
 
@@ -689,9 +728,7 @@ namespace SparkRabbit{
 	void EditorLayer::OnEvent(Event& e)
 	{
 		if (m_AllowViewportCameraEvents)
-			m_ProjectiveCamera.OnEvent(e);
-
-		m_EditorScene->OnEvent(e);
+			m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SR_BIND_EVENT_FN(EditorLayer::OnKeyPressedEvent));
@@ -724,7 +761,7 @@ namespace SparkRabbit{
 			if (Input::IsKeyPressed(SR_KEY_LEFT_CONTROL))
 			{
 				m_UIShowBoundingBoxes = !m_UIShowBoundingBoxes;
-				ShowBoundingBoxes(m_UIShowBoundingBoxes, m_UIShowBoundingBoxesOnTop);
+				ShowBoundingBoxes(m_UIShowBoundingBoxes);
 			}
 			break;
 		}
@@ -804,11 +841,11 @@ namespace SparkRabbit{
 	{
 		glm::vec4 mouseClipPos = { mx, my, -1.0f, 1.0f };
 
-		auto inverseProj = glm::inverse(m_ProjectiveCamera.GetProjection());
-		auto inverseView = glm::inverse(glm::mat3(m_ProjectiveCamera.GetView()));
+		auto inverseProj = glm::inverse(m_EditorCamera.GetProjection());
+		auto inverseView = glm::inverse(glm::mat3(m_EditorCamera.GetView()));
 
 		glm::vec4 ray = inverseProj * mouseClipPos;
-		glm::vec3 rayPos = m_ProjectiveCamera.GetPosition();
+		glm::vec3 rayPos = m_EditorCamera.GetPosition();
 		glm::vec3 rayDir = inverseView * glm::vec3(ray);
 
 		return { rayPos, rayDir };

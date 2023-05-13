@@ -11,10 +11,12 @@
 // bullet3
 #include "bullet3/include/bullet/btBulletDynamicsCommon.h"
 #include "bullet3/include/bullet/LinearMath/btScalar.h"
+
 class b2World;
 
 namespace SparkRabbit {
 
+	// Light struct for storing light attributes
 	struct Light
 	{
 		glm::vec3 Direction = { 0.0f, 0.0f, 0.0f };
@@ -33,6 +35,7 @@ namespace SparkRabbit {
 		bool CastShadows = true;
 	};
 
+	//for managing multiple Directional Lights
 	struct LightEnvironment
 	{
 		DirectionalLight DirectionalLights[4];
@@ -41,6 +44,7 @@ namespace SparkRabbit {
 	class Entity;
 	using EntityMap = std::unordered_map<UUID, Entity>;
 
+	//for managing all entities in the scene and their components
 	class Scene
 	{
 	public:
@@ -49,19 +53,34 @@ namespace SparkRabbit {
 
 		void Init();
 		void OnUpdate(TickTime ts);
-		void OnRenderRuntime(TickTime ts);
-		void OnRenderEditor(TickTime ts, const ProjectiveCamera& projectiveCamera);
+
 		void OnEvent(Event& e);
 
-		//Runtime
+		void Update3DBodies(TickTime ts);
+		Camera* FindFirstCameraInScene();
+		void OnRenderRuntime(TickTime ts);
+		void OnRenderEditor(TickTime ts, const ProjectiveCamera& projectiveCamera);
+
+		//Runtime update
+		void UpdateCameraMovement(TickTime ts, Entity& cameraEntity);
+		void SetupDirectionalLights();
+		void RenderMeshesInScene(TickTime ts);
+
+		// 3d physics
+		void Init3DPhysics();
+		void Create3DBody(Entity& entity);
+
+		void CreateCircleFixture(Entity& entity);
+
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 
 		void SetViewportSize(uint32_t width, uint32_t height);
 
 		const std::shared_ptr<Environments>& GetEnvironment() const { return m_Environment; }
-		void SetSkybox(const std::shared_ptr<TextureCube>& skybox);
 
+		void SetSkybox(const std::shared_ptr<TextureCube>& skybox);
+		void SetupSkyLight();
 		Light& GetLight() { return m_Light; }
 		const Light& GetLight() const { return m_Light; }
 

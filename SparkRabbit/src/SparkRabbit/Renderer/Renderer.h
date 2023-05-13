@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CmdQueue.h"
-#include "RenderPass.h"
+#include "Framebuffer.h"
 #include "Mesh.h"
 
 namespace SparkRabbit {

@@ -7,8 +7,8 @@ namespace SparkRabbit {
 	public:
 		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
 	public:
-		SceneCamera();
-		virtual ~SceneCamera();
+		SceneCamera() {};
+		virtual ~SceneCamera() {};
 
 		void SetPerspective(float verticalFOV, float nearClip = 0.01f, float farClip = 10000.0f);
 		void SetOrthographic(float size, float nearClip = -1.0f, float farClip = 1.0f);
@@ -33,9 +33,11 @@ namespace SparkRabbit {
 	private:
 		ProjectionType m_ProjectionType = ProjectionType::Perspective;
 
+		// Perspective projection settings
 		float m_PerspectiveFOV = glm::radians(45.0f);
 		float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 10000.0f;
 
+		// Orthographic projection settings
 		float m_OrthographicSize = 10.0f;
 		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
 	};

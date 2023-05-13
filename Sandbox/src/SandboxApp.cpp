@@ -22,5 +22,5 @@ public:
 
 SparkRabbit::Application* SparkRabbit::CreateApplication()
 {
-	return new Sandbox({ "SparkRabbit Engine", 1600, 900 });
+	return new Sandbox({ "SparkRabbit Engine", 1980, 1080 });
 }

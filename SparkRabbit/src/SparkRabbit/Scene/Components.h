@@ -42,6 +42,7 @@ namespace SparkRabbit {
 			: ParentHandle(parent) {}
 	};
 
+	//Represents the transformation of an object in 3D space (including position, rotation and scaling)
 	struct TransformComponent
 	{
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };

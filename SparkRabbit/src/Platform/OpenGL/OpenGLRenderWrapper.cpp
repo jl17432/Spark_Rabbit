@@ -11,7 +11,6 @@ namespace SparkRabbit {
 		{
 		case GL_DEBUG_SEVERITY_HIGH:
 			SPARK_CORE_ERROR("[OpenGL Debug HIGH] {0}", message);
-			//SPARK_CORE_ASSERT(false, "GL_DEBUG_SEVERITY_HIGH");
 			break;
 		case GL_DEBUG_SEVERITY_MEDIUM:
 			SPARK_CORE_WARN("[OpenGL Debug MEDIUM] {0}", message);
@@ -35,10 +34,8 @@ namespace SparkRabbit {
 		glBindVertexArray(vao);
 
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		glFrontFace(GL_CCW);
+		glFrontFace(GL_CCW); 
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -64,12 +61,10 @@ namespace SparkRabbit {
 			error = glGetError();
 		}
 
-		//LoadRequiredAssets(); 
 	}
 
 	void RenderAPI::Shutdown()
 	{
-		//UnloadRequiredAssets(); 
 	}
 
 	void RenderAPI::Clear(float r, float g, float b, float a)

@@ -15,7 +15,6 @@
 
 #include "SparkRabbit/Renderer/Renderer.h"
 #include "SparkRabbit/Renderer/SceneRenderer.h"
-#include "SparkRabbit/Renderer/RenderPass.h"
 #include "SparkRabbit/Renderer/Framebuffer.h"
 #include "SparkRabbit/Renderer/Buffer.h"
 #include "SparkRabbit/Renderer/VertexArray.h"

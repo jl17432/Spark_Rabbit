@@ -36,6 +36,23 @@ namespace SparkRabbit {
 		FramebufferTextureFormat m_DepthAttachmentFormat = FramebufferTextureFormat::None;
 
 		uint32_t m_Width = 0, m_Height = 0;
+
+		static void GenerateFramebuffer(RendererID* rendererID, std::vector<RendererID>& colorAttachments, RendererID* depthAttachment);
+	};
+
+
+	class OpenGLRenderPass : public RenderPass
+	{
+	public:
+		OpenGLRenderPass(const RenderPassSpecification& spec);
+		~OpenGLRenderPass() = default;
+
+		virtual const RenderPassSpecification& GetSpecification() const override { return m_Specification; }
+
+
+	private:
+		RenderPassSpecification m_Specification;
+
 	};
 
 }

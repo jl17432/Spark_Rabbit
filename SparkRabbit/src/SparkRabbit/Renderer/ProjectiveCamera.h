@@ -32,8 +32,6 @@ namespace SparkRabbit{
 		inline const glm::vec3& GetPosition() const { return m_Position; }
 
 		inline void SetViewport(uint32_t width, uint32_t height) { m_Width = width; m_Height = height; }
-
-		inline float& GetExposure() { return m_Exposure; }
 	
 	private:
 		void UpdateCameraView();

@@ -1,6 +1,6 @@
 #pragma once
 #include "SparkRabbit/Scene/Scene.h"
-#include "RenderPass.h"
+#include "Framebuffer.h"
 #include"SparkRabbit/Renderer/Mesh.h"
 
 namespace SparkRabbit {
@@ -41,6 +41,7 @@ namespace SparkRabbit {
 		static uint32_t GetFinalColorBufferRendererID();
 
 		static SceneRendererOptions& GetOptions();
+		static void OnImGuiRender();
 	private:
 		static void FlushDrawList();
 		static void GeometryPass();

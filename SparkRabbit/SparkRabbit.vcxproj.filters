@@ -69,9 +69,6 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRenderPass.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
@@ -202,9 +199,6 @@
       <Filter>src\SparkRabbit\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\SparkRabbit\Renderer\RenderContext.h">
-      <Filter>src\SparkRabbit\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SparkRabbit\Renderer\RenderPass.h">
       <Filter>src\SparkRabbit\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\SparkRabbit\Renderer\Renderer.h">
@@ -1352,9 +1346,6 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRenderPass.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLRenderWrapper.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
@@ -1440,9 +1431,6 @@
       <Filter>src\SparkRabbit\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Renderer\ProjectiveCamera.cpp">
-      <Filter>src\SparkRabbit\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SparkRabbit\Renderer\RenderPass.cpp">
       <Filter>src\SparkRabbit\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\SparkRabbit\Renderer\Renderer.cpp">

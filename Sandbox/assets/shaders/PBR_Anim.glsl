@@ -123,8 +123,6 @@ uniform vec4 u_CascadeSplits;
 
 uniform float u_IBLContribution;
 
-uniform float u_BloomThreshold;
-
 ////////////////////////////////////////
 
 uniform vec3 u_AlbedoColor;
@@ -603,8 +601,6 @@ void main()
 	// Bloom
 	float brightness = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
 	o_BloomColor = vec4(0.0, 0.0, 0.0, 1.0);
-	if (brightness > u_BloomThreshold)
-		o_BloomColor = color;
 
 	if (u_ShowCascades)
 	{

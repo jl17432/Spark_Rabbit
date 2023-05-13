@@ -9,8 +9,9 @@ namespace SparkRabbit {
 
 	FileSystemPanel::FileSystemPanel() : m_CurrentDirectory(m_AssetDirectory)
 	{
-		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
-		m_FileIcon = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
+		m_DirectoryIcon = Texture2D::Create("Resources/Icons/folder.png");
+		m_FileIcon = Texture2D::Create("Resources/Icons/file.png");
+		m_BackIcon = Texture2D::Create("Resources/Icons/back.png");
 	}
 
 	void FileSystemPanel::OnImGuiRender()
@@ -19,10 +20,12 @@ namespace SparkRabbit {
 
 		if (m_CurrentDirectory != std::filesystem::path(m_AssetDirectory))
 		{
-			if (ImGui::Button("<-"))
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			if (ImGui::ImageButton((ImTextureID)(m_BackIcon->GetRendererID()), ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1.f, 1.f, 1.f, 1.f)))
 			{
 				m_CurrentDirectory = m_CurrentDirectory.parent_path();
 			}
+			ImGui::PopStyleColor();
 		}
 
 		static float padding = 10.0f;
@@ -49,7 +52,7 @@ namespace SparkRabbit {
 			ImGui::PushID(filenameString.c_str());
 			std::shared_ptr<Texture2D> icon = directoryEntry.is_directory() ? m_DirectoryIcon : m_FileIcon;
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, ImVec2(0, 0), ImVec2(1, 1), -1, ImVec4(0, 0, 0, 0), ImVec4(1.f, 1.f, 1.f, 1.f));
 
 			if (ImGui::BeginDragDropSource())
 			{

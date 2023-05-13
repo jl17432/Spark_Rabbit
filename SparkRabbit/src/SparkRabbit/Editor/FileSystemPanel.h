@@ -14,6 +14,7 @@ namespace SparkRabbit {
 
 		std::shared_ptr<Texture2D> m_DirectoryIcon;
 		std::shared_ptr<Texture2D> m_FileIcon;
+		std::shared_ptr<Texture2D> m_BackIcon;
 	};
 }
 

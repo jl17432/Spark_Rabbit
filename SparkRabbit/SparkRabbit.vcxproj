@@ -146,7 +146,6 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLFramebuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRenderPass.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShaderUniform.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
@@ -191,7 +190,6 @@
     <ClInclude Include="src\SparkRabbit\Renderer\ProjectiveCamera.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\RenderAPI.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\RenderContext.h" />
-    <ClInclude Include="src\SparkRabbit\Renderer\RenderPass.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Renderer.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\Renderer2D.h" />
     <ClInclude Include="src\SparkRabbit\Renderer\SceneEnvironment.h" />
@@ -575,7 +573,6 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLFramebuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRenderPass.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRenderWrapper.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShaderUniform.cpp" />
@@ -607,7 +604,6 @@
     <ClCompile Include="src\SparkRabbit\Renderer\Mesh.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Pipeline.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\ProjectiveCamera.cpp" />
-    <ClCompile Include="src\SparkRabbit\Renderer\RenderPass.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Renderer.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\Renderer2D.cpp" />
     <ClCompile Include="src\SparkRabbit\Renderer\SceneEnvironment.cpp" />

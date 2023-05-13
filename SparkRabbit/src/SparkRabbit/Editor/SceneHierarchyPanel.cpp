@@ -1,14 +1,5 @@
 #include "PrecompileH.h"
 #include "SceneHierarchyPanel.h"
-#include "SparkRabbit/Renderer/Mesh.h"
-#include"SparkRabbit/Math/Math.h"
-#include"SparkRabbit/Renderer/Mesh.h"
-#include"SparkRabbit/Scene/Components.h"
-
-
-#include"imgui.h"
-#include <imgui/imgui_internal.h>
-#include"SparkRabbit/ImGui/ImGui.h"
 
 #include <assimp/scene.h>
 
@@ -47,33 +38,49 @@ namespace SparkRabbit {
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Scene Hierarchy");
+		// Get the window's content region bounds
 		ImRect windowRect = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 
+		// If there is a context (i.e., if there is a scene loaded)...
 		if (m_Context)
 		{
+			// Variables to count the number of entities and meshes
 			uint32_t entityCount = 0, meshCount = 0;
+
+			// Iterate over each entity in the scene's entity registry
 			m_Context->m_Registry.each([&](auto entity)
 				{
 					Entity e(entity, m_Context.get());
+
+					// If the entity has an IDComponent and it's a root entity (i.e., it doesn't have a parent)
+					// then draw a node for it in the hierarchy
 					if (e.HasComponent<IDComponent>() && e.GetParentUUID() == 0)
 						DrawEntityNode(e);
 				});
 
+			// Handle drag and drop operations within the window
 			if (ImGui::BeginDragDropTargetCustom(windowRect, ImGui::GetCurrentWindow()->ID))
 			{
+				// If a payload of type "scene_entity_hierarchy" is dropped in the window...
 				const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("scene_entity_hierarchy", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
 
 				if (payload)
 				{
+					// Extract the UUID of the dropped entity
 					UUID droppedHandle = *((UUID*)payload->Data);
+
+					// Find the entity in the scene
 					Entity e = m_Context->FindEntityByUUID(droppedHandle);
 					Entity previousParent = m_Context->FindEntityByUUID(e.GetParentUUID());
 
+					// If the entity had a parent...
 					if (previousParent)
 					{
+						// Remove the entity from its previous parent's children
 						auto& children = previousParent.Children();
 						children.erase(std::remove(children.begin(), children.end(), droppedHandle), children.end());
 
+						// Adjust the entity's translation based on the parent's transform
 						glm::mat4 parentTransform = m_Context->GetTransformRelativeToParent(previousParent);
 						glm::vec3 parentTranslation, parentRotation, parentScale;
 						Math::DecomposeTransform(parentTransform, parentTranslation, parentRotation, parentScale);
@@ -81,12 +88,14 @@ namespace SparkRabbit {
 						e.Transform().Translation = e.Transform().Translation + parentTranslation;
 					}
 
+					// Set the entity's parent UUID to 0, making it a root entity
 					e.SetParentUUID(0);
 				}
 
 				ImGui::EndDragDropTarget();
 			}
 
+			// Handle right-click context menu
 			if (ImGui::BeginPopupContextWindow(0, 1, false))
 			{
 				if (ImGui::BeginMenu("Create"))
@@ -107,7 +116,7 @@ namespace SparkRabbit {
 					{
 						auto newEntity = m_Context->CreateEntity("Directional Light");
 						newEntity.AddComponent<DirectionalLightComponent>();
-						newEntity.GetComponent<TransformComponent>().Rotation = glm::radians(glm::vec3{ 80.0f, 10.0f, 0.0f });
+						newEntity.GetComponent<TransformComponent>().Rotation = glm::radians(glm::vec3{ 100.0f, 0.0f, 0.0f });
 						SetSelected(newEntity);
 					}
 					ImGui::EndMenu();
@@ -117,47 +126,35 @@ namespace SparkRabbit {
 
 			ImGui::End();
 
-			ImGui::Begin("Properties");
+			ImGui::Begin("Components");
 
 			if (m_SelectionContext)
 				DrawComponents(m_SelectionContext);
 		}
 		ImGui::End();
-
-
-#if TODO
-		ImGui::Begin("Mesh Debug");
-		if (ImGui::CollapsingHeader(mesh->m_FilePath.c_str()))
-		{
-			if (mesh->m_IsAnimated)
-			{
-				if (ImGui::CollapsingHeader("Animation"))
-				{
-					if (ImGui::Button(mesh->m_AnimationPlaying ? "Pause" : "Play"))
-						mesh->m_AnimationPlaying = !mesh->m_AnimationPlaying;
-
-					ImGui::SliderFloat("##AnimationTime", &mesh->m_AnimationTime, 0.0f, (float)mesh->m_Scene->mAnimations[0]->mDuration);
-					ImGui::DragFloat("Time Scale", &mesh->m_TimeMultiplier, 0.05f, 0.0f, 10.0f);
-				}
-			}
-		}
-		ImGui::End();
-#endif
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
+		// Set the entity's name to "Unnamed Entity" by default
 		const char* name = "Unnamed Entity";
+
+		// If the entity has a TagComponent, use the tag as the name
 		if (entity.HasComponent<TagComponent>())
 			name = entity.GetComponent<TagComponent>().Tag.c_str();
 
+		// Set up the ImGui tree node flags for the entity
 		ImGuiTreeNodeFlags flags = (entity == m_SelectionContext ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
+		// If the entity has no children, set it as a leaf node
 		if (entity.Children().empty())
 			flags |= ImGuiTreeNodeFlags_Leaf;
 
+		// Create a tree node for the entity
 		bool opened = ImGui::TreeNodeEx((void*)(uint32_t)entity, flags, name);
+
+		// If the tree node is clicked, set the entity as the selected context
 		if (ImGui::IsItemClicked())
 		{
 			m_SelectionContext = entity;
@@ -165,6 +162,7 @@ namespace SparkRabbit {
 				m_SelectionChangedCallback(m_SelectionContext);
 		}
 
+		// If right-click on the tree node, start a popup to delete the entity
 		bool entityDeleted = false;
 		if (ImGui::BeginPopupContextItem())
 		{
@@ -174,6 +172,7 @@ namespace SparkRabbit {
 			ImGui::EndPopup();
 		}
 
+		// If the tree node is dragged, create a payload with the entity's UUID
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 		{
 			UUID entityId = entity.GetUUID();
@@ -182,18 +181,23 @@ namespace SparkRabbit {
 			ImGui::EndDragDropSource();
 		}
 
+		// If a payload is dropped onto the tree node...
 		if (ImGui::BeginDragDropTarget())
 		{
 			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("scene_entity_hierarchy", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
 
 			if (payload)
 			{
+				// Extract the UUID of the dropped entity
 				UUID droppedHandle = *((UUID*)payload->Data);
+
+				// Find the entity in the scene
 				Entity e = m_Context->FindEntityByUUID(droppedHandle);
 
+				// If the dropped entity is not a descendant of the target entity...
 				if (!entity.IsDescendantOf(e))
 				{
-					// Remove from previous parent
+					// Remove the dropped entity from its previous parent's children
 					Entity previousParent = m_Context->FindEntityByUUID(e.GetParentUUID());
 					if (previousParent)
 					{
@@ -201,12 +205,15 @@ namespace SparkRabbit {
 						parentChildren.erase(std::remove(parentChildren.begin(), parentChildren.end(), droppedHandle), parentChildren.end());
 					}
 
+					// Adjust the dropped entity's translation based on the target entity's transform
 					glm::mat4 parentTransform = m_Context->GetTransformRelativeToParent(entity);
 					glm::vec3 parentTranslation, parentRotation, parentScale;
 					Math::DecomposeTransform(parentTransform, parentTranslation, parentRotation, parentScale);
 
 					e.Transform().Translation = e.Transform().Translation - parentTranslation;
 					e.SetParentUUID(entity.GetUUID());
+
+					// Add the dropped entity to the target entity
 					entity.Children().push_back(droppedHandle);
 				}
 
@@ -215,6 +222,7 @@ namespace SparkRabbit {
 			ImGui::EndDragDropTarget();
 		}
 
+		// If the tree node is opened, draw child nodes
 		if (opened)
 		{
 			for (auto child : entity.Children())
@@ -227,7 +235,7 @@ namespace SparkRabbit {
 			ImGui::TreePop();
 		}
 
-		// Defer deletion until end of node UI
+		// If the entity was marked to be deleted, destroy it and call the entity deleted callback
 		if (entityDeleted)
 		{
 			m_Context->DestroyEntity(entity);
@@ -294,43 +302,72 @@ namespace SparkRabbit {
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
+		// Define the flags for the ImGui tree node.
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+
+		// Check if the entity has a component of the specific type.
 		if (entity.HasComponent<T>())
 		{
-
+			// Push an ID for the component onto the stack.
 			ImGui::PushID((void*)typeid(T).hash_code());
+
+			// Get a reference to the component.
 			auto& component = entity.GetComponent<T>();
+
+			// Get the available content region.
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
+			// Set the style variable for frame padding.
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+
+			// Calculate the line height.
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+
+			// Draw a separator.
 			ImGui::Separator();
+
+			// Create a tree node for the component.
 			bool open = ImGui::TreeNodeEx("##dummy_id", treeNodeFlags, name.c_str());
+
+			// Pop the style variable.
 			ImGui::PopStyleVar();
+
+			// Draw a button on the same line as the tree node.
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
 			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
 			{
+				// Open a popup when the button is clicked.
 				ImGui::OpenPopup("ComponentSettings");
 			}
 
+			// Initialize a flag for removing the component.
 			bool removeComponent = false;
+
+			// If the popup is open...
 			if (ImGui::BeginPopup("ComponentSettings"))
 			{
+				// If the "Remove component" menu item is clicked, set the flag to remove the component.
 				if (ImGui::MenuItem("Remove component"))
 					removeComponent = true;
 
+				// End the popup.
 				ImGui::EndPopup();
 			}
 
 			if (open)
 			{
+				// Run the UI function on the component.
 				uiFunction(component);
+
+				// Close the tree node.
 				ImGui::TreePop();
 			}
 
+			// If the remove component flag is set, remove the component from the entity.
 			if (removeComponent)
 				entity.RemoveComponent<T>();
 
+			// Pop the ID from the stack.
 			ImGui::PopID();
 		}
 	}
@@ -489,14 +526,6 @@ namespace SparkRabbit {
 					ImGui::CloseCurrentPopup();
 				}
 			}
-			if (!m_SelectionContext.HasComponent<RigidBody2DComponent>())
-			{
-				if (ImGui::Button("RigidBody2D"))
-				{
-					m_SelectionContext.AddComponent<RigidBody2DComponent>();
-					ImGui::CloseCurrentPopup();
-				}
-			}
 			if (!m_SelectionContext.HasComponent<Rigidbody3DComponent>())
 			{
 				if (ImGui::Button("Rigidbody 3D"))
@@ -505,6 +534,7 @@ namespace SparkRabbit {
 					ImGui::CloseCurrentPopup();
 				}
 			}
+
 
 			ImGui::EndPopup();
 		}
@@ -528,11 +558,11 @@ namespace SparkRabbit {
 		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& cc)
 			{
 				// Projection Type
-				const char* projTypeStrings[] = { "Perspective", "Orthographic" };
+				const char* projTypeStrings[] = { "Perspective"};
 				const char* currentProj = projTypeStrings[(int)cc.Camera.GetProjectionType()];
 				if (ImGui::BeginCombo("Projection", currentProj))
 				{
-					for (int type = 0; type < 2; type++)
+					for (int type = 0; type < 1; type++)
 					{
 						bool is_selected = (currentProj == projTypeStrings[type]);
 						if (ImGui::Selectable(projTypeStrings[type], is_selected))
@@ -557,26 +587,10 @@ namespace SparkRabbit {
 					float nearClip = cc.Camera.GetPerspectiveNearClip();
 					if (UI::Property("Near Clip", nearClip))
 						cc.Camera.SetPerspectiveNearClip(nearClip);
-					ImGui::SameLine();
+
 					float farClip = cc.Camera.GetPerspectiveFarClip();
 					if (UI::Property("Far Clip", farClip))
 						cc.Camera.SetPerspectiveFarClip(farClip);
-				}
-
-				// Orthographic parameters
-				else if (cc.Camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
-				{
-					float orthoSize = cc.Camera.GetOrthographicSize();
-					if (UI::Property("Size", orthoSize))
-						cc.Camera.SetOrthographicSize(orthoSize);
-
-					float nearClip = cc.Camera.GetOrthographicNearClip();
-					if (UI::Property("Near Clip", nearClip))
-						cc.Camera.SetOrthographicNearClip(nearClip);
-					ImGui::SameLine();
-					float farClip = cc.Camera.GetOrthographicFarClip();
-					if (UI::Property("Far Clip", farClip))
-						cc.Camera.SetOrthographicFarClip(farClip);
 				}
 
 				UI::EndPropertyGrid();
@@ -593,28 +607,6 @@ namespace SparkRabbit {
 				UI::EndPropertyGrid();
 			});
 
-		DrawComponent<RigidBody2DComponent>("RigidBody2D", entity, [](RigidBody2DComponent& rb2d)
-			{
-				// Rigid body type
-				const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
-				const char* currentbodyTypeStrings = bodyTypeStrings[(int)rb2d.Type];
-				if (ImGui::BeginCombo("Body Tye", currentbodyTypeStrings))
-				{
-					for (int type = 0; type < 2; type++)
-					{
-						bool is_selected = (currentbodyTypeStrings == bodyTypeStrings[type]);
-						if (ImGui::Selectable(bodyTypeStrings[type], is_selected))
-						{
-							currentbodyTypeStrings = bodyTypeStrings[type];
-							rb2d.Type = (RigidBody2DComponent::BodyType)type;
-						}
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
-					}
-					ImGui::EndCombo();
-				}
-				ImGui::Checkbox("Fixed Rotation", &rb2d.FixedRotation);
-			});
 		DrawComponent<Rigidbody3DComponent>("Rigidbody 3D", entity, [](auto& component)
 			{
 				const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
