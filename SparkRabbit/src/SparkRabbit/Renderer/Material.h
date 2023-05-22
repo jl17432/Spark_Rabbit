@@ -65,7 +65,6 @@ namespace SparkRabbit {
 		T& Get(const std::string& name)
 		{
 			auto decl = m_Material->FindUniformDeclaration(name);
-			//SR_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
 			auto& buffer = GetUniformBufferTarget(decl);
 			return buffer.Read<T>(decl->GetOffset());
 		}
@@ -74,9 +73,7 @@ namespace SparkRabbit {
 		std::shared_ptr<T> GetResource(const std::string& name)
 		{
 			auto decl = m_Material->FindResourceDeclaration(name);
-			//HZ_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
 			uint32_t slot = decl->GetRegister();
-			//HZ_CORE_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
 			return m_Textures[slot];
 		}
 
@@ -156,9 +153,7 @@ namespace SparkRabbit {
 		std::shared_ptr<T> GetResource(const std::string& name)
 		{
 			auto decl = m_Material->FindResourceDeclaration(name);
-			//HZ_CORE_ASSERT(decl, "Could not find uniform with name 'x'");
 			uint32_t slot = decl->GetRegister();
-			//HZ_CORE_ASSERT(slot < m_Textures.size(), "Texture slot is invalid!");
 			return std::make_shared<T>(m_Textures[slot]);
 		}
 

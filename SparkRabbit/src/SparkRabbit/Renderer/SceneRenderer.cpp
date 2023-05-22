@@ -42,8 +42,8 @@ namespace SparkRabbit {
 		float ShadowMapSize = 20.0f;
 		float LightDistance = 0.1f;
 		glm::mat4 LightMatrices[4];
-		glm::mat4 LightViewMatrix;
-		float CascadeSplitLambda = 0.91f;
+		glm::mat4 LightViewMatrix;	
+		float CascadeSplitLambda = 1.1f;
 		glm::vec4 CascadeSplits;
 		float CascadeFarPlaneOffset = 15.0f, CascadeNearPlaneOffset = -15.0f;
 		bool ShowCascades = false;
@@ -742,6 +742,18 @@ namespace SparkRabbit {
 			UI::Property("Max Shadow Distance", s_Data.MaxShadowDistance, 1.0f);
 			UI::Property("Shadow Fade", s_Data.ShadowFade, 5.0f);
 			UI::EndPropertyGrid();
+			if (UI::BeginTreeNode("Cascade Settings"))
+			{
+				UI::BeginPropertyGrid();
+				UI::Property("Show Cascades", s_Data.ShowCascades);
+				UI::Property("Cascade Fading", s_Data.CascadeFading);
+				UI::Property("Cascade Transition Fade", s_Data.CascadeTransitionFade, 0.05f, 0.0f, FLT_MAX);
+				UI::Property("Cascade Split", s_Data.CascadeSplitLambda, 0.01f);
+				UI::Property("CascadeNearPlaneOffset", s_Data.CascadeNearPlaneOffset, 0.1f, -FLT_MAX, 0.0f);
+				UI::Property("CascadeFarPlaneOffset", s_Data.CascadeFarPlaneOffset, 0.1f, 0.0f, FLT_MAX);
+				UI::EndPropertyGrid();
+				UI::EndTreeNode();
+			}
 			if (UI::BeginTreeNode("Shadow Map", false))
 			{
 				static int cascadeIndex = 0;

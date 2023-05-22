@@ -2,7 +2,7 @@
 
 namespace SparkRabbit{
 	EditorLayer::EditorLayer()
-		: m_EditorCamera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 1000.0f))
+		: m_EditorCamera(glm::perspectiveFov(glm::radians(45.0f), 1920.0f, 1080.0f, 0.1f, 1000.0f))
 	{
 		m_ViewportBounds[0] = glm::vec2(0.0f);
 		m_ViewportBounds[1] = glm::vec2(0.0f);
@@ -313,7 +313,6 @@ namespace SparkRabbit{
 		m_SceneHierarchyPanel->OnImGuiRender();
 		m_AssetFilePanel->OnImGuiRender();
 		m_defaultAssetsPanel->OnImGuiRender();
-		SceneRenderer::OnImGuiRender();
 
 		// Begin menu bar
 		if (ImGui::BeginMenuBar())
@@ -721,6 +720,8 @@ namespace SparkRabbit{
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
+
+		SceneRenderer::OnImGuiRender();
 
 		ImGui::End();
 	}

@@ -431,7 +431,7 @@ float FindBlockerDistance_DirectionalLight(sampler2D shadowMap, vec3 shadowCoord
 	int numBlockerSearchSamples = 64;
 	int blockers = 0;
 	float avgBlockerDistance = 0;
-	
+	float a;
 	float zEye = -(u_LightView * vec4(vs_Input.WorldPosition, 1.0)).z;
 	vec2 searchWidth = searchRegionRadiusUV(zEye);
 	for (int i = 0; i < numBlockerSearchSamples; i++)
@@ -442,6 +442,7 @@ float FindBlockerDistance_DirectionalLight(sampler2D shadowMap, vec3 shadowCoord
 			blockers++;
 			avgBlockerDistance += z;
 		}
+		a= (shadowCoords.xy + SamplePoisson(i) * searchWidth).x;
 	}
 
 	if (blockers > 0)
@@ -528,10 +529,10 @@ void main()
 
 	bool fadeCascades = u_CascadeFading;
 	float shadowAmount = 1.0;
+	vec3 sjf;
 	if (fadeCascades)
 	{
 		float cascadeTransitionFade = u_CascadeTransitionFade;
-		
 		float c0 = smoothstep(u_CascadeSplits[0] + cascadeTransitionFade * 0.5f, u_CascadeSplits[0] - cascadeTransitionFade * 0.5f, vs_Input.ViewPosition.z);
 		float c1 = smoothstep(u_CascadeSplits[1] + cascadeTransitionFade * 0.5f, u_CascadeSplits[1] - cascadeTransitionFade * 0.5f, vs_Input.ViewPosition.z);
 		float c2 = smoothstep(u_CascadeSplits[2] + cascadeTransitionFade * 0.5f, u_CascadeSplits[2] - cascadeTransitionFade * 0.5f, vs_Input.ViewPosition.z);
@@ -544,6 +545,7 @@ void main()
 			float shadowAmount1 = u_SoftShadows ? PCSS_DirectionalLight(u_ShadowMapTexture[1], shadowMapCoords, u_LightSize) : HardShadows_DirectionalLight(u_ShadowMapTexture[1], shadowMapCoords);
 
 			shadowAmount = mix(shadowAmount0, shadowAmount1, c0);
+
 		}
 		else if (c1 > 0.0 && c1 < 1.0)
 		{
@@ -576,7 +578,6 @@ void main()
 		vec3 shadowMapCoords = (vs_Input.ShadowMapCoords[CascadeIndex].xyz / vs_Input.ShadowMapCoords[CascadeIndex].w);
 		shadowAmount = u_SoftShadows ? PCSS_DirectionalLight(u_ShadowMapTexture[CascadeIndex], shadowMapCoords, u_LightSize) : HardShadows_DirectionalLight(u_ShadowMapTexture[CascadeIndex], shadowMapCoords);
 	}
-
 	float NdotL = dot(m_Params.Normal, u_DirectionalLights.Direction);
 	NdotL = smoothstep(0.0, 0.4, NdotL + 0.2);
 	shadowAmount *= (NdotL * 1.0);
@@ -584,7 +585,7 @@ void main()
 	vec3 iblContribution = IBL(F0, Lr) * u_IBLContribution;
 	vec3 lightContribution = u_DirectionalLights.Multiplier > 0.0f ? (Lighting(F0) * shadowAmount) : vec3(0.0f);
 
-	color = vec4(lightContribution + iblContribution, 1.0);
+	color = vec4(iblContribution + lightContribution, 1.0);
 
 	// Bloom
 	float brightness = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
